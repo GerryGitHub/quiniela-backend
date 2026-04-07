@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: quiniela-db
+    environment:
+      POSTGRES_DB: quiniela
+      POSTGRES_USER: quiniela_user
+      POSTGRES_PASSWORD: quiniela_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
