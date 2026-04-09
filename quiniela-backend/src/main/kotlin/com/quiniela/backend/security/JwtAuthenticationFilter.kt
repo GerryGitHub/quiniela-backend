@@ -22,7 +22,11 @@ class JwtAuthenticationFilter(
 
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
         val path = request.servletPath
-        return path.startsWith("/auth/") || path.startsWith("/swagger-ui") || path.startsWith("/v3/api-docs")
+        // Public endpoints
+        return path == "/auth/register" || path == "/auth/login" || 
+               path.startsWith("/swagger-ui") || path.startsWith("/v3/api-docs") ||
+               path == "/partidos" || path.startsWith("/api/grupos") ||
+               path.startsWith("/api/resultados")
     }
 
     override fun doFilterInternal(

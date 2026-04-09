@@ -110,9 +110,13 @@ class PartidoService(
 
     private fun Partido.toDTO() = PartidoDTO(
         id = id,
-        equipoLocal = equipoLocal,
-        equipoVisitante = equipoVisitante,
-        fechaHora = fechaHora,
+        equipoLocal = equipoLocal.nombre,
+        equipoVisitante = equipoVisitante.nombre,
+        fechaHora = fechaHora.toString(),
+        grupo = grupo.nombre,
+        grupoId = grupo.id,
+        equipoLocalId = equipoLocal.id,
+        equipoVisitanteId = equipoVisitante.id,
         golesLocalReal = golesLocalReal,
         golesVisitanteReal = golesVisitanteReal,
         estado = estado.name

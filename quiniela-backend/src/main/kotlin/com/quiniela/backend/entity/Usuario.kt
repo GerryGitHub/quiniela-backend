@@ -10,5 +10,6 @@ class Usuario(
     val nombre: String,
     @Column(unique = true)
     val email: String,
-    var password: String = ""
+    var password: String = "",
+    var rol: String = "USER"  // USER o ADMIN
 )

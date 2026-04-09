@@ -30,7 +30,10 @@ class AuthController(
 
     @GetMapping("/me")
     @Operation(summary = "Obtener perfil del usuario actual")
-    fun getPerfil(@AuthenticationPrincipal userDetails: UserDetails): ResponseEntity<UsuarioPerfilDTO> {
+    fun getPerfil(@AuthenticationPrincipal userDetails: UserDetails?): ResponseEntity<UsuarioPerfilDTO> {
+        if (userDetails == null) {
+            return ResponseEntity.status(401).build()
+        }
         return ResponseEntity.ok(authService.getPerfil(userDetails.username))
     }
 }

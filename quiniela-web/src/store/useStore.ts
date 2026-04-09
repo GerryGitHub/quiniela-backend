@@ -79,8 +79,13 @@ export const useStore = create<AppState>((set, get) => ({
   },
 
   fetchPerfil: async () => {
-    const response = await authService.getPerfil();
-    set({ usuario: response, isAuthenticated: true });
+    try {
+      const response = await authService.getPerfil();
+      set({ usuario: response, isAuthenticated: true });
+    } catch (error) {
+      console.log('Error fetching perfil (silent):', error);
+      // No lanzar error - la app puede continuar
+    }
   },
 
   fetchQuinielas: async () => {

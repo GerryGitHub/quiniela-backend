@@ -100,9 +100,13 @@ class QuinielaService(
             .map { p ->
                 PartidoDTO(
                     id = p.id,
-                    equipoLocal = p.equipoLocal,
-                    equipoVisitante = p.equipoVisitante,
-                    fechaHora = p.fechaHora,
+                    equipoLocal = p.equipoLocal.nombre,
+                    equipoVisitante = p.equipoVisitante.nombre,
+                    fechaHora = p.fechaHora.toString(),
+                    grupo = p.grupo.nombre,
+                    grupoId = p.grupo.id,
+                    equipoLocalId = p.equipoLocal.id,
+                    equipoVisitanteId = p.equipoVisitante.id,
                     golesLocalReal = p.golesLocalReal,
                     golesVisitanteReal = p.golesVisitanteReal,
                     estado = p.estado.name

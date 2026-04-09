@@ -50,7 +50,8 @@ class AuthService(
             usuario = UsuarioDTO(
                 id = usuarioGuardado.id,
                 nombre = usuarioGuardado.nombre,
-                email = usuarioGuardado.email
+                email = usuarioGuardado.email,
+                rol = usuarioGuardado.rol
             )
         )
     }
@@ -71,7 +72,8 @@ class AuthService(
             usuario = UsuarioDTO(
                 id = usuario.id,
                 nombre = usuario.nombre,
-                email = usuario.email
+                email = usuario.email,
+                rol = usuario.rol
             )
         )
     }
@@ -117,6 +119,7 @@ class AuthService(
             id = usuario.id,
             nombre = usuario.nombre,
             email = usuario.email,
+            rol = usuario.rol,
             puntosTotalesGlobales = puntosGlobales,
             quinielas = quinielas
         )

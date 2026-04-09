@@ -13,21 +13,25 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
-    console.log('➡️ Token enviado:', token.substring(0, 30) + '...');
     config.headers.Authorization = 'Bearer ' + token;
-  } else {
-    console.log('➡️ Sin token');
   }
   return config;
 });
 
 api.interceptors.response.use(
   (response) => {
-    console.log('✅ Respuesta:', response.status);
     return response;
   },
   (error) => {
-    console.log('❌ Error:', error.response?.status, error.response?.data);
+    const url = error.config?.url || '';
+    console.log('❌ Error API:', error.response?.status, url);
+    
+    // No hacer logout para /auth/me - puede fallar si el token expira
+    if (url.includes('/auth/me')) {
+      console.log('⚠️ Error en /auth/me - no logout');
+      return Promise.reject(error);
+    }
+    
     if (error.response?.status === 401 || error.response?.status === 403) {
       localStorage.removeItem('token');
       window.location.href = '/';

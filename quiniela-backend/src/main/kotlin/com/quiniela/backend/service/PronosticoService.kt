@@ -150,9 +150,13 @@ class PronosticoService(
         return PronosticosPorPartidoDTO(
             partido = PartidoDTO(
                 id = partido.id,
-                equipoLocal = partido.equipoLocal,
-                equipoVisitante = partido.equipoVisitante,
-                fechaHora = partido.fechaHora,
+                equipoLocal = partido.equipoLocal.nombre,
+                equipoVisitante = partido.equipoVisitante.nombre,
+                fechaHora = partido.fechaHora.toString(),
+                grupo = partido.grupo.nombre,
+                grupoId = partido.grupo.id,
+                equipoLocalId = partido.equipoLocal.id,
+                equipoVisitanteId = partido.equipoVisitante.id,
                 golesLocalReal = partido.golesLocalReal,
                 golesVisitanteReal = partido.golesVisitanteReal,
                 estado = partido.estado.name
@@ -172,9 +176,13 @@ class PronosticoService(
             ),
             partido = PartidoDTO(
                 id = partido.id,
-                equipoLocal = partido.equipoLocal,
-                equipoVisitante = partido.equipoVisitante,
-                fechaHora = partido.fechaHora,
+                equipoLocal = partido.equipoLocal.nombre,
+                equipoVisitante = partido.equipoVisitante.nombre,
+                fechaHora = partido.fechaHora.toString(),
+                grupo = partido.grupo.nombre,
+                grupoId = partido.grupo.id,
+                equipoLocalId = partido.equipoLocal.id,
+                equipoVisitanteId = partido.equipoVisitante.id,
                 golesLocalReal = partido.golesLocalReal,
                 golesVisitanteReal = partido.golesVisitanteReal,
                 estado = partido.estado.name

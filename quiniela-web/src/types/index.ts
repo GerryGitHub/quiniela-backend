@@ -2,6 +2,7 @@ export interface Usuario {
   id: number;
   nombre: string;
   email: string;
+  rol: string;
   puntosTotales?: number;
 }
 
@@ -55,6 +56,10 @@ export interface Partido {
   equipoLocal: string;
   equipoVisitante: string;
   fechaHora: string;
+  grupo?: string;
+  grupoId?: number;
+  equipoLocalId?: number;
+  equipoVisitanteId?: number;
   golesLocalReal: number | null;
   golesVisitanteReal: number | null;
   estado: string;

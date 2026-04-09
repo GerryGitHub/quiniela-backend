@@ -37,6 +37,9 @@ open class SecurityConfig(
                     .requestMatchers(AntPathRequestMatcher.antMatcher("/swagger-ui/**")).permitAll()
                     .requestMatchers(AntPathRequestMatcher.antMatcher("/v3/api-docs/**")).permitAll()
                     .requestMatchers(AntPathRequestMatcher.antMatcher("/swagger-ui.html")).permitAll()
+                    .requestMatchers(AntPathRequestMatcher.antMatcher("/partidos/**")).permitAll()
+                    .requestMatchers(AntPathRequestMatcher.antMatcher("/api/grupos/**")).permitAll()
+                    .requestMatchers(AntPathRequestMatcher.antMatcher("/api/resultados/**")).permitAll()
                     .requestMatchers(AntPathRequestMatcher.antMatcher("/admin/**")).hasRole("ADMIN")
                     .anyRequest().authenticated()
             }

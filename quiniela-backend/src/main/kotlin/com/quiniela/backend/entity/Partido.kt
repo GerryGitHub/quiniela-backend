@@ -8,8 +8,19 @@ class Partido(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
-    val equipoLocal: String,
-    val equipoVisitante: String,
+    
+    @ManyToOne
+    @JoinColumn(name = "equipo_local_id")
+    val equipoLocal: Equipo,
+    
+    @ManyToOne
+    @JoinColumn(name = "equipo_visitante_id")
+    val equipoVisitante: Equipo,
+    
+    @ManyToOne
+    @JoinColumn(name = "grupo_id")
+    val grupo: Grupo,
+    
     val fechaHora: LocalDateTime,
     var golesLocalReal: Int? = null,
     var golesVisitanteReal: Int? = null,

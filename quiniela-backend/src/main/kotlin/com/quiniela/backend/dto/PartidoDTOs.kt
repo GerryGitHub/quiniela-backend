@@ -6,7 +6,11 @@ data class PartidoDTO(
     val id: Long,
     val equipoLocal: String,
     val equipoVisitante: String,
-    val fechaHora: LocalDateTime,
+    val fechaHora: String,
+    val grupo: String? = null,
+    val grupoId: Long? = null,
+    val equipoLocalId: Long? = null,
+    val equipoVisitanteId: Long? = null,
     val golesLocalReal: Int?,
     val golesVisitanteReal: Int?,
     val estado: String

@@ -17,10 +17,12 @@ class CustomUserDetailsService(
         val usuario = usuarioRepository.findByEmail(email)
             .orElseThrow { UsernameNotFoundException("Usuario no encontrado: $email") }
 
+        val rol = if (usuario.rol == "ADMIN") "ROLE_ADMIN" else "ROLE_USER"
+        
         return User.builder()
             .username(usuario.email)
             .password(usuario.password)
-            .authorities(listOf(SimpleGrantedAuthority("ROLE_USER")))
+            .authorities(listOf(SimpleGrantedAuthority(rol)))
             .build()
     }
 }
