@@ -5,6 +5,8 @@ import Register from '../pages/Register';
 import Dashboard from '../pages/Dashboard';
 import QuinielaDetalle from '../pages/QuinielaDetalle';
 import Pronosticos from '../pages/Pronosticos';
+import Grupos from '../pages/Grupos';
+import Resultados from '../pages/Resultados';
 
 const router = createBrowserRouter([
   {
@@ -34,6 +36,14 @@ const router = createBrowserRouter([
       {
         path: 'pronosticos/:quinielaId',
         element: <Pronosticos />,
+      },
+      {
+        path: 'grupos',
+        element: <Grupos />,
+      },
+      {
+        path: 'resultados',
+        element: <Resultados />,
       },
     ],
   },

@@ -1,21 +1,19 @@
 import { useEffect } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import { useStore } from './store/useStore';
 
 export default function App() {
-  const navigate = useNavigate();
-  const { isAuthenticated, fetchPerfil, logout } = useStore();
+  const { fetchPerfil, logout, usuario } = useStore();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (token && !isAuthenticated) {
+    if (token && !usuario) {
+      console.log('Token found, fetching perfil...');
       fetchPerfil()
-        .then(() => {
-          // Token valid, user authenticated
-        })
+        .then(() => console.log('Perfil fetched successfully'))
         .catch((err) => {
-          console.log('Error fetching perfil:', err);
-          // Don't logout immediately, let user try to use the app
+          console.error('Error fetching perfil:', err);
+          // No logout - permitir que el usuario use la app
         });
     }
   }, []);

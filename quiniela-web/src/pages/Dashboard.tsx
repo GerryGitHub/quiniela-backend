@@ -10,13 +10,14 @@ export default function Dashboard() {
   const [showUnirse, setShowUnirse] = useState(false);
   const [nombre, setNombre] = useState('');
   const [codigo, setCodigo] = useState('');
-  const [codigoInvitacion, setCodigoInvitacion] = useState('');
   const [error, setError] = useState('');
 
   useEffect(() => {
     fetchPerfil();
     fetchQuinielas();
   }, []);
+
+  const isAdmin = usuario?.rol === 'ADMIN';
 
   const handleCrear = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,13 +42,58 @@ export default function Dashboard() {
     }
   };
 
+  if (isAdmin) {
+    return (
+      <div className="dashboard">
+        <header className="header">
+          <h1>Panel de Administración</h1>
+          <div className="header-actions">
+            <Link to="/grupos" className="btn-grupos">Grupos FIFA</Link>
+            <Link to="/resultados" className="btn-grupos">Resultados</Link>
+            <div className="header-right">
+              <span className="user-info">{usuario?.nombre}</span>
+              <button onClick={logout} className="btn-logout">Cerrar Sesión</button>
+            </div>
+          </div>
+        </header>
+
+        <main className="main-content">
+          <div className="admin-dashboard">
+            <h2>Bienvenido, Administrador</h2>
+            <p className="admin-desc">Gestiona los resultados de los partidos y monitorea el mundial.</p>
+            
+            <div className="admin-cards">
+              <Link to="/grupos" className="admin-card">
+                <div className="admin-icon">🌐</div>
+                <h3>Grupos FIFA</h3>
+                <p>Ver tablas de posiciones y resultados de grupos</p>
+              </Link>
+              
+              <Link to="/resultados" className="admin-card">
+                <div className="admin-icon">⚽</div>
+                <h3>Resultados</h3>
+                <p>Actualizar marcadores de partidos</p>
+              </Link>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="dashboard">
       <header className="header">
         <h1>Quiniela</h1>
-        <div className="header-right">
-          <span className="user-info">{usuario?.nombre}</span>
-          <button onClick={logout} className="btn-logout">Cerrar Sesión</button>
+        <div className="header-actions">
+          <Link to="/grupos" className="btn-grupos">Grupos FIFA</Link>
+          {usuario?.rol === 'ADMIN' && (
+            <Link to="/resultados" className="btn-grupos">Resultados</Link>
+          )}
+          <div className="header-right">
+            <span className="user-info">{usuario?.nombre}</span>
+            <button onClick={logout} className="btn-logout">Cerrar Sesión</button>
+          </div>
         </div>
       </header>
 
