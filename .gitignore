@@ -21,3 +21,10 @@ Thumbs.db
 # Environment
 .env
 .env.local
+
+# Build outputs
+out/
+
+# Extra files
+partidos.txt
+spring-boot-demo/
