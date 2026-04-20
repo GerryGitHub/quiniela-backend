@@ -2,14 +2,11 @@ package com.quiniela.app.ui.grupos
 
 import android.os.Bundle
 import android.view.View
-import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.quiniela.app.databinding.ActivityGruposBinding
-import com.quiniela.app.model.GrupoDTO
 import com.quiniela.app.repository.GrupoRepository
 import com.quiniela.app.repository.Result
 import kotlinx.coroutines.launch

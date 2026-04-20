@@ -1,13 +1,12 @@
 package com.quiniela.app.ui.grupos
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.quiniela.app.databinding.ItemGrupoBinding
 import com.quiniela.app.model.GrupoDTO
-import com.quiniela.app.model.SeleccionDTO
 
 class GrupoAdapter(private val grupos: List<GrupoDTO>) : RecyclerView.Adapter<GrupoAdapter.ViewHolder>() {
 
@@ -23,6 +22,7 @@ class GrupoAdapter(private val grupos: List<GrupoDTO>) : RecyclerView.Adapter<Gr
     override fun getItemCount() = grupos.size
 
     class ViewHolder(private val binding: ItemGrupoBinding) : RecyclerView.ViewHolder(binding.root) {
+        @SuppressLint("SetTextI18n")
         fun bind(grupo: GrupoDTO) {
             binding.tvGrupoNombre.text = "Grupo ${grupo.nombre}"
             binding.tvGrupoPais.text = "País: ${grupo.pais}"

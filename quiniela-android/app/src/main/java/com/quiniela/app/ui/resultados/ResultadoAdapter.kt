@@ -1,5 +1,6 @@
 package com.quiniela.app.ui.resultados
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -20,6 +21,7 @@ class ResultadoAdapter(private val partidos: List<PartidoDTO>) : RecyclerView.Ad
     override fun getItemCount() = partidos.size
 
     class ViewHolder(private val binding: ItemResultadoBinding) : RecyclerView.ViewHolder(binding.root) {
+        @SuppressLint("SetTextI18n")
         fun bind(partido: PartidoDTO) {
             binding.tvEquipos.text = "${partido.equipoLocal} vs ${partido.equipoVisitante}"
             binding.tvFecha.text = partido.fechaHora

@@ -1,5 +1,6 @@
 package com.quiniela.app.ui.pronosticos
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -20,6 +21,7 @@ class PronosticoAdapter : ListAdapter<PronosticoDTO, PronosticoAdapter.ViewHolde
     }
 
     class ViewHolder(private val binding: ItemPronosticoBinding) : RecyclerView.ViewHolder(binding.root) {
+        @SuppressLint("SetTextI18n")
         fun bind(item: PronosticoDTO) {
             binding.tvEquipos.text = "${item.partido.equipoLocal} vs ${item.partido.equipoVisitante}"
             binding.tvFecha.text = item.partido.fechaHora
