@@ -33,14 +33,17 @@ open class SecurityConfig(
             .cors { }
             .authorizeHttpRequests { auth ->
                 auth
-                    .requestMatchers(AntPathRequestMatcher.antMatcher("/auth/**")).permitAll()
-                    .requestMatchers(AntPathRequestMatcher.antMatcher("/swagger-ui/**")).permitAll()
-                    .requestMatchers(AntPathRequestMatcher.antMatcher("/v3/api-docs/**")).permitAll()
-                    .requestMatchers(AntPathRequestMatcher.antMatcher("/swagger-ui.html")).permitAll()
-                    .requestMatchers(AntPathRequestMatcher.antMatcher("/partidos/**")).permitAll()
-                    .requestMatchers(AntPathRequestMatcher.antMatcher("/api/grupos/**")).permitAll()
-                    .requestMatchers(AntPathRequestMatcher.antMatcher("/api/resultados/**")).permitAll()
-                    .requestMatchers(AntPathRequestMatcher.antMatcher("/admin/**")).hasRole("ADMIN")
+                    .requestMatchers("/auth/**").permitAll()
+                    .requestMatchers("/api/auth/**").permitAll()
+                    .requestMatchers("/swagger-ui/**").permitAll()
+                    .requestMatchers("/v3/api-docs/**").permitAll()
+                    .requestMatchers("/partidos/**").permitAll()
+                    .requestMatchers("/pronosticos/**").permitAll()
+                    .requestMatchers("/ws/**").permitAll()
+                    .requestMatchers("/quinielas/**").permitAll()
+                    .requestMatchers("/api/grupos/**").permitAll()
+                    .requestMatchers("/api/resultados/**").permitAll()
+                    .requestMatchers("/admin/**").hasRole("ADMIN")
                     .anyRequest().authenticated()
             }
             .sessionManagement { session ->

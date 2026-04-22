@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -100,30 +101,78 @@
                         android:textColor="@color/primary"
                         android:layout_marginBottom="16dp"/>
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="16dp"
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etCodigoUnirse"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint="Código de invitación"
-                            android:inputType="text"/>
-
-                    </com.google.android.material.textfield.TextInputLayout>
-
                     <Button
-                        android:id="@+id/btnUnirseConfirmar"
+                        android:id="@+id/btnEscanearQR"
                         android:layout_width="match_parent"
                         android:layout_height="56dp"
-                        android:text="Unirse"
-                        android:textColor="@color/primary"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:text="Escanear Código QR"
+                        android:backgroundTint="@color/accent"
                         app:cornerRadius="16dp"
-                        app:strokeColor="@color/primary"/>
+                        android:layout_marginBottom="12dp"
+                        app:icon="@android:drawable/ic_menu_camera"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Escanea el código QR de un amigo para unirte a su quiniela instantáneamente."
+                        android:textSize="14sp"
+                        android:textColor="@color/text_secondary"
+                        android:gravity="center"
+                        android:layout_marginBottom="12dp"
+                        android:paddingHorizontal="8dp"/>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardQR"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/surface"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="24dp"
+                    android:gravity="center">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Código para Unirse"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/success"
+                        android:layout_marginBottom="16dp"/>
+
+                    <ImageView
+                        android:id="@+id/ivQR"
+                        android:layout_width="250dp"
+                        android:layout_height="250dp"
+                        android:layout_marginBottom="16dp"
+                        android:background="@color/white"
+                        android:contentDescription="Código QR"/>
+
+                    <TextView
+                        android:id="@+id/tvCodigo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@color/text_secondary"
+                        android:layout_marginBottom="16dp"/>
+
+                    <Button
+                        android:id="@+id/btnCompartir"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="Compartir por WhatsApp"
+                        android:backgroundTint="@color/success"
+                        app:cornerRadius="16dp"/>
 
                 </LinearLayout>
 

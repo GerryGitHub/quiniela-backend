@@ -16,6 +16,23 @@ class PronosticoController(
     private val pronosticoService: PronosticoService
 ) {
 
+    @GetMapping("/mis-pronosticos")
+    @Operation(summary = "Ver todos mis pronósticos")
+    fun getMisPronosticos(
+        @RequestParam(required = false) quinielaId: Long?,
+        @AuthenticationPrincipal userDetails: UserDetails?
+    ): ResponseEntity<MisPronosticosDTO> {
+        if (userDetails == null) {
+            return ResponseEntity.status(401).build()
+        }
+        
+        return if (quinielaId != null) {
+            ResponseEntity.ok(pronosticoService.getMisPronosticos(quinielaId, userDetails.username))
+        } else {
+            ResponseEntity.ok(pronosticoService.getTodosMisPronosticos(userDetails.username))
+        }
+    }
+
     @GetMapping("/quiniela/{quinielaId}")
     @Operation(summary = "Ver mis pronósticos en una quiniela")
     fun getMisPronosticos(

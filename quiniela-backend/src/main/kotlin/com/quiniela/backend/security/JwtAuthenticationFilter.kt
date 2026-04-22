@@ -22,11 +22,8 @@ class JwtAuthenticationFilter(
 
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
         val path = request.servletPath
-        // Public endpoints
-        return path == "/auth/register" || path == "/auth/login" || 
-               path.startsWith("/swagger-ui") || path.startsWith("/v3/api-docs") ||
-               path == "/partidos" || path.startsWith("/api/grupos") ||
-               path.startsWith("/api/resultados")
+        // No skip - always process to authenticate
+        return false
     }
 
     override fun doFilterInternal(
@@ -35,37 +32,29 @@ class JwtAuthenticationFilter(
         filterChain: FilterChain
     ) {
         val authHeader = request.getHeader("Authorization")
-        println("JWT Filter - Path: ${request.servletPath}, AuthHeader: ${authHeader?.take(20)}")
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response)
-            return
-        }
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            try {
+                val jwt = authHeader.substring(7)
+                val userEmail = jwtService.extractUsername(jwt)
 
-        try {
-            val jwt = authHeader.substring(7)
-            val userEmail = jwtService.extractUsername(jwt)
-            println("JWT Filter - Email extraído: $userEmail")
+                if (userEmail != null && SecurityContextHolder.getContext().authentication == null) {
+                    val userDetails = userDetailsService.loadUserByUsername(userEmail)
 
-            if (userEmail != null && SecurityContextHolder.getContext().authentication == null) {
-                val userDetails = userDetailsService.loadUserByUsername(userEmail)
-                println("JWT Filter - User loaded: ${userDetails.username}")
-
-                if (jwtService.isTokenValid(jwt, userDetails)) {
-                    println("JWT Filter - Token válido, autenticando")
-                    val authToken = UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.authorities
-                    )
-                    authToken.details = WebAuthenticationDetailsSource().buildDetails(request)
-                    SecurityContextHolder.getContext().authentication = authToken
-                } else {
-                    println("JWT Filter - Token inválido")
+                    if (jwtService.isTokenValid(jwt, userDetails)) {
+                        val authToken = UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.authorities
+                        )
+                        authToken.details = WebAuthenticationDetailsSource().buildDetails(request)
+                        SecurityContextHolder.getContext().authentication = authToken
+                    }
                 }
+            } catch (e: Exception) {
+                // Log error but continue - let controller handle auth
+                println("JWT Filter error: ${e.message}")
             }
-        } catch (e: Exception) {
-            println("JWT Filter - Error: ${e.message}")
         }
 
         filterChain.doFilter(request, response)

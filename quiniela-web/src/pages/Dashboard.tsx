@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useStore } from '../store/useStore';
+import { connectWebSocket, disconnectWebSocket } from '../services/websocket';
 import './Dashboard.css';
 
 export default function Dashboard() {
@@ -11,10 +12,27 @@ export default function Dashboard() {
   const [nombre, setNombre] = useState('');
   const [codigo, setCodigo] = useState('');
   const [error, setError] = useState('');
+  const [partidosEnVivo, setPartidosEnVivo] = useState<any[]>([]);
 
   useEffect(() => {
     fetchPerfil();
     fetchQuinielas();
+    
+    connectWebSocket((partido) => {
+      setPartidosEnVivo(prev => {
+        const index = prev.findIndex(p => p.id === partido.id);
+        if (index >= 0) {
+          const updated = [...prev];
+          updated[index] = partido;
+          return updated;
+        }
+        return [...prev, partido];
+      });
+    });
+
+    return () => {
+      disconnectWebSocket();
+    };
   }, []);
 
   const isAdmin = usuario?.rol === 'ADMIN';
@@ -132,6 +150,21 @@ export default function Dashboard() {
                 </div>
               </div>
             ))}
+</div>
+        )}
+
+      {partidosEnVivo.length > 0 && (
+        <div className="partidos-en-vivo">
+            <h3>🔴 Partidos en Vivo</h3>
+            <div className="partidos-grid">
+              {partidosEnVivo.filter(p => p.estado === 'EN_CURSO').map(partido => (
+                <div key={partido.id} className="partido-card live">
+                  <span className="equipo">{partido.equipoLocal}</span>
+                  <span className="marcador">{partido.golesLocalReal} - {partido.golesVisitanteReal}</span>
+                  <span className="equipo">{partido.equipoVisitante}</span>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </main>

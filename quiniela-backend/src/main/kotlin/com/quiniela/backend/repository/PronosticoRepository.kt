@@ -18,4 +18,7 @@ interface PronosticoRepository : JpaRepository<Pronostico, Long> {
 
     @Query("SELECT p FROM Pronostico p WHERE p.participacion.id = :participacionId")
     fun findByParticipacionId(participacionId: Long): List<Pronostico>
+
+    @Query("SELECT p FROM Pronostico p JOIN p.participacion pa JOIN pa.usuario u WHERE u.email = :email")
+    fun findByUsuarioEmail(email: String): List<Pronostico>
 }

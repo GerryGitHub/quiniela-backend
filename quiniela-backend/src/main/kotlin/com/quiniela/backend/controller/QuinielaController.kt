@@ -18,7 +18,8 @@ class QuinielaController(
 
     @GetMapping
     @Operation(summary = "Listar quinielas del usuario")
-    fun getQuinielas(@AuthenticationPrincipal userDetails: UserDetails): ResponseEntity<List<QuinielaResumenDTO>> {
+    fun getQuinielas(@AuthenticationPrincipal userDetails: UserDetails?): ResponseEntity<List<QuinielaResumenDTO>> {
+        if (userDetails == null) return ResponseEntity.status(401).build()
         return ResponseEntity.ok(quinielaService.getQuinielas(userDetails.username))
     }
 
@@ -26,17 +27,27 @@ class QuinielaController(
     @Operation(summary = "Crear nueva quiniela")
     fun crearQuiniela(
         @RequestBody request: CrearQuinielaRequest,
-        @AuthenticationPrincipal userDetails: UserDetails
+        @AuthenticationPrincipal userDetails: UserDetails?
     ): ResponseEntity<QuinielaDTO> {
-        return ResponseEntity.ok(quinielaService.crearQuiniela(request, userDetails.username))
+        if (userDetails == null) return ResponseEntity.status(401).build()
+        
+        val codigoGenerado = if (request.codigoInvitacion.isNullOrBlank()) {
+            java.util.UUID.randomUUID().toString().take(8).uppercase()
+        } else {
+            request.codigoInvitacion
+        }
+        
+        val requestConCodigo = CrearQuinielaRequest(request.nombre, codigoGenerado)
+        return ResponseEntity.ok(quinielaService.crearQuiniela(requestConCodigo, userDetails.username))
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Obtener detalle de una quiniela")
     fun getQuinielaDetalle(
         @PathVariable id: Long,
-        @AuthenticationPrincipal userDetails: UserDetails
+        @AuthenticationPrincipal userDetails: UserDetails?
     ): ResponseEntity<QuinielaDetalleDTO> {
+        if (userDetails == null) return ResponseEntity.status(401).build()
         return ResponseEntity.ok(quinielaService.getQuinielaDetalle(id, userDetails.username))
     }
 
@@ -44,8 +55,9 @@ class QuinielaController(
     @Operation(summary = "Unirse a una quiniela por código de invitación")
     fun unirseQuiniela(
         @RequestBody request: UnirseQuinielaRequest,
-        @AuthenticationPrincipal userDetails: UserDetails
+        @AuthenticationPrincipal userDetails: UserDetails?
     ): ResponseEntity<QuinielaDTO> {
+        if (userDetails == null) return ResponseEntity.status(401).build()
         return ResponseEntity.ok(quinielaService.unirseQuiniela(request, userDetails.username))
     }
 

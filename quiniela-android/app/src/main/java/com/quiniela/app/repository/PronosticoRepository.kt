@@ -23,31 +23,10 @@ class PronosticoRepository(private val apiService: ApiService = RetrofitClient.a
         }
     }
 
-    suspend fun getPronosticosPorPartido(id: Long): Result<PronosticosPorPartidoDTO> {
+    suspend fun getMisPronosticosByQuiniela(quinielaId: Long): Result<MisPronosticosDTO> {
         return withContext(Dispatchers.IO) {
             try {
-                val response = apiService.getPronosticosPorPartido(id)
-                if (response.isSuccessful) {
-                    response.body()?.let { Result.Success(it) } ?: Result.Error("Respuesta vacía")
-                } else {
-                    Result.Error("Error: ${response.code()}")
-                }
-            } catch (e: Exception) {
-                Result.Error(e.message ?: "Error desconocido")
-            }
-        }
-    }
-
-    suspend fun crearPronostico(
-        idParticipacion: Long,
-        idPartido: Long,
-        golesLocal: Int,
-        golesVisitante: Int
-    ): Result<PronosticoDTO> {
-        return withContext(Dispatchers.IO) {
-            try {
-                val request = CrearPronosticoRequest(idParticipacion, idPartido, golesLocal, golesVisitante)
-                val response = apiService.crearPronostico(request)
+                val response = apiService.getMisPronosticosByQuiniela(quinielaId)
                 if (response.isSuccessful) {
                     response.body()?.let { Result.Success(it) } ?: Result.Error("Respuesta vacía")
                 } else {

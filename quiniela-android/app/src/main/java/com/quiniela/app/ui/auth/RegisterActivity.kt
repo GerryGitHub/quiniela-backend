@@ -24,6 +24,10 @@ class RegisterActivity : AppCompatActivity() {
         binding.btnBackToLogin.setOnClickListener { finish() }
     }
 
+    private fun isValidEmail(email: String): Boolean {
+        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    }
+
     private fun register() {
         val nombre = binding.etNombre.text.toString().trim()
         val email = binding.etEmail.text.toString().trim()
@@ -31,6 +35,16 @@ class RegisterActivity : AppCompatActivity() {
 
         if (nombre.isEmpty() || email.isEmpty() || password.isEmpty()) {
             Toast.makeText(this, "Por favor completa todos los campos", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (!isValidEmail(email)) {
+            Toast.makeText(this, "Ingresa un correo electrónico válido", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (password.length < 6) {
+            Toast.makeText(this, "La contraseña debe tener al menos 6 caracteres", Toast.LENGTH_SHORT).show()
             return
         }
 

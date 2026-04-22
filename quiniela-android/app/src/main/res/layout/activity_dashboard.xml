@@ -145,36 +145,31 @@
             android:textColor="@color/text_hint" />
     </LinearLayout>
 
-    <LinearLayout
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/btnCrearQuiniela"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:orientation="vertical"
-        android:gravity="center">
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="88dp"
+        android:text="Crear Nueva"
+        android:textColor="@color/white"
+        app:icon="@android:drawable/ic_input_add"
+        app:iconTint="@color/white"
+        app:backgroundTint="@color/primary" />
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/btnCrearQuiniela"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:contentDescription="Crear Quiniela"
-            android:src="@android:drawable/ic_input_add"
-            app:backgroundTint="@color/primary"
-            app:fabSize="normal"
-            app:tint="@color/white" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/btnUnirseQuiniela"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:contentDescription="Unirse a Quiniela"
-            android:src="@android:drawable/ic_menu_add"
-            app:backgroundTint="@color/accent"
-            app:fabSize="normal"
-            app:tint="@color/white" />
-
-    </LinearLayout>
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/btnUnirseQuiniela"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:text="Unirse con QR"
+        android:textColor="@color/white"
+        app:icon="@android:drawable/ic_menu_camera"
+        app:iconTint="@color/white"
+        app:backgroundTint="@color/accent" />
 
     <ProgressBar
         android:id="@+id/progressBar"

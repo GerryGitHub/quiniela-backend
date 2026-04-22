@@ -1,5 +1,6 @@
 package com.quiniela.app.ui.dashboard
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
@@ -18,7 +19,15 @@ import com.quiniela.app.ui.auth.LoginActivity
 import com.quiniela.app.ui.quiniela.CrearQuinielaActivity
 import com.quiniela.app.ui.quiniela.QuinielaDetalleActivity
 import com.quiniela.app.ui.quiniela.QuinielaAdapter
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.MultiFormatWriter
+import com.google.zxing.common.BitMatrix
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.quiniela.app.databinding.DialogQrBinding
+import com.quiniela.app.model.QuinielaResumenDTO
 import kotlinx.coroutines.launch
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.set
 
 class DashboardActivity : AppCompatActivity() {
     private lateinit var binding: ActivityDashboardBinding
@@ -33,12 +42,17 @@ class DashboardActivity : AppCompatActivity() {
         binding = ActivityDashboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        adapter = QuinielaAdapter { quiniela ->
-            val intent = Intent(this, QuinielaDetalleActivity::class.java)
-            intent.putExtra("quinielaId", quiniela.id)
-            intent.putExtra("quinielaNombre", quiniela.nombre)
-            startActivity(intent)
-        }
+        adapter = QuinielaAdapter(
+            onItemClick = { quiniela ->
+                val intent = Intent(this, QuinielaDetalleActivity::class.java)
+                intent.putExtra("quinielaId", quiniela.id)
+                intent.putExtra("quinielaNombre", quiniela.nombre)
+                startActivity(intent)
+            },
+            onShareClick = { quiniela ->
+                showQRDialog(quiniela)
+            }
+        )
         
         adapterPartidosEnVivo = PartidoEnVivoAdapter()
         
@@ -52,6 +66,7 @@ class DashboardActivity : AppCompatActivity() {
         loadData()
     }
 
+    @SuppressLint("SetTextI18n")
     private fun loadData() {
         binding.progressBar.visibility = View.VISIBLE
         lifecycleScope.launch {
@@ -96,6 +111,51 @@ class DashboardActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun showQRDialog(quiniela: QuinielaResumenDTO) {
+        val dialogBinding = DialogQrBinding.inflate(layoutInflater)
+        val dialog = MaterialAlertDialogBuilder(this)
+            .setView(dialogBinding.root)
+            .create()
+
+        dialogBinding.tvCodigo.text = quiniela.codigoInvitacion
+
+        try {
+            val size = 500
+            val bitMatrix: BitMatrix = MultiFormatWriter().encode(
+                quiniela.codigoInvitacion,
+                BarcodeFormat.QR_CODE,
+                size,
+                size
+            )
+            val bitmap = createBitmap(size, size)
+            for (x in 0 until size) {
+                for (y in 0 until size) {
+                    bitmap[x, y] = if (bitMatrix[x, y]) 0xFF000000.toInt() else 0xFFFFFFFF.toInt()
+                }
+            }
+            dialogBinding.ivQR.setImageBitmap(bitmap)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "Error QR: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+
+        dialogBinding.btnCompartir.setOnClickListener {
+            compartirCodigo(quiniela.codigoInvitacion)
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    private fun compartirCodigo(codigo: String) {
+        val mensaje = "Únete a mi quiniela! Usa el código: $codigo\n\nO escanea el código QR de la app Quiniela"
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, mensaje)
+        }
+        startActivity(Intent.createChooser(intent, "Compartir con"))
     }
 
     private fun setupButtons() {

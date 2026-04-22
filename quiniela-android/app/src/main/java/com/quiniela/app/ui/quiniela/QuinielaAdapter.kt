@@ -10,7 +10,8 @@ import com.quiniela.app.databinding.ItemQuinielaBinding
 import com.quiniela.app.model.QuinielaResumenDTO
 
 class QuinielaAdapter(
-    private val onItemClick: (QuinielaResumenDTO) -> Unit
+    private val onItemClick: (QuinielaResumenDTO) -> Unit,
+    private val onShareClick: (QuinielaResumenDTO) -> Unit
 ) : ListAdapter<QuinielaResumenDTO, QuinielaAdapter.ViewHolder>(DiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -26,10 +27,10 @@ class QuinielaAdapter(
         @SuppressLint("SetTextI18n")
         fun bind(quiniela: QuinielaResumenDTO) {
             binding.tvNombre.text = quiniela.nombre
-            binding.tvCodigo.text = "Código: ${quiniela.codigoInvitacion}"
             binding.tvPuntos.text = "${quiniela.puntosTotales} pts"
             
             binding.root.setOnClickListener { onItemClick(quiniela) }
+            binding.btnShare.setOnClickListener { onShareClick(quiniela) }
         }
     }
 

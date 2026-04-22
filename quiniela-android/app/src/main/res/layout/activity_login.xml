@@ -128,6 +128,18 @@
                     app:cornerRadius="16dp" />
 
                 <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnBiometric"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Iniciar con Huella/Rostro"
+                    android:textAllCaps="false"
+                    android:visibility="gone"
+                    app:icon="@android:drawable/ic_menu_view"
+                    app:iconGravity="textStart" />
+
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnRegister"
                     style="@style/Widget.Material3.Button.TextButton"
                     android:layout_width="match_parent"

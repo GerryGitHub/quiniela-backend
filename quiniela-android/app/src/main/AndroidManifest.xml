@@ -24,13 +24,16 @@
             android:name=".ui.dashboard.DashboardActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.pronosticos.PronosticosActivity"
-            android:exported="false" />
-        <activity
             android:name=".ui.grupos.GruposActivity"
             android:exported="false" />
         <activity
             android:name=".ui.resultados.ResultadosActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.quiniela.CrearQuinielaActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.quiniela.QuinielaDetalleActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"

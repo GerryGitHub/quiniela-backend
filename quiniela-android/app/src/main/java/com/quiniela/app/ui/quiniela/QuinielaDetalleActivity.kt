@@ -195,6 +195,11 @@ class PartidosConPronosticoAdapter(
             
             binding.tvMiPronostico.text = "Tu pronóstico: ${item.golesLocalPredicho} - ${item.golesVisitantePredicho}"
             
+            // Inhabilitar si el partido ya terminó o está en curso
+            val esEditable = item.partido.estado == "PENDIENTE"
+            binding.etGolesLocal.isEnabled = esEditable
+            binding.etGolesVisitante.isEnabled = esEditable
+            
             binding.etGolesLocal.removeTextChangedListener(textWatcher)
             binding.etGolesVisitante.removeTextChangedListener(textWatcher)
             

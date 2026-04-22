@@ -3,7 +3,6 @@ package com.quiniela.backend.service
 import com.quiniela.backend.dto.*
 import com.quiniela.backend.entity.Participacion
 import com.quiniela.backend.entity.Quiniela
-import com.quiniela.backend.entity.Usuario
 import com.quiniela.backend.exception.NotFoundException
 import com.quiniela.backend.repository.*
 import org.springframework.stereotype.Service
@@ -174,7 +173,7 @@ class QuinielaService(
     }
 
     fun getLeaderboard(quinielaId: Long): List<LeaderboardEntryDTO> {
-        val quiniela = quinielaRepository.findById(quinielaId)
+      quinielaRepository.findById(quinielaId)
             .orElseThrow { NotFoundException("Quiniela no encontrada") }
 
         val participantes = participacionRepository.findByQuinielaIdOrderByPuntosDesc(quinielaId)

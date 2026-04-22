@@ -2,7 +2,6 @@ package com.quiniela.backend.service
 
 import com.quiniela.backend.dto.*
 import com.quiniela.backend.entity.EstadoPartido
-import com.quiniela.backend.entity.Partido
 import com.quiniela.backend.entity.Pronostico
 import com.quiniela.backend.exception.ForbiddenException
 import com.quiniela.backend.exception.NotFoundException
@@ -21,6 +20,14 @@ class PronosticoService(
 
     fun getMisPronosticos(quinielaId: Long, email: String): MisPronosticosDTO {
         val pronosticos = pronosticoRepository.findByQuinielaIdAndUsuarioEmail(quinielaId, email)
+
+        val pronosticosDTO = pronosticos.map { it.toDTO() }
+
+        return MisPronosticosDTO(pronosticos = pronosticosDTO)
+    }
+
+    fun getTodosMisPronosticos(email: String): MisPronosticosDTO {
+        val pronosticos = pronosticoRepository.findByUsuarioEmail(email)
 
         val pronosticosDTO = pronosticos.map { it.toDTO() }
 

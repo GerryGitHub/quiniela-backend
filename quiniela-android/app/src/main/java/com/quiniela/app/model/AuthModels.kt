@@ -37,7 +37,39 @@ data class UsuarioPerfilDTO(
 data class QuinielaResumenDTO(
     val id: Long,
     val nombre: String,
-    val codigo: String,
-    val estado: String,
+    val codigoInvitacion: String,
+    val puntosTotales: Int = 0
+)
+
+data class CrearQuinielaRequest(
+    val nombre: String,
+    val codigoInvitacion: String
+)
+
+data class UnirseQuinielaRequest(
+    val codigoInvitacion: String
+)
+
+data class QuinielaDTO(
+    val id: Long,
+    val nombre: String,
+    val codigoInvitacion: String,
+    val administrador: UsuarioDTO,
+    val participantes: List<UsuarioDTO>,
+    val esPublica: Boolean = false
+)
+
+data class QuinielaDetalleDTO(
+    val id: Long,
+    val nombre: String,
+    val codigoInvitacion: String,
+    val administrador: UsuarioDTO,
+    val participantes: List<UsuarioDTO>,
+    val partidos: List<PartidoDTO>
+)
+
+data class LeaderboardEntryDTO(
+    val posicion: Int,
+    val usuario: UsuarioDTO,
     val puntosTotales: Int
 )
