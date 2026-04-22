@@ -23,46 +23,25 @@ class PartidoRepository(private val apiService: ApiService = RetrofitClient.apiS
         }
     }
 
-    suspend fun getPartidoDetalle(id: Long): Result<PartidoDTO> {
-        return withContext(Dispatchers.IO) {
-            try {
-                val response = apiService.getPartidoDetalle(id)
-                if (response.isSuccessful) {
-                    response.body()?.let { Result.Success(it) } ?: Result.Error("Respuesta vacía")
-                } else {
-                    Result.Error("Error: ${response.code()}")
-                }
-            } catch (e: Exception) {
-                Result.Error(e.message ?: "Error desconocido")
-            }
-        }
-    }
-
-    suspend fun actualizarPartido(
-        id: Long,
-        golesLocal: Int?,
-        golesVisitante: Int?,
-        estado: String
-    ): Result<PartidoDTO> {
-        return withContext(Dispatchers.IO) {
-            try {
-                val request = ActualizarPartidoRequest(golesLocal, golesVisitante, estado)
-                val response = apiService.actualizarPartido(id, request)
-                if (response.isSuccessful) {
-                    response.body()?.let { Result.Success(it) } ?: Result.Error("Respuesta vacía")
-                } else {
-                    Result.Error("Error: ${response.code()}")
-                }
-            } catch (e: Exception) {
-                Result.Error(e.message ?: "Error desconocido")
-            }
-        }
-    }
-
-    suspend fun getResultados(): Result<List<PartidoDTO>> {
+suspend fun getResultados(): Result<List<PartidoDTO>> {
         return withContext(Dispatchers.IO) {
             try {
                 val response = apiService.getResultados()
+                if (response.isSuccessful) {
+                    response.body()?.let { Result.Success(it) } ?: Result.Error("Respuesta vacía")
+                } else {
+                    Result.Error("Error: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                    Result.Error(e.message ?: "Error desconocido")
+            }
+        }
+    }
+
+    suspend fun getPartidosEnVivo(): Result<List<PartidoDTO>> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.getPartidosEnVivo()
                 if (response.isSuccessful) {
                     response.body()?.let { Result.Success(it) } ?: Result.Error("Respuesta vacía")
                 } else {

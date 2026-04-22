@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import api from '../services/api';
 import './Resultados.css';
 
 interface Partido {
@@ -28,12 +29,22 @@ export default function Resultados() {
   const [resultado, setResultado] = useState<ResultadoUpdate>({ golesLocal: 0, golesVisitante: 0 });
   const [mensaje, setMensaje] = useState('');
 
+  const filtrarPartidosDelDia = (data: Partido[]) => {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    const manana = new Date(hoy);
+    manana.setDate(manana.getDate() + 1);
+    
+    return data.filter((p: Partido) => {
+      const fechaPartido = new Date(p.fechaHora);
+      return fechaPartido >= hoy && fechaPartido < manana;
+    });
+  };
+
   useEffect(() => {
-    fetch('http://localhost:8080/api/resultados/partidos')
-      .then(res => res.json())
-      .then(data => {
-        console.log('Todos:', data);
-        setPartidos(data);
+    api.get('/api/resultados/partidos')
+      .then(res => {
+        setPartidos(filtrarPartidosDelDia(res.data));
         setLoading(false);
       })
       .catch(err => {
@@ -44,31 +55,43 @@ export default function Resultados() {
 
   const handleActualizar = async (partidoId: number) => {
     try {
-      const res = await fetch(`http://localhost:8080/api/resultados/${partidoId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(resultado)
-      });
+      const res = await api.patch(`/api/resultados/${partidoId}`, resultado);
       
-      if (res.ok) {
+      if (res.status === 200) {
         setMensaje('¡Resultado actualizado!');
         setEditando(null);
         setTimeout(() => setMensaje(''), 3000);
-        fetch('http://localhost:8080/api/resultados/partidos')
-          .then(res => res.json())
-          .then(data => setPartidos(data));
+        api.get('/api/resultados/partidos')
+          .then(res => setPartidos(filtrarPartidosDelDia(res.data)));
       } else {
         setMensaje('Error al actualizar');
       }
-    } catch (err) {
-      setMensaje('Error al actualizar');
+    } catch (err: any) {
+      setMensaje(err.response?.data?.error || 'Error al actualizar');
     }
   };
 
-  const puedeIngresarResultado = (fechaHora: string): boolean => {
+const handleFinalizar = async (partidoId: number) => {
+    try {
+      const res = await api.patch(`/api/resultados/${partidoId}/finalizar`);
+      
+      if (res.status === 200) {
+        setMensaje('¡Partido finalizado! Puntos calculados.');
+        setTimeout(() => setMensaje(''), 3000);
+        api.get('/api/resultados/partidos')
+          .then(res => setPartidos(filtrarPartidosDelDia(res.data)));
+      } else {
+        setMensaje('Error al finalizar partido');
+      }
+    } catch (err: any) {
+      setMensaje(err.response?.data?.error || 'Error al finalizar partido');
+    }
+  };
+
+  const puedeIngresarResultado = (fechaHora: string, estado: string): boolean => {
+    if (estado === 'FINALIZADO') return false;
     const partidoTime = new Date(fechaHora).getTime();
     const ahora = Date.now();
-    // Habilitar 30 minutos antes del partido
     const treintaMinutos = 30 * 60 * 1000;
     return partidoTime <= ahora + treintaMinutos;
   };
@@ -106,7 +129,7 @@ export default function Resultados() {
             <p className="no-partidos">No hay partidos</p>
           ) : (
             partidosOrdenados.map(partido => {
-              const puedeEditar = puedeIngresarResultado(partido.fechaHora);
+              const puedeEditar = puedeIngresarResultado(partido.fechaHora, partido.estado);
               return (
                 <div key={partido.id} className={`partido-card ${partido.golesLocalReal !== null ? 'completado' : ''} ${!puedeEditar ? 'pendiente' : ''}`}>
                   <div className="partido-header">
@@ -152,7 +175,7 @@ export default function Resultados() {
                   </div>
 
                   <div className="acciones">
-                    {editando === partido.id ? (
+                      {editando === partido.id ? (
                       <>
                         <button 
                           className="btn-guardar"
@@ -168,13 +191,23 @@ export default function Resultados() {
                         </button>
                       </>
                     ) : (
-                      <button 
-                        className="btn-editar"
-                        onClick={() => iniciarEdicion(partido)}
-                        disabled={!puedeEditar}
-                      >
-                        {partido.golesLocalReal !== null ? 'Modificar Resultado' : 'Ingresar Resultado'}
-                      </button>
+                      <>
+                        <button 
+                          className="btn-editar"
+                          onClick={() => iniciarEdicion(partido)}
+                          disabled={!puedeEditar}
+                        >
+                          {partido.golesLocalReal !== null ? 'Modificar Resultado' : 'Ingresar Resultado'}
+                        </button>
+                        {partido.golesLocalReal !== null && partido.golesVisitanteReal !== null && partido.estado !== 'FINALIZADO' && (
+                          <button 
+                            className="btn-finalizar"
+                            onClick={() => handleFinalizar(partido.id)}
+                          >
+                            Finalizar Partido
+                          </button>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>

@@ -62,14 +62,34 @@ class PronosticarAdapter : ListAdapter<PartidoDTO, PronosticarAdapter.ViewHolder
             binding.tvLocal.text = partido.equipoLocal
             binding.tvVisitante.text = partido.equipoVisitante
             
+            val esEditable = partido.estado == "PENDIENTE"
+            binding.etGolesLocal.isEnabled = esEditable
+            binding.etGolesVisitante.isEnabled = esEditable
+            
+            val esFinalizado = partido.estado == "FINALIZADO"
+            if (esFinalizado) {
+                binding.tvEstado.text = "Finalizado"
+                binding.tvEstado.setTextColor(0xFFF44336.toInt())
+            } else if (partido.estado == "EN_CURSO") {
+                binding.tvEstado.text = "En vivo"
+                binding.tvEstado.setTextColor(0xFFFFC107.toInt())
+            } else {
+                binding.tvEstado.text = ""
+            }
+            
             val local = existente?.golesLocalPredicho ?: 0
             val visitante = existente?.golesVisitantePredicho ?: 0
             
             binding.etGolesLocal.removeTextChangedListener(textWatcher)
             binding.etGolesVisitante.removeTextChangedListener(textWatcher)
             
-            binding.etGolesLocal.setText(local.toString())
-            binding.etGolesVisitante.setText(visitante.toString())
+            if (esEditable) {
+                binding.etGolesLocal.setText(local.toString())
+                binding.etGolesVisitante.setText(visitante.toString())
+            } else {
+                binding.etGolesLocal.setText(if (local > 0) local.toString() else "")
+                binding.etGolesVisitante.setText(if (visitante > 0) visitante.toString() else "")
+            }
             
             binding.etGolesLocal.addTextChangedListener(textWatcher)
             binding.etGolesVisitante.addTextChangedListener(textWatcher)

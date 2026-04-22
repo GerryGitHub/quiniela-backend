@@ -71,8 +71,10 @@ class PronosticarActivity : AppCompatActivity() {
         lifecycleScope.launch {
             when (val result = partidoRepository.getPartidos()) {
                 is Result.Success -> {
-                    val partidosPendientes = result.data.filter { it.estado == "PENDIENTE" }
-                    adapter.submitList(partidosPendientes)
+                    val partidosActivos = result.data.filter { 
+                        it.estado == "PENDIENTE" || it.estado == "EN_CURSO" || it.estado == "FINALIZADO" 
+                    }
+                    adapter.submitList(partidosActivos)
                 }
                 is Result.Error -> {
                     Toast.makeText(this@PronosticarActivity, result.message, Toast.LENGTH_SHORT).show()
@@ -88,7 +90,9 @@ class PronosticarActivity : AppCompatActivity() {
             return
         }
 
-        val pronosticosItems = adapter.getPronosticos().map { pronostico ->
+        val pronosticosItems = adapter.getPronosticos()
+            .filter { it.partido.estado == "PENDIENTE" }
+            .map { pronostico ->
             PronosticoItemRequest(
                 idPartido = pronostico.partido.id,
                 golesLocalPredicho = pronostico.golesLocalPredicho,
