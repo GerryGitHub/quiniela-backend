@@ -1,5 +1,6 @@
 package com.quiniela.backend.exception
 
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -7,31 +8,31 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
+    private val logger = LoggerFactory.getLogger(GlobalExceptionHandler::class.java)
 
     @ExceptionHandler(IllegalArgumentException::class)
     fun handleIllegalArgumentException(e: IllegalArgumentException): ResponseEntity<Map<String, String>> {
-        println("ERROR IllegalArgumentException: ${e.message}")
+        logger.warn("Bad request: {}", e.message)
         return ResponseEntity.badRequest().body(mapOf("error" to (e.message ?: "Bad request")))
     }
 
     @ExceptionHandler(ForbiddenException::class)
     fun handleForbiddenException(e: ForbiddenException): ResponseEntity<Map<String, String>> {
-        println("ERROR ForbiddenException: ${e.message}")
+        logger.warn("Forbidden: {}", e.message)
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(mapOf("error" to (e.message ?: "Forbidden")))
     }
 
     @ExceptionHandler(NotFoundException::class)
     fun handleNotFoundException(e: NotFoundException): ResponseEntity<Map<String, String>> {
-        println("ERROR NotFoundException: ${e.message}")
+        logger.warn("Not found: {}", e.message)
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(mapOf("error" to (e.message ?: "Not found")))
     }
 
     @ExceptionHandler(Exception::class)
     fun handleGenericException(e: Exception): ResponseEntity<Map<String, String>> {
-        println("ERROR GenericException: ${e.message}")
-        e.printStackTrace()
+        logger.error("Internal server error: {}", e.message, e)
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(mapOf("error" to (e.message ?: "Error interno del servidor")))
+            .body(mapOf("error" to "Error interno del servidor"))
     }
 }
 

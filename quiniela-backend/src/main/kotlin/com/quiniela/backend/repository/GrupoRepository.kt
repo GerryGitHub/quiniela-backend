@@ -7,5 +7,4 @@ import org.springframework.stereotype.Repository
 @Repository
 interface GrupoRepository : JpaRepository<Grupo, Long> {
     fun findByNombre(nombre: String): Grupo?
-    fun findAllByOrderByNombre(): List<Grupo>
 }

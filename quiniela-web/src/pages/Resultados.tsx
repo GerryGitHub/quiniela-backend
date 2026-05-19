@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
+import Spinner from '../components/Spinner';
 import './Resultados.css';
 
 interface Partido {
@@ -28,6 +29,7 @@ export default function Resultados() {
   const [editando, setEditando] = useState<number | null>(null);
   const [resultado, setResultado] = useState<ResultadoUpdate>({ golesLocal: 0, golesVisitante: 0 });
   const [mensaje, setMensaje] = useState('');
+  const [submitting, setSubmitting] = useState<number | null>(null);
 
   const filtrarPartidosDelDia = (data: Partido[]) => {
     const hoy = new Date();
@@ -54,6 +56,7 @@ export default function Resultados() {
   }, []);
 
   const handleActualizar = async (partidoId: number) => {
+    setSubmitting(partidoId);
     try {
       const res = await api.patch(`/api/resultados/${partidoId}`, resultado);
       
@@ -68,10 +71,13 @@ export default function Resultados() {
       }
     } catch (err: any) {
       setMensaje(err.response?.data?.error || 'Error al actualizar');
+    } finally {
+      setSubmitting(null);
     }
   };
 
 const handleFinalizar = async (partidoId: number) => {
+    setSubmitting(partidoId);
     try {
       const res = await api.patch(`/api/resultados/${partidoId}/finalizar`);
       
@@ -85,6 +91,8 @@ const handleFinalizar = async (partidoId: number) => {
       }
     } catch (err: any) {
       setMensaje(err.response?.data?.error || 'Error al finalizar partido');
+    } finally {
+      setSubmitting(null);
     }
   };
 
@@ -180,8 +188,9 @@ const handleFinalizar = async (partidoId: number) => {
                         <button 
                           className="btn-guardar"
                           onClick={() => handleActualizar(partido.id)}
+                          disabled={submitting === partido.id}
                         >
-                          Guardar
+                          {submitting === partido.id ? <Spinner size={14} /> : 'Guardar'}
                         </button>
                         <button 
                           className="btn-cancelar"
@@ -203,8 +212,9 @@ const handleFinalizar = async (partidoId: number) => {
                           <button 
                             className="btn-finalizar"
                             onClick={() => handleFinalizar(partido.id)}
+                            disabled={submitting === partido.id}
                           >
-                            Finalizar Partido
+                            {submitting === partido.id ? <Spinner size={14} /> : 'Finalizar Partido'}
                           </button>
                         )}
                       </>

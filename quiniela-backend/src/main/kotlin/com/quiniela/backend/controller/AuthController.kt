@@ -4,6 +4,7 @@ import com.quiniela.backend.dto.*
 import com.quiniela.backend.service.AuthService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.core.userdetails.UserDetails
@@ -18,13 +19,13 @@ class AuthController(
 
     @PostMapping("/register")
     @Operation(summary = "Registrar nuevo usuario")
-    fun register(@RequestBody request: RegisterRequest): ResponseEntity<AuthResponse> {
+    fun register(@Valid @RequestBody request: RegisterRequest): ResponseEntity<AuthResponse> {
         return ResponseEntity.ok(authService.register(request))
     }
 
     @PostMapping("/login")
     @Operation(summary = "Iniciar sesión")
-    fun login(@RequestBody request: LoginRequest): ResponseEntity<AuthResponse> {
+    fun login(@Valid @RequestBody request: LoginRequest): ResponseEntity<AuthResponse> {
         return ResponseEntity.ok(authService.login(request))
     }
 

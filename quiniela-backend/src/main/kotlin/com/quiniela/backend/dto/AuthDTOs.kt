@@ -1,13 +1,24 @@
 package com.quiniela.backend.dto
 
+import jakarta.validation.constraints.Email
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Size
+
 data class RegisterRequest(
+    @field:NotBlank(message = "El nombre es requerido")
     val nombre: String,
+    @field:Email(message = "Email inválido")
+    @field:NotBlank(message = "El email es requerido")
     val email: String,
+    @field:Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
     val password: String
 )
 
 data class LoginRequest(
+    @field:Email(message = "Email inválido")
+    @field:NotBlank(message = "El email es requerido")
     val email: String,
+    @field:NotBlank(message = "La contraseña es requerida")
     val password: String
 )
 

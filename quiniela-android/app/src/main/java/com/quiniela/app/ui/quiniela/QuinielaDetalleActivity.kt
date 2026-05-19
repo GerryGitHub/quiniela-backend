@@ -77,7 +77,7 @@ class QuinielaDetalleActivity : AppCompatActivity() {
                     val detalle = result.data
                     binding.toolbar.title = detalle.nombre
                     
-                    when (val pronosResult = pronosticoRepository.getMisPronosticosByQuiniela(quinielaId)) {
+when (val pronosResult = pronosticoRepository.getMisPronosticosByQuiniela(quinielaId)) {
                         is Result.Success -> {
                             val pronosticosMap = pronosResult.data.pronosticos.associateBy { it.partido.id }
                             val partidosConPronostico = detalle.partidos.map { partido ->
@@ -87,15 +87,17 @@ class QuinielaDetalleActivity : AppCompatActivity() {
                                     golesLocalPredicho = pronostico?.golesLocalPredicho ?: 0,
                                     golesVisitantePredicho = pronostico?.golesVisitantePredicho ?: 0
                                 )
-                            }.toMutableList()
-                            partidosAdapter = PartidosConPronosticoAdapter(partidosConPronostico)
+                            }
+                            val itemsAgrupados = crearListaAgrupada(partidosConPronostico)
+                            partidosAdapter = PartidosConPronosticoAdapter(itemsAgrupados)
                             binding.rvPartidos.adapter = partidosAdapter
                         }
                         is Result.Error -> {
                             val partidosConPronostico = detalle.partidos.map { partido ->
                                 PartidoConPronostico(partido = partido, golesLocalPredicho = 0, golesVisitantePredicho = 0)
-                            }.toMutableList()
-                            partidosAdapter = PartidosConPronosticoAdapter(partidosConPronostico)
+                            }
+                            val itemsAgrupados = crearListaAgrupada(partidosConPronostico)
+                            partidosAdapter = PartidosConPronosticoAdapter(itemsAgrupados)
                             binding.rvPartidos.adapter = partidosAdapter
                         }
                     }
@@ -115,6 +117,38 @@ class QuinielaDetalleActivity : AppCompatActivity() {
             
             binding.progressBar.visibility = View.GONE
         }
+    }
+
+    private fun crearListaAgrupada(partidos: List<PartidoConPronostico>): List<GrupoExpansible> {
+        val ordenGrupo = listOf("A", "B", "C", "D", "E", "F", "G", "H")
+        
+        val grouped = partidos.groupBy { 
+            normalizarGrupo(it.partido.grupo) 
+        }
+        
+        val gruposOrdenados = grouped.keys.sortedWith { a, b ->
+            val idxA = ordenGrupo.indexOf(a)
+            val idxB = ordenGrupo.indexOf(b)
+            when {
+                idxA != -1 && idxB != -1 -> idxA - idxB
+                idxA != -1 -> -1
+                idxB != -1 -> 1
+                else -> a.compareTo(b)
+            }
+        }
+        
+        return gruposOrdenados.map { grupo ->
+            GrupoExpansible(
+                nombre = grupo,
+                partidos = (grouped[grupo]?.sortedBy { it.partido.fechaHora } ?: emptyList()).toMutableList(),
+                expandido = false
+            )
+        }
+    }
+    
+    private fun normalizarGrupo(grupo: String?): String {
+        if (grupo == null) return "Sin grupo"
+        return grupo.trim().take(1).uppercase()
     }
 
     private fun guardarPronosticos() {
@@ -157,34 +191,109 @@ data class PartidoConPronostico(
     var golesVisitantePredicho: Int = 0
 )
 
+data class GrupoExpansible(
+    val nombre: String,
+    val partidos: MutableList<PartidoConPronostico>,
+    var expandido: Boolean = false
+)
+
 class PartidosConPronosticoAdapter(
-    private val partidos: MutableList<PartidoConPronostico>
-) : androidx.recyclerview.widget.RecyclerView.Adapter<PartidosConPronosticoAdapter.ViewHolder>() {
-    
-    override fun onCreateViewHolder(parent: android.view.ViewGroup, viewType: Int): ViewHolder {
-        val binding = com.quiniela.app.databinding.ItemQuinielaPartidoBinding.inflate(
-            android.view.LayoutInflater.from(parent.context), parent, false)
-        return ViewHolder(binding)
+    private val grupos: List<GrupoExpansible>
+) : androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>() {
+
+    companion object {
+        private const val TYPE_HEADER = 0
+        private const val TYPE_PARTIDO = 1
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(partidos[position])
+    override fun getItemViewType(position: Int): Int {
+        var headersCount = 0
+        for (grupo in grupos) {
+            if (position == headersCount) return TYPE_HEADER
+            headersCount++
+            if (grupo.expandido) {
+                if (position < headersCount + grupo.partidos.size) return TYPE_PARTIDO
+                headersCount += grupo.partidos.size
+            }
+        }
+        return TYPE_PARTIDO
     }
 
-    override fun getItemCount() = partidos.size
+    override fun getItemCount(): Int {
+        var count = grupos.size
+        for (grupo in grupos) {
+            if (grupo.expandido) count += grupo.partidos.size
+        }
+        return count
+    }
 
-    fun getAllPronosticos(): List<PartidoConPronostico> = partidos
+    private fun getItem(position: Int): Any? {
+        var headersCount = 0
+        for (grupo in grupos) {
+            if (position == headersCount) return grupo
+            headersCount++
+            if (grupo.expandido) {
+                val partidoIndex = position - headersCount
+                if (partidoIndex < grupo.partidos.size) {
+                    return grupo.partidos[partidoIndex]
+                }
+                headersCount += grupo.partidos.size
+            }
+        }
+        return null
+    }
+
+    override fun onCreateViewHolder(parent: android.view.ViewGroup, viewType: Int): androidx.recyclerview.widget.RecyclerView.ViewHolder {
+        return when (viewType) {
+            TYPE_HEADER -> {
+                val binding = com.quiniela.app.databinding.ItemGrupoHeaderBinding.inflate(
+                    android.view.LayoutInflater.from(parent.context), parent, false)
+                HeaderViewHolder(binding)
+            }
+            else -> {
+                val binding = com.quiniela.app.databinding.ItemQuinielaPartidoBinding.inflate(
+                    android.view.LayoutInflater.from(parent.context), parent, false)
+                ViewHolder(binding)
+            }
+        }
+    }
+
+    override fun onBindViewHolder(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder, position: Int) {
+        val item = getItem(position)
+        when (item) {
+            is GrupoExpansible -> (holder as HeaderViewHolder).bind(item)
+            is PartidoConPronostico -> (holder as ViewHolder).bind(item)
+            null -> {}
+        }
+    }
+
+    fun getAllPronosticos(): List<PartidoConPronostico> {
+        return grupos.flatMap { it.partidos }
+    }
+
+    inner class HeaderViewHolder(private val binding: com.quiniela.app.databinding.ItemGrupoHeaderBinding) : 
+        androidx.recyclerview.widget.RecyclerView.ViewHolder(binding.root) {
+        
+        fun bind(grupo: GrupoExpansible) {
+            binding.tvHeader.text = "Grupo ${grupo.nombre} ${if (grupo.expandido) "▼" else "▶"}"
+            binding.root.setOnClickListener {
+                grupo.expandido = !grupo.expandido
+                notifyDataSetChanged()
+            }
+        }
+    }
 
     inner class ViewHolder(private val binding: com.quiniela.app.databinding.ItemQuinielaPartidoBinding) : 
         androidx.recyclerview.widget.RecyclerView.ViewHolder(binding.root) {
         
         private var textWatcher: TextWatcher? = null
+        private var partidoActual: PartidoConPronostico? = null
         
         fun bind(item: PartidoConPronostico) {
-            val pos = adapterPosition
+            partidoActual = item
             
-            binding.tvLocal.text = item.partido.equipoLocal
-            binding.tvVisitante.text = item.partido.equipoVisitante
+            binding.tvLocal.text = "${obtenerBandera(item.partido.equipoLocal)} ${item.partido.equipoLocal}"
+            binding.tvVisitante.text = "${item.partido.equipoVisitante} ${obtenerBandera(item.partido.equipoVisitante)}"
             binding.tvFecha.text = item.partido.fechaHora
             
             if (item.partido.golesLocalReal != null && item.partido.golesVisitanteReal != null) {
@@ -195,7 +304,6 @@ class PartidosConPronosticoAdapter(
             
             binding.tvMiPronostico.text = "Tu pronóstico: ${item.golesLocalPredicho} - ${item.golesVisitantePredicho}"
             
-            // Inhabilitar si el partido ya terminó o está en curso
             val esEditable = item.partido.estado == "PENDIENTE"
             binding.etGolesLocal.isEnabled = esEditable
             binding.etGolesVisitante.isEnabled = esEditable
@@ -203,19 +311,18 @@ class PartidosConPronosticoAdapter(
             binding.etGolesLocal.removeTextChangedListener(textWatcher)
             binding.etGolesVisitante.removeTextChangedListener(textWatcher)
             
-            binding.etGolesLocal.setText(item.golesLocalPredicho.toString())
-            binding.etGolesVisitante.setText(item.golesVisitantePredicho.toString())
+            binding.etGolesLocal.setText(if (item.golesLocalPredicho > 0) item.golesLocalPredicho.toString() else "")
+            binding.etGolesVisitante.setText(if (item.golesVisitantePredicho > 0) item.golesVisitantePredicho.toString() else "")
             
             textWatcher = object : TextWatcher {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
                 override fun afterTextChanged(s: Editable?) {
-                    val position = adapterPosition
-                    if (position != androidx.recyclerview.widget.RecyclerView.NO_POSITION && position < partidos.size) {
+                    partidoActual?.let { partido ->
                         val local = binding.etGolesLocal.text.toString().toIntOrNull() ?: 0
                         val visitante = binding.etGolesVisitante.text.toString().toIntOrNull() ?: 0
-                        partidos[position].golesLocalPredicho = local
-                        partidos[position].golesVisitantePredicho = visitante
+                        partido.golesLocalPredicho = local
+                        partido.golesVisitantePredicho = visitante
                         binding.tvMiPronostico.text = "Tu pronóstico: $local - $visitante"
                     }
                 }
@@ -223,6 +330,26 @@ class PartidosConPronosticoAdapter(
             
             binding.etGolesLocal.addTextChangedListener(textWatcher)
             binding.etGolesVisitante.addTextChangedListener(textWatcher)
+        }
+        
+        private fun obtenerBandera(pais: String): String {
+            return when (pais.uppercase()) {
+                "MEXICO", "MÉXICO" -> "🇲🇽"
+                "ARGENTINA" -> "🇦🇷"
+                "BRASIL" -> "🇧🇷"
+                "URUGUAY" -> "🇺🇾"
+                "COLOMBIA" -> "🇨🇴"
+                "PERÚ", "PERU" -> "🇵🇪"
+                "CHILE" -> "🇨🇱"
+                "VENEZUELA" -> "🇻🇪"
+                "ECUADOR" -> "🇪🇨"
+                "PARAGUAY" -> "🇵🇾"
+                "BOLIVIA" -> "🇧🇴"
+                "PANAMÁ" -> "🇵🇦"
+                "USA", "ESTADOS UNIDOS" -> "🇺🇸"
+                "CANADÁ", "CANADA" -> "🇨🇦"
+                else -> "⚽"
+            }
         }
     }
 }

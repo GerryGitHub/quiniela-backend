@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { connectWebSocket, disconnectWebSocket } from '../services/websocket';
+import api from '../services/api';
+import Spinner from '../components/Spinner';
 import './Dashboard.css';
 
 export default function Dashboard() {
@@ -13,11 +15,21 @@ export default function Dashboard() {
   const [codigo, setCodigo] = useState('');
   const [error, setError] = useState('');
   const [partidosEnVivo, setPartidosEnVivo] = useState<any[]>([]);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     fetchPerfil();
     fetchQuinielas();
     
+    // Cargar partidos en vivo al inicio
+    api.get('/api/resultados/en-vivo')
+      .then(res => {
+        if (res.data && Array.isArray(res.data)) {
+          setPartidosEnVivo(res.data);
+        }
+      })
+      .catch(err => console.log('Error cargando partidos en vivo:', err));
+
     connectWebSocket((partido) => {
       setPartidosEnVivo(prev => {
         const index = prev.findIndex(p => p.id === partido.id);
@@ -37,26 +49,43 @@ export default function Dashboard() {
 
   const isAdmin = usuario?.rol === 'ADMIN';
 
+  const getErrorMessage = (err: any): string => {
+    if (!err.response) return 'Error de conexión. Intenta más tarde.';
+    const status = err.response.status;
+    const data = err.response.data;
+    if (status === 401 || status === 403) return 'Tu sesión expiró. Por favor inicia sesión.';
+    if (status === 400) return data?.error || 'Solicitud inválida';
+    if (status === 404) return data?.error || 'Recurso no encontrado';
+    if (status >= 500) return 'Error del servidor. Intenta más tarde.';
+    return data?.error || 'Ocurrió un error';
+  };
+
   const handleCrear = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitting(true);
     try {
       const codigoGenerado = Math.random().toString(36).substring(2, 10).toUpperCase();
       await crearQuiniela(nombre, codigoGenerado);
       setShowCrear(false);
       setNombre('');
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Error al crear quiniela');
+      setError(getErrorMessage(err));
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const handleUnirse = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitting(true);
     try {
       await unirseQuiniela(codigo);
       setShowUnirse(false);
       setCodigo('');
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Error al unirse');
+      setError(getErrorMessage(err));
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -185,11 +214,11 @@ export default function Dashboard() {
                 />
               </div>
               <div className="modal-buttons">
-                <button type="button" onClick={() => setShowCrear(false)} className="btn-cancel">
+                <button type="button" onClick={() => setShowCrear(false)} className="btn-cancel" disabled={submitting}>
                   Cancelar
                 </button>
-                <button type="submit" className="btn-primary">
-                  Crear
+                <button type="submit" className="btn-primary" disabled={submitting}>
+                  {submitting ? <Spinner /> : 'Crear'}
                 </button>
               </div>
             </form>
@@ -213,11 +242,11 @@ export default function Dashboard() {
                 />
               </div>
               <div className="modal-buttons">
-                <button type="button" onClick={() => setShowUnirse(false)} className="btn-cancel">
+                <button type="button" onClick={() => setShowUnirse(false)} className="btn-cancel" disabled={submitting}>
                   Cancelar
                 </button>
-                <button type="submit" className="btn-primary">
-                  Unirse
+                <button type="submit" className="btn-primary" disabled={submitting}>
+                  {submitting ? <Spinner /> : 'Unirse'}
                 </button>
               </div>
             </form>

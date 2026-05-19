@@ -27,6 +27,15 @@ class AuthService(
 
     @Transactional
     fun register(request: RegisterRequest): AuthResponse {
+        if (request.email.isBlank() || !request.email.contains("@")) {
+            throw IllegalArgumentException("Email inválido")
+        }
+        if (request.password.length < 6) {
+            throw IllegalArgumentException("La contraseña debe tener al menos 6 caracteres")
+        }
+        if (request.nombre.isBlank()) {
+            throw IllegalArgumentException("El nombre es requerido")
+        }
         if (usuarioRepository.existsByEmail(request.email)) {
             throw IllegalArgumentException("El email ya está registrado")
         }

@@ -7,8 +7,14 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.quiniela.app.databinding.ItemGrupoHeaderBinding
 import com.quiniela.app.databinding.ItemPronosticarBinding
 import com.quiniela.app.model.PartidoDTO
+
+sealed class PronosticoItem {
+    data class Header(val grupo: String) : PronosticoItem()
+    data class PartidoItem(val partido: PartidoDTO) : PronosticoItem()
+}
 
 data class PartidoConPronostico(
     val partido: PartidoDTO,
@@ -16,23 +22,54 @@ data class PartidoConPronostico(
     var golesVisitantePredicho: Int = 0
 )
 
-class PronosticarAdapter : ListAdapter<PartidoDTO, PronosticarAdapter.ViewHolder>(DiffCallback()) {
+class PronosticarAdapter : ListAdapter<PronosticoItem, RecyclerView.ViewHolder>(DiffCallback()) {
 
     private val pronosticos = mutableMapOf<Long, PartidoConPronostico>()
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val binding = ItemPronosticarBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return ViewHolder(binding)
+    companion object {
+        private const val TYPE_HEADER = 0
+        private const val TYPE_PARTIDO = 1
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val partido = getItem(position)
-        val existente = pronosticos[partido.id]
-        holder.bind(partido, existente)
+    override fun getItemViewType(position: Int): Int {
+        return when (getItem(position)) {
+            is PronosticoItem.Header -> TYPE_HEADER
+            is PronosticoItem.PartidoItem -> TYPE_PARTIDO
+        }
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return when (viewType) {
+            TYPE_HEADER -> {
+                val binding = ItemGrupoHeaderBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                HeaderViewHolder(binding)
+            }
+            else -> {
+                val binding = ItemPronosticarBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                ViewHolder(binding)
+            }
+        }
+    }
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        when (val item = getItem(position)) {
+            is PronosticoItem.Header -> (holder as HeaderViewHolder).bind(item.grupo)
+            is PronosticoItem.PartidoItem -> {
+                val h = holder as ViewHolder
+                val existente = pronosticos[item.partido.id]
+                h.bind(item.partido, existente)
+            }
+        }
     }
 
     fun getPronosticos(): List<PartidoConPronostico> {
-        return pronosticos.values.toList()
+        return pronosticos.values.filter { it.partido.estado == "PENDIENTE" }.toList()
+    }
+
+    inner class HeaderViewHolder(private val binding: ItemGrupoHeaderBinding) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(grupo: String) {
+            binding.tvHeader.text = "Grupo $grupo"
+        }
     }
 
     inner class ViewHolder(private val binding: ItemPronosticarBinding) : RecyclerView.ViewHolder(binding.root) {
@@ -43,7 +80,9 @@ class PronosticarAdapter : ListAdapter<PartidoDTO, PronosticarAdapter.ViewHolder
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
-                val partido = currentList.find { it.id == partidoId } ?: return
+                val partido = (currentList.find { 
+                    it is PronosticoItem.PartidoItem && (it as PronosticoItem.PartidoItem).partido.id == partidoId 
+                } as? PronosticoItem.PartidoItem)?.partido ?: return
                 val local = binding.etGolesLocal.text.toString().toIntOrNull() ?: 0
                 val visitante = binding.etGolesVisitante.text.toString().toIntOrNull() ?: 0
                 
@@ -98,8 +137,17 @@ class PronosticarAdapter : ListAdapter<PartidoDTO, PronosticarAdapter.ViewHolder
         }
     }
 
-    class DiffCallback : DiffUtil.ItemCallback<PartidoDTO>() {
-        override fun areItemsTheSame(oldItem: PartidoDTO, newItem: PartidoDTO) = oldItem.id == newItem.id
-        override fun areContentsTheSame(oldItem: PartidoDTO, newItem: PartidoDTO) = oldItem == newItem
+    class DiffCallback : DiffUtil.ItemCallback<PronosticoItem>() {
+        override fun areItemsTheSame(oldItem: PronosticoItem, newItem: PronosticoItem): Boolean {
+            return when {
+                oldItem is PronosticoItem.Header && newItem is PronosticoItem.Header -> oldItem.grupo == newItem.grupo
+                oldItem is PronosticoItem.PartidoItem && newItem is PronosticoItem.PartidoItem -> oldItem.partido.id == newItem.partido.id
+                else -> false
+            }
+        }
+
+        override fun areContentsTheSame(oldItem: PronosticoItem, newItem: PronosticoItem): Boolean {
+            return oldItem == newItem
+        }
     }
 }

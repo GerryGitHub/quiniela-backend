@@ -7,6 +7,8 @@ import com.quiniela.backend.exception.NotFoundException
 import com.quiniela.backend.repository.*
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 @Service
 class ResultadosService(
@@ -37,14 +39,15 @@ class ResultadosService(
     }
 
     fun getPartidosEnVivo(): List<PartidoDTO> {
-        val ahora = java.time.LocalDateTime.now()
-        val inicioDia = ahora.toLocalDate().atStartOfDay()
+        val zonaMexico = ZoneId.of("America/Mexico_City")
+        val ahora = ZonedDateTime.now(zonaMexico)
+        val inicioDia = ahora.toLocalDate().atStartOfDay(zonaMexico)
         val finDia = inicioDia.plusDays(1)
-        
+
         return partidoRepository.findAll()
-            .filter { 
-                val fechaPartido = it.fechaHora
-                (it.estado == EstadoPartido.EN_CURSO || it.estado == EstadoPartido.PENDIENTE) &&
+            .filter {
+                val fechaPartido = it.fechaHora.atZone(zonaMexico)
+                it.estado == EstadoPartido.EN_CURSO &&
                 fechaPartido >= inicioDia && fechaPartido < finDia
             }
             .sortedBy { it.fechaHora }

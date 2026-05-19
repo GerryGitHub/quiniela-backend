@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
+import Spinner from '../components/Spinner';
 import './Pronosticos.css';
 
 interface PronosticoLocal {
@@ -234,7 +235,7 @@ export default function Pronosticos() {
           disabled={guardando || !hayCambios() || !hayPronosticosModificables()}
           className="btn-guardar"
         >
-          {guardando ? 'Guardando...' : 'Guardar Pronósticos'}
+          {guardando ? <Spinner size={16} /> : 'Guardar Pronósticos'}
         </button>
       </div>
     </div>

@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { PronosticoItem } from '../types';
+import { getApiUrl } from './apiConfig';
 
-const API_URL = 'http://localhost:8080';
+const API_URL = getApiUrl();
 
 const api = axios.create({
   baseURL: API_URL,
@@ -24,18 +25,13 @@ api.interceptors.response.use(
   },
   (error) => {
     const url = error.config?.url || '';
-    console.log('❌ Error API:', error.response?.status, url);
-    
-    // No hacer logout para /auth/me - puede fallar si el token expira
-    if (url.includes('/auth/me')) {
-      console.log('⚠️ Error en /auth/me - no logout');
-      return Promise.reject(error);
-    }
-    
-    if (error.response?.status === 401 || error.response?.status === 403) {
+    const status = error.response?.status;
+
+    if (status === 401 || status === 403) {
       localStorage.removeItem('token');
-      window.location.href = '/';
+      localStorage.setItem('sessionExpired', 'true');
     }
+
     return Promise.reject(error);
   }
 );

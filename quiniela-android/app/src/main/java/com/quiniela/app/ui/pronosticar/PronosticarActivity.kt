@@ -8,8 +8,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.quiniela.app.databinding.ActivityPronosticarBinding
-import com.quiniela.app.model.*
-import com.quiniela.app.repository.*
+import com.quiniela.app.model.PartidoDTO
+import com.quiniela.app.model.PronosticoItemRequest
+import com.quiniela.app.model.QuinielaResumenDTO
+import com.quiniela.app.repository.AuthRepository
+import com.quiniela.app.repository.PartidoRepository
+import com.quiniela.app.repository.PronosticoRepository
+import com.quiniela.app.repository.Result
 import kotlinx.coroutines.launch
 
 class PronosticarActivity : AppCompatActivity() {
@@ -74,7 +79,8 @@ class PronosticarActivity : AppCompatActivity() {
                     val partidosActivos = result.data.filter { 
                         it.estado == "PENDIENTE" || it.estado == "EN_CURSO" || it.estado == "FINALIZADO" 
                     }
-                    adapter.submitList(partidosActivos)
+                    val items = crearListaAgrupada(partidosActivos)
+                    adapter.submitList(items)
                 }
                 is Result.Error -> {
                     Toast.makeText(this@PronosticarActivity, result.message, Toast.LENGTH_SHORT).show()
@@ -82,6 +88,35 @@ class PronosticarActivity : AppCompatActivity() {
             }
             binding.progressBar.visibility = View.GONE
         }
+    }
+
+    private fun crearListaAgrupada(partidos: List<PartidoDTO>): List<PronosticoItem> {
+        val ordenGrupo = listOf("A", "B", "C", "D", "E", "F", "G", "H")
+        
+        val grouped = partidos.groupBy { it.grupo ?: "Sin grupo" }
+        
+        val result = mutableListOf<PronosticoItem>()
+        
+        val gruposOrdenados = grouped.keys.sortedWith { a, b ->
+            val idxA = ordenGrupo.indexOf(a)
+            val idxB = ordenGrupo.indexOf(b)
+            when {
+                idxA != -1 && idxB != -1 -> idxA - idxB
+                idxA != -1 -> -1
+                idxB != -1 -> 1
+                else -> a.compareTo(b)
+            }
+        }
+        
+        for (grupo in gruposOrdenados) {
+            result.add(PronosticoItem.Header(grupo))
+            val partidosDelGrupo = grouped[grupo]?.sortedBy { it.fechaHora } ?: emptyList()
+            for (partido in partidosDelGrupo) {
+                result.add(PronosticoItem.PartidoItem(partido))
+            }
+        }
+        
+        return result
     }
 
     private fun guardarPronosticos() {

@@ -55,6 +55,13 @@ class QuinielaService(
 
     @Transactional
     fun crearQuiniela(request: CrearQuinielaRequest, email: String): QuinielaDTO {
+        if (request.nombre.isBlank()) {
+            throw IllegalArgumentException("El nombre de la quiniela es requerido")
+        }
+        if (quinielaRepository.existsByNombre(request.nombre)) {
+            throw IllegalArgumentException("Ya existe una quiniela con ese nombre")
+        }
+
         val usuario = usuarioRepository.findByEmail(email)
             .orElseThrow { IllegalArgumentException("Usuario no encontrado") }
 

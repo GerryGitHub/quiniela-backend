@@ -102,8 +102,7 @@ class PartidoService(
             predichoLocal == realLocal && predichoVisitante == realVisitante -> 10
             (predichoLocal - predichoVisitante) == (realLocal - realVisitante) -> 5
             (predichoLocal > predichoVisitante && realLocal > realVisitante) ||
-            (predichoLocal < predichoVisitante && realLocal < realVisitante) ||
-            (predichoLocal == realLocal && predichoVisitante == realVisitante) -> 3
+            (predichoLocal < predichoVisitante && realLocal < realVisitante) -> 3
             else -> 0
         }
     }

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useStore } from '../store/useStore';
+import Spinner from '../components/Spinner';
 import './Login.css';
 
 export default function Register() {
@@ -11,6 +12,17 @@ export default function Register() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
+  const getErrorMessage = (err: any): string => {
+    if (!err.response) return 'Error de conexión. Intenta más tarde.';
+    const status = err.response.status;
+    const data = err.response.data;
+    if (status === 401 || status === 403) return 'Tu sesión expiró. Por favor inicia sesión.';
+    if (status === 400) return data?.error || 'Solicitud inválida';
+    if (status === 409) return data?.error || 'El email ya está registrado';
+    if (status >= 500) return 'Error del servidor. Intenta más tarde.';
+    return data?.error || 'Ocurrió un error';
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -18,7 +30,7 @@ export default function Register() {
       await register(nombre, email, password);
       window.location.href = '/dashboard';
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Error al registrar');
+      setError(getErrorMessage(err));
     }
   };
 
@@ -39,6 +51,7 @@ export default function Register() {
               onChange={(e) => setNombre(e.target.value)}
               required
               placeholder="Tu nombre"
+              disabled={loading}
             />
           </div>
           
@@ -50,6 +63,7 @@ export default function Register() {
               onChange={(e) => setEmail(e.target.value)}
               required
               placeholder="tu@email.com"
+              disabled={loading}
             />
           </div>
           
@@ -61,11 +75,12 @@ export default function Register() {
               onChange={(e) => setPassword(e.target.value)}
               required
               placeholder="••••••••"
+              disabled={loading}
             />
           </div>
           
           <button type="submit" disabled={loading} className="btn-primary">
-            {loading ? 'Registrando...' : 'Crear Cuenta'}
+            {loading ? <Spinner /> : 'Crear Cuenta'}
           </button>
         </form>
         

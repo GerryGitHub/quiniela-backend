@@ -1,5 +1,6 @@
 import { Client } from '@stomp/stompjs';
 import api from './api';
+import { getApiUrl } from './apiConfig';
 
 let stompClient: Client | null = null;
 
@@ -12,9 +13,10 @@ export const connectWebSocket = async (onMessage: (partido: any) => void) => {
     console.log('No se pudieron cargar partidos en vivo');
   }
 
+  const apiUrl = getApiUrl().replace('http://', '').replace('https://', '');
   stompClient = new Client({
     webSocketFactory: () => {
-      return new WebSocket('ws://localhost:8080/ws');
+      return new WebSocket(`ws://${apiUrl}/ws`);
     },
     onConnect: () => {
       stompClient?.subscribe('/topic/partidos', (message) => {

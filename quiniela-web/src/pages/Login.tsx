@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
+import Spinner from '../components/Spinner';
 import './Login.css';
 
 export default function Login() {
@@ -9,6 +10,12 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+
+  const sessionExpired = localStorage.getItem('sessionExpired');
+  if (sessionExpired) {
+    localStorage.removeItem('sessionExpired');
+    setTimeout(() => setError('Tu sesión expiró. Por favor inicia sesión nuevamente.'), 100);
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,6 +45,7 @@ export default function Login() {
               onChange={(e) => setEmail(e.target.value)}
               required
               placeholder="tu@email.com"
+              disabled={loading}
             />
           </div>
           
@@ -49,11 +57,12 @@ export default function Login() {
               onChange={(e) => setPassword(e.target.value)}
               required
               placeholder="••••••••"
+              disabled={loading}
             />
           </div>
           
           <button type="submit" disabled={loading} className="btn-primary">
-            {loading ? 'Iniciando...' : 'Iniciar Sesión'}
+            {loading ? <Spinner /> : 'Iniciar Sesión'}
           </button>
         </form>
         

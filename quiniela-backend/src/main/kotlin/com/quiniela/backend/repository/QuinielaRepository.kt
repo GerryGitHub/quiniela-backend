@@ -15,4 +15,6 @@ interface QuinielaRepository : JpaRepository<Quiniela, Long> {
 
     @Query("SELECT q FROM Quiniela q JOIN Participacion p ON p.quiniela = q WHERE p.usuario.id = :usuarioId")
     fun findByParticipanteId(usuarioId: Long): List<Quiniela>
+
+    fun existsByNombre(nombre: String): Boolean
 }
