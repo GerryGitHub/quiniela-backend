@@ -100,6 +100,8 @@ class PronosticarAdapter : ListAdapter<PronosticoItem, RecyclerView.ViewHolder>(
             binding.tvFecha.text = partido.fechaHora
             binding.tvLocal.text = partido.equipoLocal
             binding.tvVisitante.text = partido.equipoVisitante
+            binding.tvFlagLocal.text = obtenerBandera(partido.equipoLocal)
+            binding.tvFlagVisitante.text = obtenerBandera(partido.equipoVisitante)
             
             val esEditable = partido.estado == "PENDIENTE"
             binding.etGolesLocal.isEnabled = esEditable
@@ -134,6 +136,26 @@ class PronosticarAdapter : ListAdapter<PronosticoItem, RecyclerView.ViewHolder>(
             binding.etGolesVisitante.addTextChangedListener(textWatcher)
             
             pronosticos[partido.id] = PartidoConPronostico(partido, local, visitante)
+        }
+
+        private fun obtenerBandera(pais: String): String {
+            return when (pais.uppercase()) {
+                "MEXICO", "MÉXICO" -> "🇲🇽"
+                "ARGENTINA" -> "🇦🇷"
+                "BRASIL" -> "🇧🇷"
+                "URUGUAY" -> "🇺🇾"
+                "COLOMBIA" -> "🇨🇴"
+                "PERÚ", "PERU" -> "🇵🇪"
+                "CHILE" -> "🇨🇱"
+                "VENEZUELA" -> "🇻🇪"
+                "ECUADOR" -> "🇪🇨"
+                "PARAGUAY" -> "🇵🇾"
+                "BOLIVIA" -> "🇧🇴"
+                "PANAMÁ" -> "🇵🇦"
+                "USA", "ESTADOS UNIDOS" -> "🇺🇸"
+                "CANADÁ", "CANADA" -> "🇨🇦"
+                else -> "⚽"
+            }
         }
     }
 

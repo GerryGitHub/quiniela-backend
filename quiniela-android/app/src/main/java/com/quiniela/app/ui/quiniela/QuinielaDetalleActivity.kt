@@ -275,11 +275,22 @@ class PartidosConPronosticoAdapter(
         androidx.recyclerview.widget.RecyclerView.ViewHolder(binding.root) {
         
         fun bind(grupo: GrupoExpansible) {
-            binding.tvHeader.text = "Grupo ${grupo.nombre} ${if (grupo.expandido) "▼" else "▶"}"
+            binding.tvHeader.text = "Grupo ${grupo.nombre}"
+            binding.ivExpandido.setImageResource(
+                if (grupo.expandido) android.R.drawable.arrow_up_float 
+                else android.R.drawable.arrow_down_float
+            )
             binding.root.setOnClickListener {
                 grupo.expandido = !grupo.expandido
-                notifyDataSetChanged()
+                notifyItemRangeChanged(
+                    adapterPosition, 
+                    if (grupo.expandido) grupo.partidos.size + 1 else 1
+                )
             }
+            binding.root.animate()
+                .alpha(1f)
+                .setDuration(200)
+                .start()
         }
     }
 

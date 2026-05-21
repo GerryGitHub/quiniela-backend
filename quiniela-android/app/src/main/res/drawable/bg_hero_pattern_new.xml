@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Diagonal lines - Green accent -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="linear"
+                android:startColor="#0000B86B"
+                android:endColor="#2000B86B"
+                android:angle="45"/>
+        </shape>
+    </item>
+    <!-- Red accent diagonal -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="linear"
+                android:startColor="#20FF4D4D"
+                android:endColor="#00000000"
+                android:angle="135"/>
+        </shape>
+    </item>
+    <!-- Subtle geometric pattern -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="linear"
+                android:startColor="#10FFFFFF"
+                android:endColor="#00FFFFFF"
+                android:angle="0"/>
+        </shape>
+    </item>
+</layer-list>

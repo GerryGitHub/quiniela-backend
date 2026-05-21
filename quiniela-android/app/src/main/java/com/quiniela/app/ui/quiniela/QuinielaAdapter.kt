@@ -27,7 +27,7 @@ class QuinielaAdapter(
         @SuppressLint("SetTextI18n")
         fun bind(quiniela: QuinielaResumenDTO) {
             binding.tvNombre.text = quiniela.nombre
-            binding.tvPuntos.text = "${quiniela.puntosTotales} pts"
+            binding.tvPuntos.text = quiniela.puntosTotales.toString()
             
             binding.root.setOnClickListener { onItemClick(quiniela) }
             binding.btnShare.setOnClickListener { onShareClick(quiniela) }
