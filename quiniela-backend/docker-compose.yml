@@ -24,7 +24,7 @@ services:
       SPRING_DATASOURCE_USERNAME: quiniela_user
       SPRING_DATASOURCE_PASSWORD: quiniela_pass
     expose:
-      - "8080:8080"
+      - "8080"
     depends_on:
       postgres:
         condition: service_healthy
