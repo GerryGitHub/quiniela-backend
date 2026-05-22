@@ -6,8 +6,6 @@ services:
       POSTGRES_DB: quiniela
       POSTGRES_USER: quiniela_user
       POSTGRES_PASSWORD: quiniela_pass
-    #ports:
-     # - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -25,7 +23,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/quiniela
       SPRING_DATASOURCE_USERNAME: quiniela_user
       SPRING_DATASOURCE_PASSWORD: quiniela_pass
-    ports:
+    expose:
       - "8080:8080"
     depends_on:
       postgres:
