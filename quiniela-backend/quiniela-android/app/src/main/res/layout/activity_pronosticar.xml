@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F8FAFC">
+
+    <!-- Premium Header -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="@drawable/bg_hero_login_new"
+        android:fitsSystemWindows="true">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@android:color/transparent"
+            app:title="Hacer Pronósticos"
+            app:titleTextColor="#FFFFFF"
+            app:navigationIcon="@drawable/ic_back_white"/>
+
+    </FrameLayout>
+
+    <!-- Selector Section -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="8dp"
+        android:background="#FFFFFF">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Selecciona una quiniela"
+            android:textSize="14sp"
+            android:textColor="#6B7280"
+            android:layout_marginBottom="12dp"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
+            app:boxCornerRadiusTopStart="12dp"
+            app:boxCornerRadiusTopEnd="12dp"
+            app:boxCornerRadiusBottomStart="12dp"
+            app:boxCornerRadiusBottomEnd="12dp"
+            app:boxBackgroundColor="#F8FAFC"
+            app:boxStrokeWidth="1dp"
+            app:boxStrokeColor="#E2E8F0">
+
+            <AutoCompleteTextView
+                android:id="@+id/spQuiniela"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none"
+                android:hint="Quiniela"
+                android:textColor="#111827"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#E2E8F0"/>
+
+    <!-- Matches List -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvPartidos"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:paddingVertical="8dp"
+        android:clipToPadding="false"/>
+
+    <!-- Save Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnGuardar"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_margin="16dp"
+        android:text="Guardar Pronósticos"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#0D5BFF"
+        app:cornerRadius="16dp"
+        app:elevation="4dp"/>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        android:indeterminateTint="#0D5BFF"/>
+
+</LinearLayout>

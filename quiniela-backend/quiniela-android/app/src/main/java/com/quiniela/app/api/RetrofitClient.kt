@@ -1,0 +1,52 @@
+package com.quiniela.app.api
+
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
+
+object RetrofitClient {
+    // Local: http://10.0.2.2:8080/
+    // Local (Android Emulator): http://10.0.2.2:8080/
+    private const val BASE_URL = "http://10.0.2.2:8080/"
+
+    private val loggingInterceptor = HttpLoggingInterceptor().apply {
+        level = HttpLoggingInterceptor.Level.BODY
+    }
+
+    private val okHttpClient = OkHttpClient.Builder()
+        .addInterceptor(loggingInterceptor)
+        .addInterceptor { chain ->
+            val request = chain.request().newBuilder()
+            TokenManager.getToken()?.let { token ->
+                request.addHeader("Authorization", "Bearer $token")
+            }
+            chain.proceed(request.build())
+        }
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .build()
+
+    private val retrofit = Retrofit.Builder()
+        .baseUrl(BASE_URL)
+        .client(okHttpClient)
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
+    val apiService: ApiService = retrofit.create(ApiService::class.java)
+}
+
+object TokenManager {
+    private var token: String? = null
+
+    fun setToken(token: String?) {
+        this.token = token
+    }
+
+    fun getToken(): String? = token
+
+    fun clearToken() {
+        token = null
+    }
+}

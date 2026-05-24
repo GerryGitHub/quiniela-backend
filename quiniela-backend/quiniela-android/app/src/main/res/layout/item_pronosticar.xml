@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="4dp"
+    app:cardCornerRadius="14dp"
+    app:cardElevation="1dp"
+    app:cardBackgroundColor="#FFFFFF">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <!-- LINE 1: Team - Score - Team (horizontal) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <!-- Local Flag -->
+            <TextView
+                android:id="@+id/tvFlagLocal"
+                android:layout_width="24dp"
+                android:layout_height="wrap_content"
+                android:text="🇲🇽"
+                android:textSize="18sp"
+                android:gravity="center"/>
+
+            <!-- Local Team Name -->
+            <TextView
+                android:id="@+id/tvLocal"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="#111827"
+                android:gravity="end"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:layout_marginEnd="6dp"/>
+
+            <!-- Score Inputs Compact -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    style="@style/Widget.Material3.TextInputLayout.FilledBox"
+                    app:boxCornerRadiusTopStart="6dp"
+                    app:boxCornerRadiusTopEnd="6dp"
+                    app:boxCornerRadiusBottomStart="6dp"
+                    app:boxCornerRadiusBottomEnd="6dp"
+                    app:boxBackgroundColor="#F8FAFC"
+                    app:boxStrokeWidth="1dp"
+                    app:boxStrokeColor="#E2E8F0"
+                    app:hintEnabled="false">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etGolesLocal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="0"
+                        android:inputType="number"
+                        android:gravity="center"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="#111827"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-"
+                    android:textSize="14sp"
+                    android:textColor="#9CA3AF"
+                    android:layout_marginHorizontal="3dp"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    style="@style/Widget.Material3.TextInputLayout.FilledBox"
+                    app:boxCornerRadiusTopStart="6dp"
+                    app:boxCornerRadiusTopEnd="6dp"
+                    app:boxCornerRadiusBottomStart="6dp"
+                    app:boxCornerRadiusBottomEnd="6dp"
+                    app:boxBackgroundColor="#F8FAFC"
+                    app:boxStrokeWidth="1dp"
+                    app:boxStrokeColor="#E2E8F0"
+                    app:hintEnabled="false">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etGolesVisitante"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="0"
+                        android:inputType="number"
+                        android:gravity="center"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="#111827"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </LinearLayout>
+
+            <!-- Visitor Team Name -->
+            <TextView
+                android:id="@+id/tvVisitante"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="#111827"
+                android:gravity="start"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:layout_marginStart="6dp"/>
+
+            <!-- Visitor Flag -->
+            <TextView
+                android:id="@+id/tvFlagVisitante"
+                android:layout_width="24dp"
+                android:layout_height="wrap_content"
+                android:text="🇦🇷"
+                android:textSize="18sp"
+                android:gravity="center"/>
+
+        </LinearLayout>
+
+        <!-- LINE 2: Date and time -->
+        <TextView
+            android:id="@+id/tvFecha"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="11sp"
+            android:textColor="#9CA3AF"
+            android:gravity="center"
+            android:layout_marginTop="6dp"/>
+
+        <!-- LINE 3: Real result or state (only if exists) -->
+        <TextView
+            android:id="@+id/tvEstado"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="11sp"
+            android:gravity="center"
+            android:layout_marginTop="2dp"
+            android:visibility="gone"/>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

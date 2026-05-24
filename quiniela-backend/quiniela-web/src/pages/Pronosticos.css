@@ -1,0 +1,251 @@
+.pronosticos-page {
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
+.header {
+  background: #667eea;
+  color: white;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.btn-back {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.header h1 {
+  margin: 0;
+}
+
+.content {
+  padding: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.info-box {
+  background: #e8f4fd;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.info-box p {
+  margin: 0;
+  color: #004085;
+}
+
+.mensaje-exito {
+  background: #d4edda;
+  color: #155724;
+  padding: 14px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.partidos-agrupados {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.dia-grupo {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.dia-titulo {
+  margin: 0 0 16px 0;
+  color: #333;
+  font-size: 18px;
+  border-bottom: 2px solid #667eea;
+  padding-bottom: 8px;
+}
+
+.partidos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.partido-card {
+  background: #fafafa;
+  padding: 16px;
+  border-radius: 10px;
+  border: 2px solid #e0e0e0;
+  transition: all 0.3s;
+}
+
+.partido-card.disabled {
+  opacity: 0.7;
+  border-color: #ccc;
+}
+
+.partido-card.disabled .marcador-input input {
+  background: #f0f0f0;
+  cursor: not-allowed;
+}
+
+.partido-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.equipos {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.equipo {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.vs {
+  color: #999;
+  font-size: 12px;
+}
+
+.fecha {
+  color: #666;
+  font-size: 13px;
+}
+
+.estado {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.estado-pendiente {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.estado-en_curso {
+  background: #cce5ff;
+  color: #004085;
+}
+
+.estado-finalizado {
+  background: #d4edda;
+  color: #155724;
+}
+
+.marcador-input {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.input-group label {
+  font-size: 11px;
+  color: #666;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.input-group input {
+  width: 50px;
+  padding: 8px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 700;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  transition: border-color 0.3s;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.input-group input:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
+  color: #999;
+}
+
+.separador {
+  font-size: 22px;
+  font-weight: 700;
+  color: #999;
+  margin-top: 18px;
+}
+
+.bloqueo-info {
+  text-align: center;
+  margin-top: 10px;
+  padding: 8px;
+  background: #fee;
+  color: #c00;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.resultado-real {
+  text-align: center;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+  color: #667eea;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.puntos-obtenidos {
+  color: #28a745;
+}
+
+.btn-guardar {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  margin-top: 32px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn-guardar:hover:not(:disabled) {
+  background: #5568d3;
+}
+
+.btn-guardar:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}

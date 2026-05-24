@@ -1,0 +1,9 @@
+{
+  "name": "Quiniela",
+  "bundleIdentifier": "com.quiniela.app",
+  "version": "1.0.0",
+  "orientation": "portrait",
+  "UILaunchScreen": {
+    "backgroundColor": "#1E88E5"
+  }
+}
