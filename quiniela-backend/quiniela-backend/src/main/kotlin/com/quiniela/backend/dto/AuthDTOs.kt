@@ -36,6 +36,20 @@ data class UsuarioDTO(
     val puntosTotales: Int = 0
 )
 
+data class RegisterResponse(
+    val message: String
+)
+
+data class MessageResponse(
+    val message: String
+)
+
+data class ResendVerificationRequest(
+    @field:Email(message = "Email inválido")
+    @field:NotBlank(message = "El email es requerido")
+    val email: String
+)
+
 data class UsuarioPerfilDTO(
     val id: Long,
     val nombre: String,

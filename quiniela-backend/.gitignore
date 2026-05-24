@@ -1,6 +1,30 @@
+# Gradle
 .gradle/
-.idea/
 build/
-out/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDE
+.idea/
 *.iml
+*.ipr
+*.iws
+.vscode/
+*.class
+
+# OS
 .DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+
+# Build outputs
+out/
+
+# Extra files
+partidos.txt
+spring-boot-demo/

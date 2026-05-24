@@ -11,5 +11,7 @@ class Usuario(
     @Column(unique = true)
     val email: String,
     var password: String = "",
-    var rol: String = "USER"  // USER o ADMIN
+    var rol: String = "USER",  // USER o ADMIN
+    @Column(name = "email_verified")
+    var emailVerified: Boolean = false
 )
