@@ -1,7 +1,9 @@
 package com.quiniela.app.util
 
 import android.content.Context
+import android.graphics.drawable.Drawable
 import androidx.appcompat.content.res.AppCompatResources
+import com.quiniela.app.R
 
 object CountryFlagResolver {
 
@@ -83,7 +85,7 @@ object CountryFlagResolver {
         return flagMap[key] ?: R.drawable.mex
     }
 
-    fun getFlagDrawable(context: Context, countryName: String?): android.graphics.drawable.Drawable? {
+    fun getFlagDrawable(context: Context, countryName: String?): Drawable? {
         val resId = getFlagResource(countryName)
         return AppCompatResources.getDrawable(context, resId)
     }
