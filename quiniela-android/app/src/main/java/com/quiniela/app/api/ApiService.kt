@@ -8,6 +8,7 @@ import com.quiniela.app.model.CrearPronosticosBatchResponse
 import com.quiniela.app.model.CrearQuinielaRequest
 import com.quiniela.app.model.LeaderboardEntryDTO
 import com.quiniela.app.model.LoginRequest
+import com.quiniela.app.model.MessageResponse
 import com.quiniela.app.model.MisPronosticosDTO
 import com.quiniela.app.model.PartidoDTO
 import com.quiniela.app.model.PronosticoDTO
@@ -29,7 +30,7 @@ import retrofit2.http.Query
 
 interface ApiService {
     @POST("auth/register")
-    suspend fun register(@Body request: RegisterRequest): Response<AuthResponse>
+    suspend fun register(@Body request: RegisterRequest): Response<MessageResponse>
 
     @POST("auth/login")
     suspend fun login(@Body request: LoginRequest): Response<AuthResponse>

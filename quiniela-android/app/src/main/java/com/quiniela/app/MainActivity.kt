@@ -9,6 +9,7 @@ import com.quiniela.app.ui.dashboard.DashboardActivity
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        setTheme(R.style.Theme_QuinielaApp)
         super.onCreate(savedInstanceState)
         
         val authRepository = AuthRepository()

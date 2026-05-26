@@ -54,7 +54,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Quiniela"
+                    android:text="QGol"
                     android:textSize="44sp"
                     android:textStyle="bold"
                     android:textColor="#FFFFFF"

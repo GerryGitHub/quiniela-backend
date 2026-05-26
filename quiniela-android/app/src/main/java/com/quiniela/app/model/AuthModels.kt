@@ -73,3 +73,7 @@ data class LeaderboardEntryDTO(
     val usuario: UsuarioDTO,
     val puntosTotales: Int
 )
+
+data class MessageResponse(
+    val message: String
+)

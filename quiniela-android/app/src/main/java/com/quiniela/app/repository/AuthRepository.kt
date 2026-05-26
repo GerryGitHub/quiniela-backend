@@ -31,21 +31,20 @@ class AuthRepository(private val apiService: ApiService = RetrofitClient.apiServ
     private fun getMessageForCode(code: Int): String = when (code) {
         400 -> "Solicitud inválida"
         401 -> "Tu sesión expiró. Por favor inicia sesión."
-        403 -> "No autorizado"
+        403 -> "Debes verificar tu correo antes de iniciar sesión"
         404 -> "Recurso no encontrado"
         409 -> "El email ya está registrado"
         in 500..599 -> "Error del servidor. Intenta más tarde."
         else -> "Error: $code"
     }
 
-    suspend fun register(nombre: String, email: String, password: String): Result<AuthResponse> {
+    suspend fun register(nombre: String, email: String, password: String): Result<String> {
         return withContext(Dispatchers.IO) {
             try {
                 val response = apiService.register(RegisterRequest(nombre, email, password))
                 if (response.isSuccessful) {
                     response.body()?.let {
-                        TokenManager.setToken(it.token)
-                        Result.Success(it)
+                        Result.Success(it.message)
                     } ?: Result.Error("Respuesta vacía")
                 } else {
                     Result.Error(parseError(response))

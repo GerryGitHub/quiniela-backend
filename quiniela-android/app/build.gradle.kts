@@ -4,6 +4,7 @@ plugins {
 
 android {
     namespace = "com.quiniela.app"
+
     buildFeatures {
         dataBinding = true
         viewBinding = true
@@ -25,8 +26,18 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("../quiniela-release-key.jks")
+            storePassword = "Qgol2026App"
+            keyAlias = "quiniela"
+            keyPassword = "Qgol2026App"
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -34,6 +45,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11

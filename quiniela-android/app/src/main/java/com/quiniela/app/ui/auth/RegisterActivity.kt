@@ -53,8 +53,13 @@ class RegisterActivity : AppCompatActivity() {
         lifecycleScope.launch {
             when (val result = authRepository.register(nombre, email, password)) {
                 is Result.Success -> {
-                    Toast.makeText(this@RegisterActivity, "Registro exitoso!", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this@RegisterActivity, com.quiniela.app.MainActivity::class.java))
+                    Toast.makeText(
+                        this@RegisterActivity,
+                        result.data,
+                        Toast.LENGTH_LONG
+                    ).show()
+
+                    startActivity(Intent(this@RegisterActivity, LoginActivity::class.java))
                     finish()
                 }
                 is Result.Error -> {

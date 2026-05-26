@@ -11,6 +11,11 @@
 
     <style name="Theme.QuinielaApp" parent="Base.Theme.QuinielaApp" />
 
+    <!-- Splash Theme: shows QGol logo centered on background -->
+    <style name="Theme.QGol.Splash" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash_logo</item>
+    </style>
+
     <!-- ============================================ -->
     <!-- BUTTONS -->
     <!-- ============================================ -->
