@@ -25,6 +25,9 @@ Thumbs.db
 # Build outputs
 out/
 
+# Keystore
+*.jks
+
 # Extra files
 partidos.txt
 spring-boot-demo/

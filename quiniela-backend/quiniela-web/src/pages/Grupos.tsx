@@ -43,7 +43,7 @@ export default function Grupos() {
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('http://localhost:8080/api/grupos')
+    fetch('https://api.gjapps.com/api/grupos')
       .then(res => res.json())
       .then(data => {
         setGrupos(data.grupos);

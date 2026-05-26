@@ -38,14 +38,13 @@ class AuthRepository(private val apiService: ApiService = RetrofitClient.apiServ
         else -> "Error: $code"
     }
 
-    suspend fun register(nombre: String, email: String, password: String): Result<AuthResponse> {
+    suspend fun register(nombre: String, email: String, password: String): Result<String> {
         return withContext(Dispatchers.IO) {
             try {
                 val response = apiService.register(RegisterRequest(nombre, email, password))
                 if (response.isSuccessful) {
                     response.body()?.let {
-                        TokenManager.setToken(it.token)
-                        Result.Success(it)
+                        Result.Success(it.message)
                     } ?: Result.Error("Respuesta vacía")
                 } else {
                     Result.Error(parseError(response))
