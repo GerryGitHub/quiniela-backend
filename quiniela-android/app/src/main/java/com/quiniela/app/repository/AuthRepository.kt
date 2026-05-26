@@ -31,7 +31,15 @@ class AuthRepository(private val apiService: ApiService = RetrofitClient.apiServ
 
     private fun improveMessage(message: String): String {
         return when {
+            message.contains("Usuario no encontrado") -> "Usuario o contraseña incorrectos."
+            message.contains("Bad credentials") -> "Usuario o contraseña incorrectos."
+            message.contains("Unauthorized") -> "Usuario o contraseña incorrectos."
             message.contains("verificar tu correo") -> "Debes validar tu correo antes de iniciar sesión."
+            message.contains("ya está registrado") -> "Ya existe una cuenta con ese correo."
+            message.contains("Email inválido") -> "Ingresa un correo electrónico válido."
+            message.contains("La contraseña debe tener") -> "La contraseña debe tener al menos 6 caracteres."
+            message.contains("nombre es requerido") || message.contains("email es requerido") || message.contains("contraseña es requerida") -> "Completa todos los campos obligatorios."
+            message.contains("Internal Server Error") || message.contains("Error interno") -> "Ocurrió un error inesperado. Intenta más tarde."
             else -> message
         }
     }
