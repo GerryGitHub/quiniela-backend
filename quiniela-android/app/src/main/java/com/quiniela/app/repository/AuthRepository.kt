@@ -19,39 +19,37 @@ sealed class Result<out T> {
 class AuthRepository(private val apiService: ApiService = RetrofitClient.apiService) {
 
     private fun parseError(response: retrofit2.Response<*>): String {
-        return try {
-            val errorBody = response.errorBody()?.string()
-            val json = Gson().fromJson(errorBody, Map::class.java)
-            val message = json["error"]?.toString() ?: getMessageForCode(response.code())
-            improveMessage(message)
-        } catch (e: Exception) {
-            getMessageForCode(response.code())
+        val code = response.code()
+        return when (code) {
+            401 -> "Usuario o contraseña incorrectos."
+            403 -> "Debes validar tu correo antes de iniciar sesión."
+            in 500..599 -> "El servidor presentó un problema. Intenta más tarde."
+            else -> {
+                try {
+                    val errorBody = response.errorBody()?.string()
+                    if (errorBody != null) {
+                        val json = Gson().fromJson(errorBody, Map::class.java)
+                        val message = (json as? Map<*, *>)?.get("error")?.toString()
+                        if (message != null) improveMessage(message) else "Ocurrió un error inesperado."
+                    } else "Ocurrió un error inesperado."
+                } catch (e: Exception) {
+                    "Ocurrió un error inesperado."
+                }
+            }
         }
     }
 
     private fun improveMessage(message: String): String {
         return when {
             message.contains("Usuario no encontrado") -> "Usuario o contraseña incorrectos."
-            message.contains("Bad credentials") -> "Usuario o contraseña incorrectos."
-            message.contains("Unauthorized") -> "Usuario o contraseña incorrectos."
+            message.contains("Bad credentials") || message.contains("Unauthorized") -> "Usuario o contraseña incorrectos."
             message.contains("verificar tu correo") -> "Debes validar tu correo antes de iniciar sesión."
             message.contains("ya está registrado") -> "Ya existe una cuenta con ese correo."
             message.contains("Email inválido") -> "Ingresa un correo electrónico válido."
             message.contains("La contraseña debe tener") -> "La contraseña debe tener al menos 6 caracteres."
             message.contains("nombre es requerido") || message.contains("email es requerido") || message.contains("contraseña es requerida") -> "Completa todos los campos obligatorios."
-            message.contains("Internal Server Error") || message.contains("Error interno") -> "Ocurrió un error inesperado. Intenta más tarde."
-            else -> message
+            else -> "Ocurrió un error inesperado."
         }
-    }
-
-    private fun getMessageForCode(code: Int): String = when (code) {
-        400 -> "No pudimos procesar tu solicitud. Verifica los datos."
-        401 -> "Tu sesión expiró. Inicia sesión nuevamente."
-        403 -> "Debes validar tu correo antes de iniciar sesión."
-        404 -> "Recurso no encontrado."
-        409 -> "El email ya está registrado."
-        in 500..599 -> "Error del servidor. Intenta más tarde."
-        else -> "Error inesperado ($code). Intenta más tarde."
     }
 
     suspend fun register(nombre: String, email: String, password: String): Result<String> {
@@ -71,6 +69,21 @@ class AuthRepository(private val apiService: ApiService = RetrofitClient.apiServ
         }
     }
 
+    private fun parseLoginError(response: retrofit2.Response<*>): String {
+        val bodyMessage = try {
+            val errorBody = response.errorBody()?.string()
+            if (errorBody != null) {
+                val json = Gson().fromJson(errorBody, Map::class.java)
+                (json as? Map<*, *>)?.get("error")?.toString()
+            } else null
+        } catch (e: Exception) { null }
+        return when {
+            response.code() == 403 && bodyMessage?.contains("verificar") == true ->
+                "Debes validar tu correo antes de iniciar sesión."
+            else -> "Usuario o contraseña incorrectos."
+        }
+    }
+
     suspend fun login(email: String, password: String): Result<AuthResponse> {
         return withContext(Dispatchers.IO) {
             try {
@@ -81,10 +94,12 @@ class AuthRepository(private val apiService: ApiService = RetrofitClient.apiServ
                         Result.Success(it)
                     } ?: Result.Error("Error del servidor. Intenta nuevamente.")
                 } else {
-                    Result.Error(parseError(response))
+                    Result.Error(parseLoginError(response))
                 }
+            } catch (e: java.io.IOException) {
+                Result.Error("No pudimos conectar con el servidor. Intenta nuevamente.")
             } catch (e: Exception) {
-                Result.Error(e.message ?: "Error de conexión. Intenta nuevamente.")
+                Result.Error("Ocurrió un error inesperado.")
             }
         }
     }
