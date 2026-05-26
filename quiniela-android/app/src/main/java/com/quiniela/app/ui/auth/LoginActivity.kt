@@ -3,7 +3,8 @@ package com.quiniela.app.ui.auth
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
+import android.view.animation.AlphaAnimation
+import android.view.animation.Animation
 import androidx.appcompat.app.AppCompatActivity
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
@@ -37,6 +38,18 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    private fun showError(message: String) {
+        binding.tvError.text = message
+        binding.layoutError.visibility = View.VISIBLE
+        val fadeIn = AlphaAnimation(0f, 1f)
+        fadeIn.duration = 300
+        binding.layoutError.startAnimation(fadeIn)
+    }
+
+    private fun hideError() {
+        binding.layoutError.visibility = View.GONE
+    }
+
     private fun setupBiometric() {
         val executor = ContextCompat.getMainExecutor(this)
         biometricPrompt = BiometricPrompt(this, executor,
@@ -50,13 +63,13 @@ class LoginActivity : AppCompatActivity() {
                     super.onAuthenticationError(errorCode, errString)
                     if (errorCode != BiometricPrompt.ERROR_USER_CANCELED &&
                         errorCode != BiometricPrompt.ERROR_NEGATIVE_BUTTON) {
-                        Toast.makeText(this@LoginActivity, "Error: $errString", Toast.LENGTH_SHORT).show()
+                        showError("Error: $errString")
                     }
                 }
 
                 override fun onAuthenticationFailed() {
                     super.onAuthenticationFailed()
-                    Toast.makeText(this@LoginActivity, "Autenticación fallida", Toast.LENGTH_SHORT).show()
+                    showError("Autenticación fallida")
                 }
             })
     }
@@ -93,7 +106,7 @@ class LoginActivity : AppCompatActivity() {
             binding.etPassword.setText(password)
             login()
         } else {
-            Toast.makeText(this, "Primero inicia sesión con correo y contraseña", Toast.LENGTH_SHORT).show()
+            showError("Primero inicia sesión con correo y contraseña")
         }
     }
 
@@ -111,10 +124,11 @@ class LoginActivity : AppCompatActivity() {
         val password = binding.etPassword.text.toString()
 
         if (email.isEmpty() || password.isEmpty()) {
-            Toast.makeText(this, "Por favor completa todos los campos", Toast.LENGTH_SHORT).show()
+            showError("Completa todos los campos para iniciar sesión")
             return
         }
 
+        hideError()
         binding.progressBar.visibility = View.VISIBLE
 
         lifecycleScope.launch {
@@ -125,7 +139,7 @@ class LoginActivity : AppCompatActivity() {
                     finish()
                 }
                 is Result.Error -> {
-                    Toast.makeText(this@LoginActivity, result.message, Toast.LENGTH_LONG).show()
+                    showError(result.message)
                 }
             }
             binding.progressBar.visibility = View.GONE

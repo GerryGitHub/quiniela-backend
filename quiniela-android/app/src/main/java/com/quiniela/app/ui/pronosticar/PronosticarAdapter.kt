@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.quiniela.app.databinding.ItemGrupoHeaderBinding
 import com.quiniela.app.databinding.ItemPronosticarBinding
 import com.quiniela.app.model.PartidoDTO
+import com.quiniela.app.util.CountryFlagResolver
 
 sealed class PronosticoItem {
     data class Header(val grupo: String) : PronosticoItem()
@@ -100,8 +101,8 @@ class PronosticarAdapter : ListAdapter<PronosticoItem, RecyclerView.ViewHolder>(
             binding.tvFecha.text = partido.fechaHora
             binding.tvLocal.text = partido.equipoLocal
             binding.tvVisitante.text = partido.equipoVisitante
-            binding.tvFlagLocal.text = obtenerBandera(partido.equipoLocal)
-            binding.tvFlagVisitante.text = obtenerBandera(partido.equipoVisitante)
+            binding.tvFlagLocal.setImageResource(CountryFlagResolver.getFlagResource(partido.equipoLocal))
+            binding.tvFlagVisitante.setImageResource(CountryFlagResolver.getFlagResource(partido.equipoVisitante))
             
             val esEditable = partido.estado == "PENDIENTE"
             binding.etGolesLocal.isEnabled = esEditable
@@ -128,8 +129,8 @@ class PronosticarAdapter : ListAdapter<PronosticoItem, RecyclerView.ViewHolder>(
                 binding.etGolesLocal.setText(local.toString())
                 binding.etGolesVisitante.setText(visitante.toString())
             } else {
-                binding.etGolesLocal.setText(if (local > 0) local.toString() else "")
-                binding.etGolesVisitante.setText(if (visitante > 0) visitante.toString() else "")
+                binding.etGolesLocal.setText(if (local >= 0) local.toString() else "")
+                binding.etGolesVisitante.setText(if (visitante >= 0) visitante.toString() else "")
             }
             
             binding.etGolesLocal.addTextChangedListener(textWatcher)
@@ -138,25 +139,6 @@ class PronosticarAdapter : ListAdapter<PronosticoItem, RecyclerView.ViewHolder>(
             pronosticos[partido.id] = PartidoConPronostico(partido, local, visitante)
         }
 
-        private fun obtenerBandera(pais: String): String {
-            return when (pais.uppercase()) {
-                "MEXICO", "MÉXICO" -> "🇲🇽"
-                "ARGENTINA" -> "🇦🇷"
-                "BRASIL" -> "🇧🇷"
-                "URUGUAY" -> "🇺🇾"
-                "COLOMBIA" -> "🇨🇴"
-                "PERÚ", "PERU" -> "🇵🇪"
-                "CHILE" -> "🇨🇱"
-                "VENEZUELA" -> "🇻🇪"
-                "ECUADOR" -> "🇪🇨"
-                "PARAGUAY" -> "🇵🇾"
-                "BOLIVIA" -> "🇧🇴"
-                "PANAMÁ" -> "🇵🇦"
-                "USA", "ESTADOS UNIDOS" -> "🇺🇸"
-                "CANADÁ", "CANADA" -> "🇨🇦"
-                else -> "⚽"
-            }
-        }
     }
 
     class DiffCallback : DiffUtil.ItemCallback<PronosticoItem>() {

@@ -3,11 +3,11 @@ import { useState } from 'react';
 const STORAGE_KEY = 'api_url_mode';
 
 export function ApiToggle() {
-  const [mode, setMode] = useState<'local' | 'oracle'>(() => {
-    return (localStorage.getItem(STORAGE_KEY) as 'local' | 'oracle') || 'local';
+  const [mode, setMode] = useState<'local' | 'vps'>(() => {
+    return (localStorage.getItem(STORAGE_KEY) as 'local' | 'vps') || 'local';
   });
 
-  const handleModeChange = (newMode: 'local' | 'oracle') => {
+  const handleModeChange = (newMode: 'local' | 'vps') => {
     if (newMode === mode) return;
     localStorage.setItem(STORAGE_KEY, newMode);
     setMode(newMode);
@@ -43,19 +43,19 @@ export function ApiToggle() {
         Local
       </button>
       <button
-        onClick={() => handleModeChange('oracle')}
-        disabled={mode === 'oracle'}
+        onClick={() => handleModeChange('vps')}
+        disabled={mode === 'vps'}
         style={{
-          background: mode === 'oracle' ? '#2196F3' : '#555',
+          background: mode === 'vps' ? '#2196F3' : '#555',
           color: 'white',
           border: 'none',
           padding: '4px 8px',
           borderRadius: 4,
-          cursor: mode === 'oracle' ? 'default' : 'pointer',
-          opacity: mode === 'oracle' ? 0.5 : 1,
+          cursor: mode === 'vps' ? 'default' : 'pointer',
+          opacity: mode === 'vps' ? 0.5 : 1,
         }}
       >
-        Oracle
+        VPS
       </button>
     </div>
   );

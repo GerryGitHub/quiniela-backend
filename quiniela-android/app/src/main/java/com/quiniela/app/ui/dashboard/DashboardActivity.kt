@@ -5,11 +5,14 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.quiniela.app.R
 import com.quiniela.app.databinding.ActivityDashboardBinding
 import com.quiniela.app.repository.AuthRepository
 import com.quiniela.app.repository.QuinielaRepository
@@ -42,6 +45,9 @@ class DashboardActivity : AppCompatActivity() {
         binding = ActivityDashboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.toolbar)
+        supportActionBar?.setDisplayShowTitleEnabled(false)
+
         adapter = QuinielaAdapter(
             onItemClick = { quiniela ->
                 val intent = Intent(this, QuinielaDetalleActivity::class.java)
@@ -73,6 +79,7 @@ class DashboardActivity : AppCompatActivity() {
             when (val result = authRepository.getPerfil()) {
                 is Result.Success -> {
                     binding.tvWelcome.text = "Bienvenido, ${result.data.nombre}"
+                    binding.tvWelcome.visibility = View.VISIBLE
                     
                     val quinielas = result.data.quinielas
                     if (quinielas.isEmpty()) {
@@ -158,6 +165,23 @@ class DashboardActivity : AppCompatActivity() {
         startActivity(Intent.createChooser(intent, "Compartir con"))
     }
 
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.dashboard_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_logout -> {
+                authRepository.logout()
+                startActivity(Intent(this, LoginActivity::class.java))
+                finish()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
     private fun setupButtons() {
         binding.btnCrearQuiniela.setOnClickListener {
             val intent = Intent(this, CrearQuinielaActivity::class.java)
@@ -169,12 +193,6 @@ class DashboardActivity : AppCompatActivity() {
             val intent = Intent(this, CrearQuinielaActivity::class.java)
             intent.putExtra("modo", "unirse")
             startActivity(intent)
-        }
-        
-        binding.btnLogout.setOnClickListener {
-            authRepository.logout()
-            startActivity(Intent(this, LoginActivity::class.java))
-            finish()
         }
     }
 
