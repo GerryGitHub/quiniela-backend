@@ -329,8 +329,8 @@ class PartidosConPronosticoAdapter(
             binding.etGolesLocal.removeTextChangedListener(textWatcher)
             binding.etGolesVisitante.removeTextChangedListener(textWatcher)
             
-            binding.etGolesLocal.setText(if (item.golesLocalPredicho > 0) item.golesLocalPredicho.toString() else "")
-            binding.etGolesVisitante.setText(if (item.golesVisitantePredicho > 0) item.golesVisitantePredicho.toString() else "")
+            binding.etGolesLocal.setText(item.golesLocalPredicho.toString())
+            binding.etGolesVisitante.setText(item.golesVisitantePredicho.toString())
             
             textWatcher = object : TextWatcher {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}

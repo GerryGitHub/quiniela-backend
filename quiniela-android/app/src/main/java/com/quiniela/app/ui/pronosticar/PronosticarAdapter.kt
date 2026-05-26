@@ -129,8 +129,8 @@ class PronosticarAdapter : ListAdapter<PronosticoItem, RecyclerView.ViewHolder>(
                 binding.etGolesLocal.setText(local.toString())
                 binding.etGolesVisitante.setText(visitante.toString())
             } else {
-                binding.etGolesLocal.setText(if (local > 0) local.toString() else "")
-                binding.etGolesVisitante.setText(if (visitante > 0) visitante.toString() else "")
+                binding.etGolesLocal.setText(if (local >= 0) local.toString() else "")
+                binding.etGolesVisitante.setText(if (visitante >= 0) visitante.toString() else "")
             }
             
             binding.etGolesLocal.addTextChangedListener(textWatcher)
