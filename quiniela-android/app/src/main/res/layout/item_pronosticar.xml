@@ -23,14 +23,12 @@
             android:gravity="center_vertical">
 
             <!-- Local Flag -->
-            <TextView
+            <ImageView
                 android:id="@+id/tvFlagLocal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="🇲🇽"
-                android:textSize="13sp"
-                android:includeFontPadding="false"
-                android:gravity="center"/>
+                android:layout_width="24dp"
+                android:layout_height="18dp"
+                android:scaleType="fitCenter"
+                android:contentDescription="Bandera local"/>
 
             <!-- Local Team Name -->
             <TextView
@@ -134,14 +132,12 @@
                 android:layout_marginEnd="4dp"/>
 
             <!-- Visitor Flag -->
-            <TextView
+            <ImageView
                 android:id="@+id/tvFlagVisitante"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="🇦🇷"
-                android:textSize="13sp"
-                android:includeFontPadding="false"
-                android:gravity="center"/>
+                android:layout_width="24dp"
+                android:layout_height="18dp"
+                android:scaleType="fitCenter"
+                android:contentDescription="Bandera visitante"/>
 
         </LinearLayout>
 

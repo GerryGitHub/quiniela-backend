@@ -6,6 +6,7 @@ import android.text.TextWatcher
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.quiniela.app.databinding.ActivityQuinielaDetalleBinding
@@ -13,6 +14,7 @@ import com.quiniela.app.model.*
 import com.quiniela.app.repository.PronosticoRepository
 import com.quiniela.app.repository.QuinielaRepository
 import com.quiniela.app.repository.Result
+import com.quiniela.app.util.CountryFlagResolver
 import kotlinx.coroutines.launch
 
 class QuinielaDetalleActivity : AppCompatActivity() {
@@ -303,8 +305,13 @@ class PartidosConPronosticoAdapter(
         fun bind(item: PartidoConPronostico) {
             partidoActual = item
             
-            binding.tvLocal.text = "${obtenerBandera(item.partido.equipoLocal)} ${item.partido.equipoLocal}"
-            binding.tvVisitante.text = "${item.partido.equipoVisitante} ${obtenerBandera(item.partido.equipoVisitante)}"
+            binding.tvLocal.text = item.partido.equipoLocal
+            val ctx = binding.root.context
+            val localFlag = CountryFlagResolver.getFlagDrawable(ctx, item.partido.equipoLocal)
+            binding.tvLocal.setCompoundDrawablesRelativeWithIntrinsicBounds(localFlag, null, null, null)
+            binding.tvVisitante.text = item.partido.equipoVisitante
+            val visitFlag = CountryFlagResolver.getFlagDrawable(ctx, item.partido.equipoVisitante)
+            binding.tvVisitante.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, visitFlag, null)
             binding.tvFecha.text = item.partido.fechaHora
             
             if (item.partido.golesLocalReal != null && item.partido.golesVisitanteReal != null) {
@@ -341,26 +348,6 @@ class PartidosConPronosticoAdapter(
             
             binding.etGolesLocal.addTextChangedListener(textWatcher)
             binding.etGolesVisitante.addTextChangedListener(textWatcher)
-        }
-        
-        private fun obtenerBandera(pais: String): String {
-            return when (pais.uppercase()) {
-                "MEXICO", "MÉXICO" -> "🇲🇽"
-                "ARGENTINA" -> "🇦🇷"
-                "BRASIL" -> "🇧🇷"
-                "URUGUAY" -> "🇺🇾"
-                "COLOMBIA" -> "🇨🇴"
-                "PERÚ", "PERU" -> "🇵🇪"
-                "CHILE" -> "🇨🇱"
-                "VENEZUELA" -> "🇻🇪"
-                "ECUADOR" -> "🇪🇨"
-                "PARAGUAY" -> "🇵🇾"
-                "BOLIVIA" -> "🇧🇴"
-                "PANAMÁ" -> "🇵🇦"
-                "USA", "ESTADOS UNIDOS" -> "🇺🇸"
-                "CANADÁ", "CANADA" -> "🇨🇦"
-                else -> "⚽"
-            }
         }
     }
 }
