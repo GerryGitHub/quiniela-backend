@@ -22,20 +22,28 @@ class AuthRepository(private val apiService: ApiService = RetrofitClient.apiServ
         return try {
             val errorBody = response.errorBody()?.string()
             val json = Gson().fromJson(errorBody, Map::class.java)
-            json["error"]?.toString() ?: getMessageForCode(response.code())
+            val message = json["error"]?.toString() ?: getMessageForCode(response.code())
+            improveMessage(message)
         } catch (e: Exception) {
             getMessageForCode(response.code())
         }
     }
 
+    private fun improveMessage(message: String): String {
+        return when {
+            message.contains("verificar tu correo") -> "Debes validar tu correo antes de iniciar sesión."
+            else -> message
+        }
+    }
+
     private fun getMessageForCode(code: Int): String = when (code) {
-        400 -> "Solicitud inválida"
-        401 -> "Tu sesión expiró. Por favor inicia sesión."
-        403 -> "Debes verificar tu correo antes de iniciar sesión"
-        404 -> "Recurso no encontrado"
-        409 -> "El email ya está registrado"
+        400 -> "No pudimos procesar tu solicitud. Verifica los datos."
+        401 -> "Tu sesión expiró. Inicia sesión nuevamente."
+        403 -> "Debes validar tu correo antes de iniciar sesión."
+        404 -> "Recurso no encontrado."
+        409 -> "El email ya está registrado."
         in 500..599 -> "Error del servidor. Intenta más tarde."
-        else -> "Error: $code"
+        else -> "Error inesperado ($code). Intenta más tarde."
     }
 
     suspend fun register(nombre: String, email: String, password: String): Result<String> {
@@ -45,12 +53,12 @@ class AuthRepository(private val apiService: ApiService = RetrofitClient.apiServ
                 if (response.isSuccessful) {
                     response.body()?.let {
                         Result.Success(it.message)
-                    } ?: Result.Error("Respuesta vacía")
+                    }                     ?: Result.Error("Error del servidor. Intenta nuevamente.")
                 } else {
                     Result.Error(parseError(response))
                 }
             } catch (e: Exception) {
-                Result.Error(e.message ?: "Error de conexión")
+                Result.Error(e.message ?: "Error de conexión. Intenta nuevamente.")
             }
         }
     }
@@ -63,12 +71,12 @@ class AuthRepository(private val apiService: ApiService = RetrofitClient.apiServ
                     response.body()?.let {
                         TokenManager.setToken(it.token)
                         Result.Success(it)
-                    } ?: Result.Error("Respuesta vacía")
+                    } ?: Result.Error("Error del servidor. Intenta nuevamente.")
                 } else {
                     Result.Error(parseError(response))
                 }
             } catch (e: Exception) {
-                Result.Error(e.message ?: "Error de conexión")
+                Result.Error(e.message ?: "Error de conexión. Intenta nuevamente.")
             }
         }
     }
@@ -80,12 +88,12 @@ class AuthRepository(private val apiService: ApiService = RetrofitClient.apiServ
                 if (response.isSuccessful) {
                     response.body()?.let {
                         Result.Success(it)
-                    } ?: Result.Error("Respuesta vacía")
+                    } ?: Result.Error("Error del servidor. Intenta nuevamente.")
                 } else {
                     Result.Error(parseError(response))
                 }
             } catch (e: Exception) {
-                Result.Error(e.message ?: "Error de conexión")
+                Result.Error(e.message ?: "Error de conexión. Intenta nuevamente.")
             }
         }
     }
