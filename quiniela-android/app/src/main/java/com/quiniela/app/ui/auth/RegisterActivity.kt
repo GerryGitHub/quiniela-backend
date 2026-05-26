@@ -3,7 +3,7 @@ package com.quiniela.app.ui.auth
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
+import android.view.animation.AlphaAnimation
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.quiniela.app.databinding.ActivityRegisterBinding
@@ -24,6 +24,18 @@ class RegisterActivity : AppCompatActivity() {
         binding.btnBackToLogin.setOnClickListener { finish() }
     }
 
+    private fun showError(message: String) {
+        binding.tvError.text = message
+        binding.layoutError.visibility = View.VISIBLE
+        val fadeIn = AlphaAnimation(0f, 1f)
+        fadeIn.duration = 300
+        binding.layoutError.startAnimation(fadeIn)
+    }
+
+    private fun hideError() {
+        binding.layoutError.visibility = View.GONE
+    }
+
     private fun isValidEmail(email: String): Boolean {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
@@ -34,36 +46,31 @@ class RegisterActivity : AppCompatActivity() {
         val password = binding.etPassword.text.toString()
 
         if (nombre.isEmpty() || email.isEmpty() || password.isEmpty()) {
-            Toast.makeText(this, "Por favor completa todos los campos", Toast.LENGTH_SHORT).show()
+            showError("Completa todos los campos para registrarte")
             return
         }
 
         if (!isValidEmail(email)) {
-            Toast.makeText(this, "Ingresa un correo electrónico válido", Toast.LENGTH_SHORT).show()
+            showError("Ingresa un correo electrónico válido")
             return
         }
 
         if (password.length < 6) {
-            Toast.makeText(this, "La contraseña debe tener al menos 6 caracteres", Toast.LENGTH_SHORT).show()
+            showError("La contraseña debe tener al menos 6 caracteres")
             return
         }
 
+        hideError()
         binding.progressBar.visibility = View.VISIBLE
 
         lifecycleScope.launch {
             when (val result = authRepository.register(nombre, email, password)) {
                 is Result.Success -> {
-                    Toast.makeText(
-                        this@RegisterActivity,
-                        result.data,
-                        Toast.LENGTH_LONG
-                    ).show()
-
                     startActivity(Intent(this@RegisterActivity, LoginActivity::class.java))
                     finish()
                 }
                 is Result.Error -> {
-                    Toast.makeText(this@RegisterActivity, result.message, Toast.LENGTH_LONG).show()
+                    showError(result.message)
                 }
             }
             binding.progressBar.visibility = View.GONE
