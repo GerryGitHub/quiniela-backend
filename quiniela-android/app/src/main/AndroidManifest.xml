@@ -21,6 +21,12 @@
             android:name=".ui.auth.RegisterActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.auth.ForgotPasswordActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.auth.ResetPasswordActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.dashboard.DashboardActivity"
             android:exported="false" />
         <activity
