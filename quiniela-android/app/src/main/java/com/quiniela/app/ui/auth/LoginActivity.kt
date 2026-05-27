@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
@@ -27,6 +28,10 @@ class LoginActivity : AppCompatActivity() {
 
         setupBiometric()
         checkBiometricAvailability()
+
+        if (intent.getBooleanExtra("reset_success", false)) {
+            Toast.makeText(this, "Tu contraseña fue actualizada correctamente", Toast.LENGTH_LONG).show()
+        }
         
         binding.btnLogin.setOnClickListener { login() }
         binding.btnRegister.setOnClickListener {
