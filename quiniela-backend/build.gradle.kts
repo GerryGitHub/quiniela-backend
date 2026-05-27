@@ -25,6 +25,7 @@ dependencies {
 
     implementation("org.postgresql:postgresql")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
     implementation(kotlin("stdlib-jdk8"))
 

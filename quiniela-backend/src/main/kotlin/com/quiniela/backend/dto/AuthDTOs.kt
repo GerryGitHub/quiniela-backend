@@ -6,20 +6,20 @@ import jakarta.validation.constraints.Size
 
 data class RegisterRequest(
     @field:NotBlank(message = "El nombre es requerido")
-    val nombre: String,
+    val nombre: String = "",
     @field:Email(message = "Email inválido")
     @field:NotBlank(message = "El email es requerido")
-    val email: String,
+    val email: String = "",
     @field:Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
-    val password: String
+    val password: String = ""
 )
 
 data class LoginRequest(
     @field:Email(message = "Email inválido")
     @field:NotBlank(message = "El email es requerido")
-    val email: String,
+    val email: String = "",
     @field:NotBlank(message = "La contraseña es requerida")
-    val password: String
+    val password: String = ""
 )
 
 data class AuthResponse(
@@ -31,7 +31,7 @@ data class AuthResponse(
 
 data class RefreshTokenRequest(
     @field:NotBlank(message = "El refresh token es requerido")
-    val refreshToken: String
+    val refreshToken: String = ""
 )
 
 data class RefreshTokenResponse(
@@ -58,20 +58,20 @@ data class MessageResponse(
 data class ResendVerificationRequest(
     @field:Email(message = "Email inválido")
     @field:NotBlank(message = "El email es requerido")
-    val email: String
+    val email: String = ""
 )
 
 data class ForgotPasswordRequest(
     @field:Email(message = "Email inválido")
     @field:NotBlank(message = "El email es requerido")
-    val email: String
+    val email: String = ""
 )
 
 data class ResetPasswordRequest(
     @field:NotBlank(message = "El token es requerido")
-    val token: String,
+    val token: String = "",
     @field:Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
-    val newPassword: String
+    val newPassword: String = ""
 )
 
 data class UsuarioPerfilDTO(
