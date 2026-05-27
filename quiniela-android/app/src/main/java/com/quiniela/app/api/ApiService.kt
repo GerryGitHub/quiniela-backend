@@ -7,8 +7,12 @@ import com.quiniela.app.model.CrearPronosticosBatchRequest
 import com.quiniela.app.model.CrearPronosticosBatchResponse
 import com.quiniela.app.model.CrearQuinielaRequest
 import com.quiniela.app.model.LeaderboardEntryDTO
+import com.quiniela.app.model.ForgotPasswordRequest
 import com.quiniela.app.model.LoginRequest
 import com.quiniela.app.model.MessageResponse
+import com.quiniela.app.model.RefreshTokenRequest
+import com.quiniela.app.model.RefreshTokenResponse
+import com.quiniela.app.model.ResetPasswordRequest
 import com.quiniela.app.model.MisPronosticosDTO
 import com.quiniela.app.model.PartidoDTO
 import com.quiniela.app.model.PronosticoDTO
@@ -94,4 +98,13 @@ interface ApiService {
 
     @GET("api/resultados/en-vivo")
     suspend fun getPartidosEnVivo(): Response<List<PartidoDTO>>
+
+    @POST("auth/forgot-password")
+    suspend fun forgotPassword(@Body request: ForgotPasswordRequest): Response<MessageResponse>
+
+    @POST("auth/reset-password")
+    suspend fun resetPassword(@Body request: ResetPasswordRequest): Response<MessageResponse>
+
+    @POST("auth/refresh")
+    suspend fun refresh(@Body request: RefreshTokenRequest): Response<RefreshTokenResponse>
 }

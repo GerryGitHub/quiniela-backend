@@ -23,9 +23,20 @@ data class LoginRequest(
 )
 
 data class AuthResponse(
-    val token: String,
+    val accessToken: String,
+    val refreshToken: String? = null,
     val tipo: String = "Bearer",
     val usuario: UsuarioDTO
+)
+
+data class RefreshTokenRequest(
+    @field:NotBlank(message = "El refresh token es requerido")
+    val refreshToken: String
+)
+
+data class RefreshTokenResponse(
+    val accessToken: String,
+    val refreshToken: String? = null
 )
 
 data class UsuarioDTO(
@@ -48,6 +59,19 @@ data class ResendVerificationRequest(
     @field:Email(message = "Email inválido")
     @field:NotBlank(message = "El email es requerido")
     val email: String
+)
+
+data class ForgotPasswordRequest(
+    @field:Email(message = "Email inválido")
+    @field:NotBlank(message = "El email es requerido")
+    val email: String
+)
+
+data class ResetPasswordRequest(
+    @field:NotBlank(message = "El token es requerido")
+    val token: String,
+    @field:Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
+    val newPassword: String
 )
 
 data class UsuarioPerfilDTO(

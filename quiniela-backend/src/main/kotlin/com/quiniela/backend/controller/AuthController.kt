@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/auth")
-@Tag(name = "Autenticación", description = "Endpoints para registro e inicio de sesión")
+@Tag(name = "Autenticación", description = "Endpoints para registro, inicio de sesión, refresh token y recuperación de contraseña")
 class AuthController(
     private val authService: AuthService,
     @Value("\${app.base-url:http://localhost:8080}") private val appBaseUrl: String
@@ -30,6 +30,12 @@ class AuthController(
     @Operation(summary = "Iniciar sesión")
     fun login(@Valid @RequestBody request: LoginRequest): ResponseEntity<AuthResponse> {
         return ResponseEntity.ok(authService.login(request))
+    }
+
+    @PostMapping("/refresh")
+    @Operation(summary = "Renovar access token mediante refresh token")
+    fun refresh(@Valid @RequestBody request: RefreshTokenRequest): ResponseEntity<RefreshTokenResponse> {
+        return ResponseEntity.ok(authService.refreshAccessToken(request))
     }
 
     @GetMapping(value = ["/verify-email"], produces = [MediaType.TEXT_HTML_VALUE])
@@ -102,6 +108,18 @@ class AuthController(
     @Operation(summary = "Reenviar correo de verificación")
     fun resendVerification(@Valid @RequestBody request: ResendVerificationRequest): ResponseEntity<MessageResponse> {
         return ResponseEntity.ok(authService.resendVerification(request))
+    }
+
+    @PostMapping("/forgot-password")
+    @Operation(summary = "Solicitar restablecimiento de contraseña")
+    fun forgotPassword(@Valid @RequestBody request: ForgotPasswordRequest): ResponseEntity<MessageResponse> {
+        return ResponseEntity.ok(authService.forgotPassword(request))
+    }
+
+    @PostMapping("/reset-password")
+    @Operation(summary = "Restablecer contraseña con token")
+    fun resetPassword(@Valid @RequestBody request: ResetPasswordRequest): ResponseEntity<MessageResponse> {
+        return ResponseEntity.ok(authService.resetPassword(request))
     }
 
     @GetMapping("/me")

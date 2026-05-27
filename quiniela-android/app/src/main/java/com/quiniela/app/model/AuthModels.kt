@@ -12,9 +12,19 @@ data class LoginRequest(
 )
 
 data class AuthResponse(
-    val token: String,
+    val accessToken: String,
+    val refreshToken: String? = null,
     val tipo: String = "Bearer",
     val usuario: UsuarioDTO
+)
+
+data class RefreshTokenRequest(
+    val refreshToken: String
+)
+
+data class RefreshTokenResponse(
+    val accessToken: String,
+    val refreshToken: String? = null
 )
 
 data class UsuarioDTO(
@@ -76,4 +86,13 @@ data class LeaderboardEntryDTO(
 
 data class MessageResponse(
     val message: String
+)
+
+data class ForgotPasswordRequest(
+    val email: String
+)
+
+data class ResetPasswordRequest(
+    val token: String,
+    val newPassword: String
 )

@@ -5,8 +5,12 @@ import com.quiniela.app.api.ApiService
 import com.quiniela.app.api.RetrofitClient
 import com.quiniela.app.api.TokenManager
 import com.quiniela.app.model.AuthResponse
+import com.quiniela.app.model.ForgotPasswordRequest
 import com.quiniela.app.model.LoginRequest
+import com.quiniela.app.model.RefreshTokenRequest
+import com.quiniela.app.model.RefreshTokenResponse
 import com.quiniela.app.model.RegisterRequest
+import com.quiniela.app.model.ResetPasswordRequest
 import com.quiniela.app.model.UsuarioPerfilDTO
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -90,7 +94,8 @@ class AuthRepository(private val apiService: ApiService = RetrofitClient.apiServ
                 val response = apiService.login(LoginRequest(email, password))
                 if (response.isSuccessful) {
                     response.body()?.let {
-                        TokenManager.setToken(it.token)
+                        TokenManager.setToken(it.accessToken)
+                        it.refreshToken?.let { rt -> TokenManager.setRefreshToken(rt) }
                         Result.Success(it)
                     } ?: Result.Error("Error del servidor. Intenta nuevamente.")
                 } else {
@@ -123,7 +128,69 @@ class AuthRepository(private val apiService: ApiService = RetrofitClient.apiServ
 
     fun logout() {
         TokenManager.clearToken()
+        TokenManager.clearRefreshToken()
     }
 
     fun isLoggedIn(): Boolean = TokenManager.getToken() != null
+
+    suspend fun refreshToken(): Result<RefreshTokenResponse> {
+        val currentRefreshToken = TokenManager.getRefreshToken() ?: return Result.Error("No hay sesión activa")
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.refresh(RefreshTokenRequest(currentRefreshToken))
+                if (response.isSuccessful) {
+                    response.body()?.let {
+                        TokenManager.setToken(it.accessToken)
+                        it.refreshToken?.let { rt -> TokenManager.setRefreshToken(rt) }
+                        Result.Success(it)
+                    } ?: Result.Error("Error del servidor. Intenta nuevamente.")
+                } else {
+                    logout()
+                    Result.Error("La sesión expiró. Inicia sesión nuevamente.")
+                }
+            } catch (e: java.io.IOException) {
+                Result.Error("No pudimos conectar con el servidor. Intenta nuevamente.")
+            } catch (e: Exception) {
+                Result.Error("Ocurrió un error inesperado.")
+            }
+        }
+    }
+
+    suspend fun forgotPassword(email: String): Result<String> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.forgotPassword(ForgotPasswordRequest(email))
+                if (response.isSuccessful) {
+                    response.body()?.let {
+                        Result.Success(it.message)
+                    } ?: Result.Error("Error del servidor. Intenta nuevamente.")
+                } else {
+                    Result.Error(parseError(response))
+                }
+            } catch (e: java.io.IOException) {
+                Result.Error("No pudimos conectar con el servidor. Intenta nuevamente.")
+            } catch (e: Exception) {
+                Result.Error("Ocurrió un error inesperado.")
+            }
+        }
+    }
+
+    suspend fun resetPassword(token: String, newPassword: String): Result<String> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.resetPassword(ResetPasswordRequest(token, newPassword))
+                if (response.isSuccessful) {
+                    response.body()?.let {
+                        Result.Success(it.message)
+                    } ?: Result.Error("Error del servidor. Intenta nuevamente.")
+                } else {
+                    Result.Error(parseError(response))
+                }
+            } catch (e: java.io.IOException) {
+                Result.Error("No pudimos conectar con el servidor. Intenta nuevamente.")
+            } catch (e: Exception) {
+                Result.Error("Ocurrió un error inesperado.")
+            }
+        }
+    }
 }

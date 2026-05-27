@@ -38,6 +38,7 @@ object RetrofitClient {
 
 object TokenManager {
     private var token: String? = null
+    private var refreshToken: String? = null
 
     fun setToken(token: String?) {
         this.token = token
@@ -47,5 +48,15 @@ object TokenManager {
 
     fun clearToken() {
         token = null
+    }
+
+    fun setRefreshToken(refreshToken: String?) {
+        this.refreshToken = refreshToken
+    }
+
+    fun getRefreshToken(): String? = refreshToken
+
+    fun clearRefreshToken() {
+        refreshToken = null
     }
 }

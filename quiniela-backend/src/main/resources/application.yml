@@ -36,6 +36,7 @@ springdoc:
 
 app:
   base-url: ${APP_BASE_URL:http://localhost:8080}
+  refresh-token-expiration-days: 30
 
 email:
   from: ${EMAIL_FROM:Quiniela <onboarding@resend.dev>}
