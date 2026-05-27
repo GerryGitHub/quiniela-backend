@@ -20,6 +20,7 @@ class ResetPasswordActivity : AppCompatActivity() {
         binding = ActivityResetPasswordBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding.tvEmail.text = intent.getStringExtra("email") ?: ""
         binding.btnBackToLogin.setOnClickListener { finish() }
         binding.btnReset.setOnClickListener { resetPassword() }
     }
@@ -51,12 +52,18 @@ class ResetPasswordActivity : AppCompatActivity() {
     }
 
     private fun resetPassword() {
-        val token = intent.getStringExtra("token") ?: ""
+        val email = intent.getStringExtra("email") ?: ""
+        val code = binding.etCode.text.toString().trim()
         val newPassword = binding.etNewPassword.text.toString()
         val confirmPassword = binding.etConfirmPassword.text.toString()
 
-        if (token.isEmpty()) {
-            showError("El enlace de recuperación no es válido")
+        if (email.isEmpty()) {
+            showError("Correo no encontrado. Solicita un nuevo código.")
+            return
+        }
+
+        if (code.length != 6) {
+            showError("Ingresa el código de 6 dígitos")
             return
         }
 
@@ -79,10 +86,11 @@ class ResetPasswordActivity : AppCompatActivity() {
         binding.progressBar.visibility = View.VISIBLE
 
         lifecycleScope.launch {
-            when (val result = authRepository.resetPassword(token, newPassword)) {
+            when (val result = authRepository.resetPassword(email, code, newPassword)) {
                 is Result.Success -> {
                     showSuccess(result.data)
                     binding.btnReset.visibility = View.GONE
+                    binding.etCode.isEnabled = false
                     binding.etNewPassword.isEnabled = false
                     binding.etConfirmPassword.isEnabled = false
                     binding.btnBackToLogin.text = "Ir a inicio de sesión"

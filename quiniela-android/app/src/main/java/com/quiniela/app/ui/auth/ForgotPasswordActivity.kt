@@ -1,5 +1,6 @@
 package com.quiniela.app.ui.auth
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.animation.AlphaAnimation
@@ -73,9 +74,15 @@ class ForgotPasswordActivity : AppCompatActivity() {
         lifecycleScope.launch {
             when (val result = authRepository.forgotPassword(email)) {
                 is Result.Success -> {
-                    showSuccess(result.data)
+                    showSuccess("Revisa tu correo. Te enviamos un código de verificación.")
                     binding.btnSend.visibility = View.GONE
                     binding.etEmail.isEnabled = false
+                    binding.btnBackToLogin.text = "Ingresar código"
+                    binding.btnBackToLogin.setOnClickListener {
+                        startActivity(Intent(this@ForgotPasswordActivity, ResetPasswordActivity::class.java).apply {
+                            putExtra("email", email)
+                        })
+                    }
                 }
                 is Result.Error -> {
                     showError(result.message)

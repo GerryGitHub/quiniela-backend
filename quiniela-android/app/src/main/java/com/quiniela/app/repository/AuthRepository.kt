@@ -52,6 +52,9 @@ class AuthRepository(private val apiService: ApiService = RetrofitClient.apiServ
             message.contains("Email inválido") -> "Ingresa un correo electrónico válido."
             message.contains("La contraseña debe tener") -> "La contraseña debe tener al menos 6 caracteres."
             message.contains("nombre es requerido") || message.contains("email es requerido") || message.contains("contraseña es requerida") -> "Completa todos los campos obligatorios."
+            message.contains("Código inválido") || message.contains("Token inválido") -> "El código ingresado no es válido."
+            message.contains("código ya fue utilizado") || message.contains("Token ya fue utilizado") -> "El código ya fue usado. Solicita uno nuevo."
+            message.contains("código ha expirado") || message.contains("Token ha expirado") -> "El código expiró. Solicita uno nuevo."
             else -> "Ocurrió un error inesperado."
         }
     }
@@ -175,10 +178,10 @@ class AuthRepository(private val apiService: ApiService = RetrofitClient.apiServ
         }
     }
 
-    suspend fun resetPassword(token: String, newPassword: String): Result<String> {
+    suspend fun resetPassword(email: String, code: String, newPassword: String): Result<String> {
         return withContext(Dispatchers.IO) {
             try {
-                val response = apiService.resetPassword(ResetPasswordRequest(token, newPassword))
+                val response = apiService.resetPassword(ResetPasswordRequest(email, code, newPassword))
                 if (response.isSuccessful) {
                     response.body()?.let {
                         Result.Success(it.message)

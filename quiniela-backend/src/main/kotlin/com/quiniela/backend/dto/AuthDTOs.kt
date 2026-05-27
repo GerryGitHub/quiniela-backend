@@ -68,8 +68,12 @@ data class ForgotPasswordRequest(
 )
 
 data class ResetPasswordRequest(
-    @field:NotBlank(message = "El token es requerido")
-    val token: String = "",
+    @field:NotBlank(message = "El email es requerido")
+    @field:Email(message = "Email inválido")
+    val email: String = "",
+    @field:NotBlank(message = "El código es requerido")
+    @field:Size(min = 6, max = 6, message = "El código debe tener 6 dígitos")
+    val code: String = "",
     @field:Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
     val newPassword: String = ""
 )

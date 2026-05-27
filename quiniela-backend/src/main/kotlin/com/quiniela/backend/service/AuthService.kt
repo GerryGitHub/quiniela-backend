@@ -207,18 +207,18 @@ class AuthService(
             val user = usuario.get()
             passwordResetTokenRepository.deleteByUsuario(user)
 
-            val token = UUID.randomUUID().toString()
+            val code = String.format("%06d", (100000..999999).random())
             val resetToken = PasswordResetToken(
                 usuario = user,
-                token = token,
-                expiresAt = LocalDateTime.now().plusMinutes(30)
+                token = code,
+                expiresAt = LocalDateTime.now().plusMinutes(15)
             )
             passwordResetTokenRepository.save(resetToken)
 
             emailService.sendPasswordResetEmail(
                 email = user.email,
                 nombre = user.nombre,
-                token = token
+                token = code
             )
         }
 
@@ -227,18 +227,20 @@ class AuthService(
 
     @Transactional
     fun resetPassword(request: ResetPasswordRequest): MessageResponse {
-        val resetToken = passwordResetTokenRepository.findByToken(request.token)
-            .orElseThrow { IllegalArgumentException("Token inválido") }
+        val usuario = usuarioRepository.findByEmail(request.email)
+            .orElseThrow { IllegalArgumentException("Usuario no encontrado") }
+
+        val resetToken = passwordResetTokenRepository.findByUsuarioAndToken(usuario, request.code)
+            .orElseThrow { IllegalArgumentException("Código inválido") }
 
         if (resetToken.used) {
-            throw IllegalArgumentException("El token ya fue utilizado")
+            throw IllegalArgumentException("El código ya fue utilizado")
         }
 
         if (resetToken.expiresAt.isBefore(LocalDateTime.now())) {
-            throw IllegalArgumentException("El token ha expirado")
+            throw IllegalArgumentException("El código ha expirado")
         }
 
-        val usuario = resetToken.usuario
         usuario.password = passwordEncoder.encode(request.newPassword)
         resetToken.used = true
 
