@@ -22,7 +22,7 @@ export default function Login() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('registered') === 'true') {
-      setSuccessMsg('Cuenta creada correctamente. Revisa tu correo para verificar tu cuenta.');
+      setSuccessMsg('Cuenta creada correctamente. Revisa tu correo para verificar tu cuenta con el código OTP.');
     }
   }, []);
 

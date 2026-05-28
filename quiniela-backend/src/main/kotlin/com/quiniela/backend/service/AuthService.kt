@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
+import java.util.UUID
 
 @Service
 class AuthService(
@@ -176,29 +177,6 @@ class AuthService(
             accessToken = newAccessToken,
             refreshToken = newRefreshTokenValue
         )
-    }
-
-    @Transactional
-    fun verifyEmail(token: String): MessageResponse {
-        val verificationToken = emailVerificationTokenRepository.findByToken(token)
-            .orElseThrow { IllegalArgumentException("Token inválido") }
-
-        if (verificationToken.used) {
-            throw IllegalArgumentException("El token ya fue utilizado")
-        }
-
-        if (verificationToken.expiresAt.isBefore(LocalDateTime.now())) {
-            throw IllegalArgumentException("El token ha expirado")
-        }
-
-        val usuario = verificationToken.usuario
-        usuario.emailVerified = true
-        verificationToken.used = true
-
-        usuarioRepository.save(usuario)
-        emailVerificationTokenRepository.save(verificationToken)
-
-        return MessageResponse(message = "Correo verificado correctamente")
     }
 
     @Transactional

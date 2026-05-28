@@ -12,7 +12,6 @@ import java.net.http.HttpResponse
 @Service
 class EmailService(
     @Value("\${resend.api-key:}") private val resendApiKey: String,
-    @Value("\${app.base-url:http://localhost:8080}") private val appBaseUrl: String,
     @Value("\${email.from:onboarding@resend.dev}") private val emailFrom: String
 ) {
     private val logger = LoggerFactory.getLogger(EmailService::class.java)
@@ -75,7 +74,6 @@ class EmailService(
             throw IllegalStateException("Servicio de correo no configurado")
         }
 
-        val link = "$appBaseUrl/auth/verify-email?token=$token"
         val htmlBody = """
             <!DOCTYPE html>
             <html>
