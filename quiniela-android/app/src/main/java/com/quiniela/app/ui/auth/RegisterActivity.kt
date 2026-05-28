@@ -66,7 +66,9 @@ class RegisterActivity : AppCompatActivity() {
         lifecycleScope.launch {
             when (val result = authRepository.register(nombre, email, password)) {
                 is Result.Success -> {
-                    startActivity(Intent(this@RegisterActivity, LoginActivity::class.java))
+                    startActivity(Intent(this@RegisterActivity, VerifyOtpActivity::class.java).apply {
+                        putExtra("email", email)
+                    })
                     finish()
                 }
                 is Result.Error -> {

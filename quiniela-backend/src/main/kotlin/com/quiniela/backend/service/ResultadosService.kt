@@ -7,6 +7,7 @@ import com.quiniela.backend.exception.NotFoundException
 import com.quiniela.backend.repository.*
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.Duration
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
@@ -47,11 +48,13 @@ class ResultadosService(
         return partidoRepository.findAll()
             .filter {
                 val fechaPartido = it.fechaHora.atZone(zonaMexico)
-                it.estado == EstadoPartido.EN_CURSO &&
-                fechaPartido >= inicioDia && fechaPartido < finDia
+                fechaPartido >= inicioDia && fechaPartido < finDia &&
+                (it.estado == EstadoPartido.POR_COMENZAR ||
+                 it.estado == EstadoPartido.EN_CURSO ||
+                 it.estado == EstadoPartido.FINALIZADO)
             }
             .sortedBy { it.fechaHora }
-            .map { it.toDTO() }
+            .map { it.toDTOConMinutos(ahora) }
     }
 
     @Transactional
@@ -61,7 +64,7 @@ class ResultadosService(
 
         when (partido.estado) {
             EstadoPartido.FINALIZADO -> throw IllegalArgumentException("No se puede modificar un partido ya finalizado")
-            EstadoPartido.PENDIENTE -> throw IllegalArgumentException("No se puede modificar un partido que no ha iniciado")
+            EstadoPartido.PENDIENTE, EstadoPartido.POR_COMENZAR -> throw IllegalArgumentException("No se puede modificar un partido que no ha iniciado")
             EstadoPartido.EN_CURSO -> {
                 if (!esAdmin) {
                     throw IllegalArgumentException("Solo admins pueden editar partidos en vivo")
@@ -72,8 +75,8 @@ class ResultadosService(
         partido.golesLocalReal = request.golesLocal
         partido.golesVisitanteReal = request.golesVisitante
         
-        if (partido.estado == EstadoPartido.PENDIENTE && request.golesLocal != null && request.golesVisitante != null) {
-            partido.estado = EstadoPartido.EN_CURSO
+        if (partido.estado == EstadoPartido.EN_CURSO && request.golesLocal != null && request.golesVisitante != null) {
+            // mantener EN_CURSO
         }
 
         val saved = partidoRepository.save(partido).toDTO()
@@ -145,6 +148,33 @@ class ResultadosService(
         equipoVisitanteId = equipoVisitante.id,
         golesLocalReal = golesLocalReal,
         golesVisitanteReal = golesVisitanteReal,
-        estado = estado.name
+        estado = estado.name,
+        minutosJugados = minutosJugados
     )
+
+    private fun Partido.toDTOConMinutos(ahora: ZonedDateTime): PartidoDTO {
+        val zonaMexico = ZoneId.of("America/Mexico_City")
+        val fechaPartido = fechaHora.atZone(zonaMexico)
+        val minutosParaInicio = if (fechaPartido.isAfter(ahora)) {
+            Duration.between(ahora, fechaPartido).toMinutes().toInt()
+        } else {
+            null
+        }
+
+        return PartidoDTO(
+            id = id,
+            equipoLocal = equipoLocal.nombre,
+            equipoVisitante = equipoVisitante.nombre,
+            fechaHora = fechaHora.toString(),
+            grupo = grupo.nombre,
+            grupoId = grupo.id,
+            equipoLocalId = equipoLocal.id,
+            equipoVisitanteId = equipoVisitante.id,
+            golesLocalReal = golesLocalReal,
+            golesVisitanteReal = golesVisitanteReal,
+            estado = estado.name,
+            minutosParaInicio = minutosParaInicio,
+            minutosJugados = minutosJugados
+        )
+    }
 }

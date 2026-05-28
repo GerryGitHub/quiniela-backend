@@ -98,6 +98,7 @@ class GrupoService(
         equipoVisitanteId = equipoVisitante.id,
         golesLocalReal = golesLocalReal,
         golesVisitanteReal = golesVisitanteReal,
-        estado = estado.name
+        estado = estado.name,
+        minutosJugados = minutosJugados
     )
 }

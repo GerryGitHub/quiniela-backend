@@ -1,20 +1,23 @@
 package com.quiniela.app.ui.quiniela
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.quiniela.app.api.TokenManager
 import com.quiniela.app.databinding.ActivityQuinielaDetalleBinding
 import com.quiniela.app.model.*
 import com.quiniela.app.repository.PronosticoRepository
 import com.quiniela.app.repository.QuinielaRepository
 import com.quiniela.app.repository.Result
 import com.quiniela.app.util.CountryFlagResolver
+import com.quiniela.app.util.UiUtils
 import kotlinx.coroutines.launch
 
 class QuinielaDetalleActivity : AppCompatActivity() {
@@ -22,6 +25,7 @@ class QuinielaDetalleActivity : AppCompatActivity() {
     private val quinielaRepository = QuinielaRepository()
     private val pronosticoRepository = PronosticoRepository()
     private var quinielaId: Long = 0
+    private var lastLeaderboardHash: Int = 0
     
     private lateinit var partidosAdapter: PartidosConPronosticoAdapter
     private lateinit var participantesAdapter: ParticipantesAdapter
@@ -49,11 +53,11 @@ class QuinielaDetalleActivity : AppCompatActivity() {
                 when (tab?.position) {
                     0 -> {
                         binding.layoutPronosticos.visibility = View.VISIBLE
-                        binding.rvParticipantes.visibility = View.GONE
+                        binding.layoutPosiciones.visibility = View.GONE
                     }
                     1 -> {
                         binding.layoutPronosticos.visibility = View.GONE
-                        binding.rvParticipantes.visibility = View.VISIBLE
+                        binding.layoutPosiciones.visibility = View.VISIBLE
                     }
                 }
             }
@@ -69,6 +73,19 @@ class QuinielaDetalleActivity : AppCompatActivity() {
 
     private fun setupButtons() {
         binding.btnGuardarPronosticos.setOnClickListener { guardarPronosticos() }
+    }
+
+    private fun actualizarBotonGuardar() {
+        if (::partidosAdapter.isInitialized) {
+            val dirtyCount = partidosAdapter.getDirtyPronosticos().size
+            if (dirtyCount > 0) {
+                binding.btnGuardarPronosticos.text = "Guardar Pronósticos ($dirtyCount)"
+                binding.btnGuardarPronosticos.isEnabled = true
+            } else {
+                binding.btnGuardarPronosticos.text = "Guardar Pronósticos"
+                binding.btnGuardarPronosticos.isEnabled = false
+            }
+        }
     }
 
     private fun loadData() {
@@ -91,33 +108,72 @@ when (val pronosResult = pronosticoRepository.getMisPronosticosByQuiniela(quinie
                                 )
                             }
                             val itemsAgrupados = crearListaAgrupada(partidosConPronostico)
-                            partidosAdapter = PartidosConPronosticoAdapter(itemsAgrupados)
+                            partidosAdapter = PartidosConPronosticoAdapter(itemsAgrupados) { actualizarBotonGuardar() }
                             binding.rvPartidos.adapter = partidosAdapter
+                            actualizarBotonGuardar()
                         }
                         is Result.Error -> {
                             val partidosConPronostico = detalle.partidos.map { partido ->
                                 PartidoConPronostico(partido = partido, golesLocalPredicho = 0, golesVisitantePredicho = 0)
                             }
                             val itemsAgrupados = crearListaAgrupada(partidosConPronostico)
-                            partidosAdapter = PartidosConPronosticoAdapter(itemsAgrupados)
+                            partidosAdapter = PartidosConPronosticoAdapter(itemsAgrupados) { actualizarBotonGuardar() }
                             binding.rvPartidos.adapter = partidosAdapter
+                            actualizarBotonGuardar()
                         }
                     }
                 }
                 is Result.Error -> {
-                    Toast.makeText(this@QuinielaDetalleActivity, result.message, Toast.LENGTH_LONG).show()
+                    UiUtils.showErrorSnackbar(binding.root, result.message)
                 }
             }
             
+            loadLeaderboard()
+            binding.progressBar.visibility = View.GONE
+        }
+    }
+
+    private fun loadLeaderboard() {
+        lifecycleScope.launch {
             when (val result = quinielaRepository.getLeaderboard(quinielaId)) {
                 is Result.Success -> {
-                    participantesAdapter = ParticipantesAdapter(result.data)
-                    binding.rvParticipantes.adapter = participantesAdapter
+                    val data = result.data
+                    val currentHash = data.hashCode()
+                    if (currentHash == lastLeaderboardHash) return@launch
+
+                    lastLeaderboardHash = currentHash
+
+                    if (data.isEmpty()) {
+                        binding.layoutEmpty.visibility = View.VISIBLE
+                        binding.rvParticipantes.visibility = View.GONE
+                    } else {
+                        binding.layoutEmpty.visibility = View.GONE
+                        binding.rvParticipantes.visibility = View.VISIBLE
+
+                        if (::participantesAdapter.isInitialized) {
+                            participantesAdapter.updateList(data)
+                        } else {
+                            participantesAdapter = ParticipantesAdapter(data)
+                            binding.rvParticipantes.adapter = participantesAdapter
+                        }
+
+                        // Sticky "Tu posición"
+                        val currentEmail = TokenManager.getUsuarioEmail()
+                        if (currentEmail != null) {
+                            val miEntry = data.find { it.usuario.email == currentEmail }
+                            if (miEntry != null) {
+                                binding.tvMiPosicion.text = "Tu posición: #${miEntry.posicion}"
+                                binding.layoutMiPosicion.visibility = View.VISIBLE
+                            } else {
+                                binding.layoutMiPosicion.visibility = View.GONE
+                            }
+                        } else {
+                            binding.layoutMiPosicion.visibility = View.GONE
+                        }
+                    }
                 }
                 is Result.Error -> {}
             }
-            
-            binding.progressBar.visibility = View.GONE
         }
     }
 
@@ -153,11 +209,31 @@ when (val pronosResult = pronosticoRepository.getMisPronosticosByQuiniela(quinie
         return grupo.trim().take(1).uppercase()
     }
 
+    private val leaderboardHandler = Handler(Looper.getMainLooper())
+    private val leaderboardPolling = object : Runnable {
+        override fun run() {
+            if (binding.layoutPosiciones.visibility == View.VISIBLE) {
+                loadLeaderboard()
+            }
+            leaderboardHandler.postDelayed(this, 15000)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        leaderboardHandler.post(leaderboardPolling)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        leaderboardHandler.removeCallbacks(leaderboardPolling)
+    }
+
     private fun guardarPronosticos() {
-        val pronosticos = partidosAdapter.getAllPronosticos()
+        val pronosticosModificados = partidosAdapter.getDirtyPronosticos()
         
-        if (pronosticos.isEmpty()) {
-            Toast.makeText(this, "No hay pronósticos para guardar", Toast.LENGTH_SHORT).show()
+        if (pronosticosModificados.isEmpty()) {
+            UiUtils.showWarningSnackbar(binding.root, "No hay cambios para guardar")
             return
         }
 
@@ -165,7 +241,7 @@ when (val pronosResult = pronosticoRepository.getMisPronosticosByQuiniela(quinie
         binding.btnGuardarPronosticos.isEnabled = false
 
         lifecycleScope.launch {
-            val items = pronosticos.map { pp ->
+            val items = pronosticosModificados.map { pp ->
                 PronosticoItemRequest(
                     idPartido = pp.partido.id,
                     golesLocalPredicho = pp.golesLocalPredicho,
@@ -175,10 +251,11 @@ when (val pronosResult = pronosticoRepository.getMisPronosticosByQuiniela(quinie
             
             when (val result = pronosticoRepository.crearPronosticosBatch(quinielaId, items)) {
                 is Result.Success -> {
-                    Toast.makeText(this@QuinielaDetalleActivity, "Pronósticos guardados: ${result.data.pronosticosGuardados}", Toast.LENGTH_SHORT).show()
+                    partidosAdapter.clearDirtyFlags()
+                    UiUtils.showSuccessSnackbar(binding.root, "Pronósticos guardados: ${result.data.pronosticosGuardados}")
                 }
                 is Result.Error -> {
-                    Toast.makeText(this@QuinielaDetalleActivity, result.message, Toast.LENGTH_LONG).show()
+                    UiUtils.showErrorSnackbar(binding.root, result.message)
                 }
             }
             binding.progressBar.visibility = View.GONE
@@ -190,7 +267,8 @@ when (val pronosResult = pronosticoRepository.getMisPronosticosByQuiniela(quinie
 data class PartidoConPronostico(
     val partido: PartidoDTO,
     var golesLocalPredicho: Int = 0,
-    var golesVisitantePredicho: Int = 0
+    var golesVisitantePredicho: Int = 0,
+    var dirty: Boolean = false
 )
 
 data class GrupoExpansible(
@@ -200,7 +278,8 @@ data class GrupoExpansible(
 )
 
 class PartidosConPronosticoAdapter(
-    private val grupos: List<GrupoExpansible>
+    private val grupos: List<GrupoExpansible>,
+    private val onDirtyChanged: () -> Unit = {}
 ) : androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>() {
 
     companion object {
@@ -273,6 +352,18 @@ class PartidosConPronosticoAdapter(
         return grupos.flatMap { it.partidos }
     }
 
+    fun getDirtyPronosticos(): List<PartidoConPronostico> {
+        return grupos.flatMap { it.partidos }.filter { it.dirty }
+    }
+
+    fun clearDirtyFlags() {
+        grupos.flatMap { it.partidos }.forEach { it.dirty = false }
+    }
+
+    fun hasDirtyPronosticos(): Boolean {
+        return grupos.flatMap { it.partidos }.any { it.dirty }
+    }
+
     inner class HeaderViewHolder(private val binding: com.quiniela.app.databinding.ItemGrupoHeaderBinding) : 
         androidx.recyclerview.widget.RecyclerView.ViewHolder(binding.root) {
         
@@ -304,34 +395,26 @@ class PartidosConPronosticoAdapter(
         
         fun bind(item: PartidoConPronostico) {
             partidoActual = item
-            
-            binding.tvLocal.text = item.partido.equipoLocal
             val ctx = binding.root.context
+
+            binding.tvLocal.text = item.partido.equipoLocal
             val localFlag = CountryFlagResolver.getFlagDrawable(ctx, item.partido.equipoLocal)
             binding.tvLocal.setCompoundDrawablesRelativeWithIntrinsicBounds(localFlag, null, null, null)
             binding.tvVisitante.text = item.partido.equipoVisitante
             val visitFlag = CountryFlagResolver.getFlagDrawable(ctx, item.partido.equipoVisitante)
             binding.tvVisitante.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, visitFlag, null)
             binding.tvFecha.text = item.partido.fechaHora
-            
-            if (item.partido.golesLocalReal != null && item.partido.golesVisitanteReal != null) {
-                binding.tvResultadoReal.text = "Resultado: ${item.partido.golesLocalReal} - ${item.partido.golesVisitanteReal}"
-            } else {
-                binding.tvResultadoReal.text = "Resultado: Por jugar"
-            }
-            
-            binding.tvMiPronostico.text = "Tu pronóstico: ${item.golesLocalPredicho} - ${item.golesVisitantePredicho}"
-            
-            val esEditable = item.partido.estado == "PENDIENTE"
+
+            val esEditable = item.partido.estado == PartidoDTO.ESTADO_PENDIENTE
             binding.etGolesLocal.isEnabled = esEditable
             binding.etGolesVisitante.isEnabled = esEditable
-            
+
             binding.etGolesLocal.removeTextChangedListener(textWatcher)
             binding.etGolesVisitante.removeTextChangedListener(textWatcher)
-            
+
             binding.etGolesLocal.setText(item.golesLocalPredicho.toString())
             binding.etGolesVisitante.setText(item.golesVisitantePredicho.toString())
-            
+
             textWatcher = object : TextWatcher {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -341,20 +424,101 @@ class PartidosConPronosticoAdapter(
                         val visitante = binding.etGolesVisitante.text.toString().toIntOrNull() ?: 0
                         partido.golesLocalPredicho = local
                         partido.golesVisitantePredicho = visitante
-                        binding.tvMiPronostico.text = "Tu pronóstico: $local - $visitante"
+                        partido.dirty = true
+                        onDirtyChanged()
                     }
                 }
             }
-            
+
             binding.etGolesLocal.addTextChangedListener(textWatcher)
             binding.etGolesVisitante.addTextChangedListener(textWatcher)
+
+            when (item.partido.estado) {
+                PartidoDTO.ESTADO_EN_CURSO -> bindEnCurso(item)
+                PartidoDTO.ESTADO_FINALIZADO -> bindFinalizado(item)
+                else -> bindPendiente(item)
+            }
+        }
+
+        private fun bindPendiente(item: PartidoConPronostico) {
+            binding.layoutStateChip.visibility = View.GONE
+            binding.tvResultadoReal.text = "⏳ Por jugar"
+            binding.tvResultadoReal.setTextColor(0x99FFFFFF.toInt())
+            binding.tvResultadoReal.textSize = 14f
+            binding.tvMiPronostico.visibility = View.GONE
+        }
+
+        private fun bindEnCurso(item: PartidoConPronostico) {
+            val ctx = binding.root.context
+
+            binding.layoutStateChip.visibility = View.VISIBLE
+            binding.vLiveDot.visibility = View.VISIBLE
+            UiUtils.startLivePulse(binding.vLiveDot)
+            binding.tvEstado.text = "EN VIVO"
+            binding.tvEstado.setTextColor(androidx.core.content.ContextCompat.getColor(ctx, com.quiniela.app.R.color.error))
+
+            val mins = item.partido.minutosJugados
+            if (mins != null) {
+                binding.tvMinutos.text = " • $mins'"
+                binding.tvMinutos.visibility = View.VISIBLE
+                binding.tvMinutos.setTextColor(androidx.core.content.ContextCompat.getColor(ctx, com.quiniela.app.R.color.error))
+            } else {
+                binding.tvMinutos.visibility = View.GONE
+            }
+
+            val local = item.partido.golesLocalReal
+            val visitante = item.partido.golesVisitanteReal
+            if (local != null && visitante != null) {
+                binding.tvResultadoReal.text = "Resultado parcial: $local - $visitante"
+            } else {
+                binding.tvResultadoReal.text = "EN VIVO"
+            }
+            binding.tvResultadoReal.setTextColor(0xFFFFFFFF.toInt())
+            binding.tvResultadoReal.textSize = 15f
+            binding.tvMiPronostico.visibility = View.GONE
+        }
+
+        private fun bindFinalizado(item: PartidoConPronostico) {
+            val ctx = binding.root.context
+
+            binding.layoutStateChip.visibility = View.VISIBLE
+            binding.vLiveDot.visibility = View.GONE
+            binding.tvEstado.text = "FINALIZADO"
+            binding.tvEstado.setTextColor(androidx.core.content.ContextCompat.getColor(ctx, com.quiniela.app.R.color.text_secondary))
+            binding.tvMinutos.visibility = View.GONE
+
+            val local = item.partido.golesLocalReal
+            val visitante = item.partido.golesVisitanteReal
+            if (local != null && visitante != null) {
+                binding.tvResultadoReal.text = "Resultado final: $local - $visitante"
+            } else {
+                binding.tvResultadoReal.text = "FINALIZADO"
+            }
+            binding.tvResultadoReal.setTextColor(0xFFFFFFFF.toInt())
+            binding.tvResultadoReal.textSize = 15f
+
+            binding.tvMiPronostico.visibility = View.VISIBLE
+            binding.tvMiPronostico.text = "Tu pronóstico: ${item.golesLocalPredicho} - ${item.golesVisitantePredicho}"
         }
     }
 }
 
-class ParticipantesAdapter(private val participantes: List<LeaderboardEntryDTO>) : 
+class ParticipantesAdapter(private var participantes: List<LeaderboardEntryDTO>) : 
     androidx.recyclerview.widget.RecyclerView.Adapter<ParticipantesAdapter.ViewHolder>() {
-    
+
+    private val posicionColors = intArrayOf(
+        0xFFFFD700.toInt(), // gold
+        0xFFC0C0C0.toInt(), // silver
+        0xFFCD7F32.toInt()  // bronze
+    )
+
+    fun updateList(newList: List<LeaderboardEntryDTO>) {
+        if (participantes.hashCode() != newList.hashCode()) {
+            participantes = newList
+            notifyDataSetChanged()
+        }
+    }
+
     override fun onCreateViewHolder(parent: android.view.ViewGroup, viewType: Int): ViewHolder {
         val binding = com.quiniela.app.databinding.ItemQuinielaParticipanteBinding.inflate(
             android.view.LayoutInflater.from(parent.context), parent, false)
@@ -367,12 +531,37 @@ class ParticipantesAdapter(private val participantes: List<LeaderboardEntryDTO>)
 
     override fun getItemCount() = participantes.size
 
-    class ViewHolder(private val binding: com.quiniela.app.databinding.ItemQuinielaParticipanteBinding) : 
+    inner class ViewHolder(private val binding: com.quiniela.app.databinding.ItemQuinielaParticipanteBinding) : 
         androidx.recyclerview.widget.RecyclerView.ViewHolder(binding.root) {
         fun bind(entry: LeaderboardEntryDTO, posicion: Int) {
-            binding.tvPosicion.text = posicion.toString()
+            val context = binding.root.context
+
+            if (posicion <= 3) {
+                binding.cardRoot.strokeColor = posicionColors[posicion - 1]
+                binding.cardRoot.strokeWidth = (2 * context.resources.displayMetrics.density).toInt()
+                binding.tvPosicion.text = when (posicion) {
+                    1 -> "🥇"
+                    2 -> "🥈"
+                    3 -> "🥉"
+                    else -> posicion.toString()
+                }
+            } else {
+                binding.cardRoot.strokeColor = androidx.core.content.ContextCompat.getColor(context, com.quiniela.app.R.color.border_soft)
+                binding.cardRoot.strokeWidth = (1 * context.resources.displayMetrics.density).toInt()
+                binding.tvPosicion.text = "#$posicion"
+            }
+
             binding.tvNombre.text = entry.usuario.nombre
-            binding.tvPuntos.text = "${entry.puntosTotales} pts"
+
+            if (posicion == 1) {
+                binding.tvPuntos.text = "${entry.puntosTotales} pts"
+                binding.tvPuntos.setTextSize(18f)
+            } else {
+                binding.tvPuntos.text = "${entry.puntosTotales} pts"
+                binding.tvPuntos.setTextSize(16f)
+            }
+
+            binding.tvAciertos.text = "${entry.aciertos} aciertos"
         }
     }
 }

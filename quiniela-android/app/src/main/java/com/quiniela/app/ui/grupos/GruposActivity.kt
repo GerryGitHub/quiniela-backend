@@ -2,13 +2,13 @@ package com.quiniela.app.ui.grupos
 
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.quiniela.app.databinding.ActivityGruposBinding
 import com.quiniela.app.repository.GrupoRepository
 import com.quiniela.app.repository.Result
+import com.quiniela.app.util.UiUtils
 import kotlinx.coroutines.launch
 
 class GruposActivity : AppCompatActivity() {
@@ -28,11 +28,17 @@ class GruposActivity : AppCompatActivity() {
         lifecycleScope.launch {
             when (val result = repository.getGrupos()) {
                 is Result.Success -> {
-                    binding.rvGrupos.layoutManager = LinearLayoutManager(this@GruposActivity)
-                    binding.rvGrupos.adapter = GrupoAdapter(result.data.grupos)
+                    val grupos = result.data.grupos
+                    if (grupos.isEmpty()) {
+                        binding.layoutEmpty.visibility = View.VISIBLE
+                        binding.rvGrupos.visibility = View.GONE
+                    } else {
+                        binding.rvGrupos.layoutManager = LinearLayoutManager(this@GruposActivity)
+                        binding.rvGrupos.adapter = GrupoAdapter(grupos)
+                    }
                 }
                 is Result.Error -> {
-                    Toast.makeText(this@GruposActivity, result.message, Toast.LENGTH_SHORT).show()
+                    UiUtils.showErrorSnackbar(binding.root, result.message)
                 }
             }
             binding.progressBar.visibility = View.GONE

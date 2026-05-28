@@ -10,7 +10,9 @@ import com.quiniela.app.model.LoginRequest
 import com.quiniela.app.model.RefreshTokenRequest
 import com.quiniela.app.model.RefreshTokenResponse
 import com.quiniela.app.model.RegisterRequest
+import com.quiniela.app.model.ResendVerificationRequest
 import com.quiniela.app.model.ResetPasswordRequest
+import com.quiniela.app.model.VerifyRegistrationOtpRequest
 import com.quiniela.app.model.UsuarioPerfilDTO
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -99,6 +101,7 @@ class AuthRepository(private val apiService: ApiService = RetrofitClient.apiServ
                     response.body()?.let {
                         TokenManager.setToken(it.accessToken)
                         it.refreshToken?.let { rt -> TokenManager.setRefreshToken(rt) }
+                        TokenManager.setUsuario(it.usuario.email, it.usuario.nombre)
                         Result.Success(it)
                     } ?: Result.Error("Error del servidor. Intenta nuevamente.")
                 } else {
@@ -130,8 +133,7 @@ class AuthRepository(private val apiService: ApiService = RetrofitClient.apiServ
     }
 
     fun logout() {
-        TokenManager.clearToken()
-        TokenManager.clearRefreshToken()
+        TokenManager.clearAll()
     }
 
     fun isLoggedIn(): Boolean = TokenManager.getToken() != null
@@ -163,6 +165,44 @@ class AuthRepository(private val apiService: ApiService = RetrofitClient.apiServ
         return withContext(Dispatchers.IO) {
             try {
                 val response = apiService.forgotPassword(ForgotPasswordRequest(email))
+                if (response.isSuccessful) {
+                    response.body()?.let {
+                        Result.Success(it.message)
+                    } ?: Result.Error("Error del servidor. Intenta nuevamente.")
+                } else {
+                    Result.Error(parseError(response))
+                }
+            } catch (e: java.io.IOException) {
+                Result.Error("No pudimos conectar con el servidor. Intenta nuevamente.")
+            } catch (e: Exception) {
+                Result.Error("Ocurrió un error inesperado.")
+            }
+        }
+    }
+
+    suspend fun verifyRegistrationOtp(email: String, code: String): Result<String> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.verifyRegistrationOtp(VerifyRegistrationOtpRequest(email, code))
+                if (response.isSuccessful) {
+                    response.body()?.let {
+                        Result.Success(it.message)
+                    } ?: Result.Error("Error del servidor. Intenta nuevamente.")
+                } else {
+                    Result.Error(parseError(response))
+                }
+            } catch (e: java.io.IOException) {
+                Result.Error("No pudimos conectar con el servidor. Intenta nuevamente.")
+            } catch (e: Exception) {
+                Result.Error("Ocurrió un error inesperado.")
+            }
+        }
+    }
+
+    suspend fun resendVerification(email: String): Result<String> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.resendVerification(ResendVerificationRequest(email))
                 if (response.isSuccessful) {
                     response.body()?.let {
                         Result.Success(it.message)

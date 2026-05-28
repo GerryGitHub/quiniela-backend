@@ -115,6 +115,9 @@ class PronosticarAdapter : ListAdapter<PronosticoItem, RecyclerView.ViewHolder>(
             } else if (partido.estado == "EN_CURSO") {
                 binding.tvEstado.text = "En vivo"
                 binding.tvEstado.setTextColor(0xFFFFC107.toInt())
+            } else if (partido.estado == "POR_COMENZAR") {
+                binding.tvEstado.text = "Por comenzar"
+                binding.tvEstado.setTextColor(0xFFF59E0B.toInt())
             } else {
                 binding.tvEstado.text = ""
             }

@@ -78,6 +78,15 @@ data class ResetPasswordRequest(
     val newPassword: String = ""
 )
 
+data class VerifyRegistrationOtpRequest(
+    @field:NotBlank(message = "El email es requerido")
+    @field:Email(message = "Email inválido")
+    val email: String = "",
+    @field:NotBlank(message = "El código es requerido")
+    @field:Size(min = 6, max = 6, message = "El código debe tener 6 dígitos")
+    val code: String = ""
+)
+
 data class UsuarioPerfilDTO(
     val id: Long,
     val nombre: String,

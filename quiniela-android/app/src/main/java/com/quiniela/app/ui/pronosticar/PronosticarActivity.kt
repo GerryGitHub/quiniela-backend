@@ -3,7 +3,6 @@ package com.quiniela.app.ui.pronosticar
 import android.os.Bundle
 import android.view.View
 import android.widget.ArrayAdapter
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,6 +14,7 @@ import com.quiniela.app.repository.AuthRepository
 import com.quiniela.app.repository.PartidoRepository
 import com.quiniela.app.repository.PronosticoRepository
 import com.quiniela.app.repository.Result
+import com.quiniela.app.util.UiUtils
 import kotlinx.coroutines.launch
 
 class PronosticarActivity : AppCompatActivity() {
@@ -47,16 +47,18 @@ class PronosticarActivity : AppCompatActivity() {
                 is Result.Success -> {
                     quinielas = result.data.quinielas
                     if (quinielas.isEmpty()) {
-                        Toast.makeText(this@PronosticarActivity, "No tienes quinielas. Crea o únete a una primero.", Toast.LENGTH_LONG).show()
-                        finish()
+                        binding.progressBar.visibility = View.GONE
+                        binding.layoutEmpty.visibility = View.VISIBLE
+                        binding.rvPartidos.visibility = View.GONE
+                        binding.btnGuardar.visibility = View.GONE
                         return@launch
                     }
                     setupQuinielaSpinner()
                     loadPartidos()
                 }
                 is Result.Error -> {
-                    Toast.makeText(this@PronosticarActivity, result.message, Toast.LENGTH_SHORT).show()
-                    finish()
+                    binding.progressBar.visibility = View.GONE
+                    UiUtils.showErrorSnackbar(binding.root, result.message)
                 }
             }
         }
@@ -77,13 +79,20 @@ class PronosticarActivity : AppCompatActivity() {
             when (val result = partidoRepository.getPartidos()) {
                 is Result.Success -> {
                     val partidosActivos = result.data.filter { 
-                        it.estado == "PENDIENTE" || it.estado == "EN_CURSO" || it.estado == "FINALIZADO" 
+                        it.estado == "PENDIENTE" || it.estado == "POR_COMENZAR" || it.estado == "EN_CURSO" || it.estado == "FINALIZADO" 
                     }
-                    val items = crearListaAgrupada(partidosActivos)
-                    adapter.submitList(items)
+                    if (partidosActivos.isEmpty()) {
+                        binding.layoutEmpty.visibility = View.VISIBLE
+                        binding.tvEmptyTitle.text = "No hay partidos disponibles"
+                        binding.tvEmptySubtitle.text = "Los partidos se publicarán cuando el torneo comience."
+                        binding.rvPartidos.visibility = View.GONE
+                    } else {
+                        val items = crearListaAgrupada(partidosActivos)
+                        adapter.submitList(items)
+                    }
                 }
                 is Result.Error -> {
-                    Toast.makeText(this@PronosticarActivity, result.message, Toast.LENGTH_SHORT).show()
+                    UiUtils.showErrorSnackbar(binding.root, result.message)
                 }
             }
             binding.progressBar.visibility = View.GONE
@@ -121,7 +130,7 @@ class PronosticarActivity : AppCompatActivity() {
 
     private fun guardarPronosticos() {
         val quinielaId = selectedQuinielaId ?: run {
-            Toast.makeText(this, "Selecciona una quiniela", Toast.LENGTH_SHORT).show()
+            UiUtils.showWarningSnackbar(binding.root, "Selecciona una quiniela")
             return
         }
 
@@ -136,7 +145,7 @@ class PronosticarActivity : AppCompatActivity() {
         }
 
         if (pronosticosItems.isEmpty()) {
-            Toast.makeText(this, "No hay pronósticos para guardar", Toast.LENGTH_SHORT).show()
+            UiUtils.showWarningSnackbar(binding.root, "No hay pronósticos para guardar")
             return
         }
 
@@ -146,11 +155,11 @@ class PronosticarActivity : AppCompatActivity() {
         lifecycleScope.launch {
             when (val result = pronosticoRepository.crearPronosticosBatch(quinielaId, pronosticosItems)) {
                 is Result.Success -> {
-                    Toast.makeText(this@PronosticarActivity, "Pronósticos guardados: ${result.data.pronosticosGuardados}", Toast.LENGTH_SHORT).show()
+                    UiUtils.showSuccessSnackbar(binding.root, "Pronósticos guardados: ${result.data.pronosticosGuardados}")
                     finish()
                 }
                 is Result.Error -> {
-                    Toast.makeText(this@PronosticarActivity, result.message, Toast.LENGTH_LONG).show()
+                    UiUtils.showErrorSnackbar(binding.root, result.message)
                 }
             }
             binding.progressBar.visibility = View.GONE

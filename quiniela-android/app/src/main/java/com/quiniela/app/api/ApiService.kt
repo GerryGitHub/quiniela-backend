@@ -12,6 +12,8 @@ import com.quiniela.app.model.LoginRequest
 import com.quiniela.app.model.MessageResponse
 import com.quiniela.app.model.RefreshTokenRequest
 import com.quiniela.app.model.RefreshTokenResponse
+import com.quiniela.app.model.ResendVerificationRequest
+import com.quiniela.app.model.VerifyRegistrationOtpRequest
 import com.quiniela.app.model.ResetPasswordRequest
 import com.quiniela.app.model.MisPronosticosDTO
 import com.quiniela.app.model.PartidoDTO
@@ -104,6 +106,12 @@ interface ApiService {
 
     @POST("auth/reset-password")
     suspend fun resetPassword(@Body request: ResetPasswordRequest): Response<MessageResponse>
+
+    @POST("auth/verify-registration-otp")
+    suspend fun verifyRegistrationOtp(@Body request: VerifyRegistrationOtpRequest): Response<MessageResponse>
+
+    @POST("auth/resend-verification")
+    suspend fun resendVerification(@Body request: ResendVerificationRequest): Response<MessageResponse>
 
     @POST("auth/refresh")
     suspend fun refresh(@Body request: RefreshTokenRequest): Response<RefreshTokenResponse>

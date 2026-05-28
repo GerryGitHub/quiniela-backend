@@ -14,29 +14,32 @@ class PartidoScheduler(
 ) {
     private val logger = LoggerFactory.getLogger(PartidoScheduler::class.java)
 
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 30000)
     fun actualizarEstados() {
         try {
             val zonaMexico = ZoneId.of("America/Mexico_City")
             val ahora = ZonedDateTime.now(zonaMexico)
             val quinceMinutosAntes = ahora.plusMinutes(15)
 
-            val partidosPendientes = partidoRepository.findAll()
-                .filter { it.estado == EstadoPartido.PENDIENTE }
+            val todos = partidoRepository.findAll()
 
-            val actualizados = partidosPendientes.filter { partido ->
-                val fechaPartido = partido.fechaHora.atZone(zonaMexico)
-                fechaPartido.isBefore(quinceMinutosAntes) || fechaPartido.isEqual(quinceMinutosAntes)
-            }
+            // PENDIENTE -> POR_COMENZAR (15 min antes del inicio)
+            todos.filter { it.estado == EstadoPartido.PENDIENTE }
+                .filter { it.fechaHora.atZone(zonaMexico).isBefore(quinceMinutosAntes) || it.fechaHora.atZone(zonaMexico).isEqual(quinceMinutosAntes) }
+                .forEach { partido ->
+                    partido.estado = EstadoPartido.POR_COMENZAR
+                    partidoRepository.save(partido)
+                    logger.info("Partido {} cambiado a POR_COMENZAR", partido.id)
+                }
 
-            actualizados.forEach { partido ->
-                partido.estado = EstadoPartido.EN_CURSO
-                partidoRepository.save(partido)
-            }
-
-            if (actualizados.isNotEmpty()) {
-                logger.info("Partidos cambiados a EN_CURSO: {}", actualizados.map { it.id })
-            }
+            // POR_COMENZAR -> EN_CURSO (a la hora del inicio)
+            todos.filter { it.estado == EstadoPartido.POR_COMENZAR }
+                .filter { it.fechaHora.atZone(zonaMexico).isBefore(ahora) || it.fechaHora.atZone(zonaMexico).isEqual(ahora) }
+                .forEach { partido ->
+                    partido.estado = EstadoPartido.EN_CURSO
+                    partidoRepository.save(partido)
+                    logger.info("Partido {} cambiado a EN_CURSO", partido.id)
+                }
         } catch (e: Exception) {
             logger.error("Error en PartidoScheduler: {}", e.message, e)
         }
