@@ -22,7 +22,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
-import java.util.UUID
 
 @Service
 class AuthService(
@@ -63,21 +62,50 @@ class AuthService(
         )
         val usuarioGuardado = usuarioRepository.save(usuario)
 
-        val token = UUID.randomUUID().toString()
+        val code = String.format("%06d", (100000..999999).random())
         val verificationToken = EmailVerificationToken(
             usuario = usuarioGuardado,
-            token = token,
-            expiresAt = LocalDateTime.now().plusHours(24)
+            token = code,
+            expiresAt = LocalDateTime.now().plusMinutes(15)
         )
         emailVerificationTokenRepository.save(verificationToken)
 
         emailService.sendVerificationEmail(
             email = usuarioGuardado.email,
             nombre = usuarioGuardado.nombre,
-            token = token
+            token = code
         )
 
-        return RegisterResponse(message = "Revisa tu correo para activar tu cuenta")
+        return RegisterResponse(message = "Revisa tu correo para activar tu cuenta con el código OTP")
+    }
+
+    @Transactional
+    fun verifyRegistrationOtp(request: VerifyRegistrationOtpRequest): MessageResponse {
+        val usuario = usuarioRepository.findByEmail(request.email)
+            .orElseThrow { IllegalArgumentException("Usuario no encontrado") }
+
+        if (usuario.emailVerified) {
+            throw IllegalArgumentException("La cuenta ya está verificada")
+        }
+
+        val verificationToken = emailVerificationTokenRepository.findByUsuarioAndToken(usuario, request.code)
+            .orElseThrow { IllegalArgumentException("Código inválido") }
+
+        if (verificationToken.used) {
+            throw IllegalArgumentException("El código ya fue utilizado")
+        }
+
+        if (verificationToken.expiresAt.isBefore(LocalDateTime.now())) {
+            throw IllegalArgumentException("El código ha expirado")
+        }
+
+        usuario.emailVerified = true
+        verificationToken.used = true
+
+        usuarioRepository.save(usuario)
+        emailVerificationTokenRepository.save(verificationToken)
+
+        return MessageResponse(message = "Correo verificado correctamente")
     }
 
     @Transactional
@@ -181,22 +209,22 @@ class AuthService(
             val user = usuario.get()
             emailVerificationTokenRepository.deleteByUsuario(user)
 
-            val newToken = UUID.randomUUID().toString()
+            val newCode = String.format("%06d", (100000..999999).random())
             val verificationToken = EmailVerificationToken(
                 usuario = user,
-                token = newToken,
-                expiresAt = LocalDateTime.now().plusHours(24)
+                token = newCode,
+                expiresAt = LocalDateTime.now().plusMinutes(15)
             )
             emailVerificationTokenRepository.save(verificationToken)
 
             emailService.sendVerificationEmail(
                 email = user.email,
                 nombre = user.nombre,
-                token = newToken
+                token = newCode
             )
         }
 
-        return MessageResponse(message = "Si el correo está registrado y no verificado, recibirás un enlace de verificación")
+        return MessageResponse(message = "Si el correo está registrado y no verificado, recibirás un código de verificación")
     }
 
     @Transactional

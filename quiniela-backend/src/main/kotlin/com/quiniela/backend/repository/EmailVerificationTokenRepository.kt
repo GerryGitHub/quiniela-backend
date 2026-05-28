@@ -10,5 +10,6 @@ import java.util.Optional
 interface EmailVerificationTokenRepository : JpaRepository<EmailVerificationToken, Long> {
     fun findByToken(token: String): Optional<EmailVerificationToken>
     fun findByUsuario(usuario: Usuario): List<EmailVerificationToken>
+    fun findByUsuarioAndToken(usuario: Usuario, token: String): Optional<EmailVerificationToken>
     fun deleteByUsuario(usuario: Usuario)
 }

@@ -104,6 +104,12 @@ class AuthController(
         """.trimIndent()
     }
 
+    @PostMapping("/verify-registration-otp")
+    @Operation(summary = "Verificar cuenta con código OTP")
+    fun verifyRegistrationOtp(@Valid @RequestBody request: VerifyRegistrationOtpRequest): ResponseEntity<MessageResponse> {
+        return ResponseEntity.ok(authService.verifyRegistrationOtp(request))
+    }
+
     @PostMapping("/resend-verification")
     @Operation(summary = "Reenviar correo de verificación")
     fun resendVerification(@Valid @RequestBody request: ResendVerificationRequest): ResponseEntity<MessageResponse> {

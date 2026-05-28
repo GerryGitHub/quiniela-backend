@@ -32,6 +32,9 @@ class LoginActivity : AppCompatActivity() {
         if (intent.getBooleanExtra("reset_success", false)) {
             Toast.makeText(this, "Tu contraseña fue actualizada correctamente", Toast.LENGTH_LONG).show()
         }
+        if (intent.getBooleanExtra("verified_success", false)) {
+            Toast.makeText(this, "Cuenta verificada correctamente. Ya puedes iniciar sesión.", Toast.LENGTH_LONG).show()
+        }
         
         binding.btnLogin.setOnClickListener { login() }
         binding.btnRegister.setOnClickListener {

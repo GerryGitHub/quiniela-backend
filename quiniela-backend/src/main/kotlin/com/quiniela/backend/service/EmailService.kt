@@ -82,12 +82,11 @@ class EmailService(
             <head><meta charset="utf-8"></head>
             <body style="font-family: sans-serif; padding: 24px;">
                 <h2>¡Bienvenido, $nombre!</h2>
-                <p>Gracias por registrarte en Quiniela.</p>
-                <p>Para activar tu cuenta, haz clic en el siguiente enlace:</p>
-                <p><a href="$link" style="display: inline-block; padding: 12px 24px; background: #0D5BFF; color: white; text-decoration: none; border-radius: 8px;">Verificar mi correo</a></p>
-                <p>O copia este enlace en tu navegador:</p>
-                <p style="color: #0D5BFF;">$link</p>
-                <p style="color: #666;">Este enlace expira en 24 horas.</p>
+                <p>Gracias por registrarte en QGol.</p>
+                <p>Tu c&oacute;digo de verificaci&oacute;n es:</p>
+                <div style="font-size: 36px; font-weight: bold; letter-spacing: 8px; color: #0D5BFF; padding: 20px; background: #F0F4FF; border-radius: 12px; margin: 20px 0;">$token</div>
+                <p style="color: #666;">Este c&oacute;digo expira en 15 minutos.</p>
+                <p style="color: #999; font-size: 12px;">Si no solicitaste esto, ignora este mensaje.</p>
             </body>
             </html>
         """.trimIndent()
@@ -95,7 +94,7 @@ class EmailService(
         val payload = mapOf(
             "from" to emailFrom,
             "to" to listOf(email),
-            "subject" to "Verifica tu correo electrónico - Quiniela",
+            "subject" to "Tu código de verificación - QGol",
             "html" to htmlBody
         )
 

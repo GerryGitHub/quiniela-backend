@@ -98,3 +98,12 @@ data class ResetPasswordRequest(
     val code: String,
     val newPassword: String
 )
+
+data class VerifyRegistrationOtpRequest(
+    val email: String,
+    val code: String
+)
+
+data class ResendVerificationRequest(
+    val email: String
+)
