@@ -11,8 +11,16 @@ data class PartidoDTO(
     val equipoVisitanteId: Long? = null,
     val golesLocalReal: Int?,
     val golesVisitanteReal: Int?,
-    val estado: String
-)
+    val estado: String,
+    val minutosParaInicio: Int? = null
+) {
+    companion object {
+        const val ESTADO_PENDIENTE = "PENDIENTE"
+        const val ESTADO_POR_COMENZAR = "POR_COMENZAR"
+        const val ESTADO_EN_CURSO = "EN_CURSO"
+        const val ESTADO_FINALIZADO = "FINALIZADO"
+    }
+}
 
 data class ActualizarPartidoRequest(
     val golesLocalReal: Int?,

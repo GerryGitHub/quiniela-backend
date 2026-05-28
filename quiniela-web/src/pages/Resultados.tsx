@@ -97,7 +97,7 @@ const handleFinalizar = async (partidoId: number) => {
   };
 
   const puedeIngresarResultado = (fechaHora: string, estado: string): boolean => {
-    if (estado === 'FINALIZADO') return false;
+    if (estado === 'FINALIZADO' || estado === 'POR_COMENZAR' || estado === 'PENDIENTE') return false;
     const partidoTime = new Date(fechaHora).getTime();
     const ahora = Date.now();
     const treintaMinutos = 30 * 60 * 1000;

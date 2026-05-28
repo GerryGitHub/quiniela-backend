@@ -27,6 +27,7 @@ import com.google.zxing.MultiFormatWriter
 import com.google.zxing.common.BitMatrix
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.quiniela.app.databinding.DialogQrBinding
+import com.quiniela.app.model.PartidoDTO
 import com.quiniela.app.model.QuinielaResumenDTO
 import kotlinx.coroutines.launch
 import androidx.core.graphics.createBitmap
@@ -39,6 +40,8 @@ class DashboardActivity : AppCompatActivity() {
     private val partidoRepository = PartidoRepository()
     private lateinit var adapter: QuinielaAdapter
     private lateinit var adapterPartidosEnVivo: PartidoEnVivoAdapter
+    private var lastPartidosHash: Int = 0
+    private var isFirstLoad = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,7 +77,9 @@ class DashboardActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     private fun loadData() {
-        binding.progressBar.visibility = View.VISIBLE
+        if (isFirstLoad) {
+            binding.progressBar.visibility = View.VISIBLE
+        }
         lifecycleScope.launch {
             when (val result = authRepository.getPerfil()) {
                 is Result.Success -> {
@@ -96,7 +101,8 @@ class DashboardActivity : AppCompatActivity() {
                 }
             }
             binding.progressBar.visibility = View.GONE
-            
+            isFirstLoad = false
+
             loadPartidosEnVivo()
         }
     }
@@ -105,13 +111,33 @@ class DashboardActivity : AppCompatActivity() {
         lifecycleScope.launch {
             when (val result = partidoRepository.getPartidosEnVivo()) {
                 is Result.Success -> {
-                    val partidos = result.data.filter { it.estado == "EN_CURSO" }
+                    val partidos = result.data
+                    val currentHash = partidos.hashCode()
+                    
+                    if (currentHash == lastPartidosHash) return@launch
+
+                    val liveCount = partidos.count { it.estado == PartidoDTO.ESTADO_EN_CURSO }
+                    val upcomingCount = partidos.count { it.estado == PartidoDTO.ESTADO_POR_COMENZAR }
+                    val finishedCount = partidos.count { it.estado == PartidoDTO.ESTADO_FINALIZADO }
+
                     if (partidos.isNotEmpty()) {
                         binding.cardPartidosEnVivo.visibility = View.VISIBLE
                         adapterPartidosEnVivo.submitList(partidos)
+
+                        val headerText = when {
+                            liveCount > 0 && upcomingCount > 0 -> "🔴 En Vivo · ⏳ Próximos"
+                            liveCount > 0 -> "🔴 En Vivo"
+                            upcomingCount > 0 -> "⏳ Próximos"
+                            finishedCount > 0 -> "FINALIZADOS"
+                            else -> "Partidos"
+                        }
+                        binding.tvLiveHeader.text = headerText
+                        adapterPartidosEnVivo.notifyDataSetChanged()
                     } else {
                         binding.cardPartidosEnVivo.visibility = View.GONE
                     }
+
+                    lastPartidosHash = currentHash
                 }
                 is Result.Error -> {
                     // Silently ignore errors for en vivo
@@ -200,7 +226,7 @@ class DashboardActivity : AppCompatActivity() {
     private val pollingRunnable = object : Runnable {
         override fun run() {
             loadPartidosEnVivo()
-            handler.postDelayed(this, 30000)
+            handler.postDelayed(this, 15000)
         }
     }
 
@@ -213,5 +239,6 @@ class DashboardActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         handler.removeCallbacks(pollingRunnable)
+        adapterPartidosEnVivo.cleanup()
     }
 }

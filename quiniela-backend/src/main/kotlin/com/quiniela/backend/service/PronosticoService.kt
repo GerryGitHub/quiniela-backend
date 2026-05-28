@@ -135,7 +135,7 @@ class PronosticoService(
         val partido = partidoRepository.findById(partidoId)
             .orElseThrow { NotFoundException("Partido no encontrado") }
 
-        if (partido.estado == EstadoPartido.PENDIENTE && partido.fechaHora.isAfter(LocalDateTime.now())) {
+        if (partido.fechaHora.isAfter(LocalDateTime.now()) && (partido.estado == EstadoPartido.PENDIENTE || partido.estado == EstadoPartido.POR_COMENZAR)) {
             throw ForbiddenException("Los pronósticos solo se pueden ver después de que comience el partido")
         }
 

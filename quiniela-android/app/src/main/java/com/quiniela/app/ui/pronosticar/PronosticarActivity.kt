@@ -77,7 +77,7 @@ class PronosticarActivity : AppCompatActivity() {
             when (val result = partidoRepository.getPartidos()) {
                 is Result.Success -> {
                     val partidosActivos = result.data.filter { 
-                        it.estado == "PENDIENTE" || it.estado == "EN_CURSO" || it.estado == "FINALIZADO" 
+                        it.estado == "PENDIENTE" || it.estado == "POR_COMENZAR" || it.estado == "EN_CURSO" || it.estado == "FINALIZADO" 
                     }
                     val items = crearListaAgrupada(partidosActivos)
                     adapter.submitList(items)

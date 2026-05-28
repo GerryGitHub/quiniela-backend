@@ -10,7 +10,10 @@ import com.quiniela.backend.repository.PronosticoRepository
 import com.quiniela.backend.repository.UsuarioRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.Duration
 import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 @Service
 class PartidoService(
@@ -107,17 +110,29 @@ class PartidoService(
         }
     }
 
-    private fun Partido.toDTO() = PartidoDTO(
-        id = id,
-        equipoLocal = equipoLocal.nombre,
-        equipoVisitante = equipoVisitante.nombre,
-        fechaHora = fechaHora.toString(),
-        grupo = grupo.nombre,
-        grupoId = grupo.id,
-        equipoLocalId = equipoLocal.id,
-        equipoVisitanteId = equipoVisitante.id,
-        golesLocalReal = golesLocalReal,
-        golesVisitanteReal = golesVisitanteReal,
-        estado = estado.name
-    )
+    private fun Partido.toDTO(): PartidoDTO {
+        val zonaMexico = ZoneId.of("America/Mexico_City")
+        val ahora = ZonedDateTime.now(zonaMexico)
+        val fechaPartido = fechaHora.atZone(zonaMexico)
+        val minutosParaInicio = if (estado.name == "POR_COMENZAR" && fechaPartido.isAfter(ahora)) {
+            Duration.between(ahora, fechaPartido).toMinutes().toInt()
+        } else {
+            null
+        }
+
+        return PartidoDTO(
+            id = id,
+            equipoLocal = equipoLocal.nombre,
+            equipoVisitante = equipoVisitante.nombre,
+            fechaHora = fechaHora.toString(),
+            grupo = grupo.nombre,
+            grupoId = grupo.id,
+            equipoLocalId = equipoLocal.id,
+            equipoVisitanteId = equipoVisitante.id,
+            golesLocalReal = golesLocalReal,
+            golesVisitanteReal = golesVisitanteReal,
+            estado = estado.name,
+            minutosParaInicio = minutosParaInicio
+        )
+    }
 }
