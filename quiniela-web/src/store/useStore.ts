@@ -43,9 +43,9 @@ export const useStore = create<AppState>((set, get) => ({
     set({ loading: true });
     try {
       const response = await authService.login({ email, password });
-      localStorage.setItem('token', response.token);
+      localStorage.setItem('token', response.accessToken);
       set({
-        token: response.token,
+        token: response.accessToken,
         usuario: response.usuario,
         isAuthenticated: true,
         loading: false,
@@ -59,14 +59,8 @@ export const useStore = create<AppState>((set, get) => ({
   register: async (nombre: string, email: string, password: string) => {
     set({ loading: true });
     try {
-      const response = await authService.register({ nombre, email, password });
-      localStorage.setItem('token', response.token);
-      set({
-        token: response.token,
-        usuario: response.usuario,
-        isAuthenticated: true,
-        loading: false,
-      });
+      await authService.register({ nombre, email, password });
+      set({ loading: false });
     } catch (error) {
       set({ loading: false });
       throw error;

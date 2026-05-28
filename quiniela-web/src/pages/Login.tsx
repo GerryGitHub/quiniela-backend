@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import Spinner from '../components/Spinner';
@@ -11,11 +11,20 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
+  const [successMsg, setSuccessMsg] = useState('');
+
   const sessionExpired = localStorage.getItem('sessionExpired');
   if (sessionExpired) {
     localStorage.removeItem('sessionExpired');
     setTimeout(() => setError('Tu sesión expiró. Por favor inicia sesión nuevamente.'), 100);
   }
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('registered') === 'true') {
+      setSuccessMsg('Cuenta creada correctamente. Revisa tu correo para verificar tu cuenta.');
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,6 +43,7 @@ export default function Login() {
         <h1>Quiniela</h1>
         <h2>Iniciar Sesión</h2>
         
+        {successMsg && <div className="success-message">{successMsg}</div>}
         {error && <div className="error-message">{error}</div>}
         
         <form onSubmit={handleSubmit}>

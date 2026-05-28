@@ -77,6 +77,15 @@
   cursor: not-allowed;
 }
 
+.success-message {
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
 .error-message {
   background: #fee;
   color: #c00;

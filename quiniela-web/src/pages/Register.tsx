@@ -28,7 +28,7 @@ export default function Register() {
     setError('');
     try {
       await register(nombre, email, password);
-      window.location.href = '/dashboard';
+      window.location.href = '/login?registered=true';
     } catch (err: any) {
       setError(getErrorMessage(err));
     }
