@@ -448,7 +448,7 @@ class ParticipantesAdapter(private var participantes: List<LeaderboardEntryDTO>)
 
             if (posicion <= 3) {
                 binding.cardRoot.strokeColor = posicionColors[posicion - 1]
-                binding.cardRoot.strokeWidth = 2f
+                binding.cardRoot.strokeWidth = (2 * context.resources.displayMetrics.density).toInt()
                 binding.tvPosicion.text = when (posicion) {
                     1 -> "🥇"
                     2 -> "🥈"
@@ -457,7 +457,7 @@ class ParticipantesAdapter(private var participantes: List<LeaderboardEntryDTO>)
                 }
             } else {
                 binding.cardRoot.strokeColor = androidx.core.content.ContextCompat.getColor(context, com.quiniela.app.R.color.border_soft)
-                binding.cardRoot.strokeWidth = 1f
+                binding.cardRoot.strokeWidth = (1 * context.resources.displayMetrics.density).toInt()
                 binding.tvPosicion.text = "#$posicion"
             }
 
