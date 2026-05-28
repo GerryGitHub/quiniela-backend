@@ -78,13 +78,12 @@ class EmailService(
             <!DOCTYPE html>
             <html>
             <head><meta charset="utf-8"></head>
-            <body style="font-family: sans-serif; padding: 24px;">
+            <body style="font-family: sans-serif; padding: 24px; text-align: center;">
                 <h2>¡Bienvenido, $nombre!</h2>
-                <p>Gracias por registrarte en QGol.</p>
                 <p>Tu c&oacute;digo de verificaci&oacute;n es:</p>
                 <div style="font-size: 36px; font-weight: bold; letter-spacing: 8px; color: #0D5BFF; padding: 20px; background: #F0F4FF; border-radius: 12px; margin: 20px 0;">$token</div>
                 <p style="color: #666;">Este c&oacute;digo expira en 15 minutos.</p>
-                <p style="color: #999; font-size: 12px;">Si no solicitaste esto, ignora este mensaje.</p>
+                <p style="color: #999; font-size: 12px;">Si no solicitaste este registro, puedes ignorar este correo.</p>
             </body>
             </html>
         """.trimIndent()
@@ -92,7 +91,7 @@ class EmailService(
         val payload = mapOf(
             "from" to emailFrom,
             "to" to listOf(email),
-            "subject" to "Tu código de verificación - QGol",
+            "subject" to "Código de verificación - QGol",
             "html" to htmlBody
         )
 
