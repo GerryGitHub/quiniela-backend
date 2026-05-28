@@ -58,20 +58,11 @@ object UiUtils {
     }
 
     fun startLivePulse(dot: View) {
-        dot.animate().cancel()
-        dot.alpha = 1f
-        dot.scaleX = 1f
-        dot.scaleY = 1f
-        dot.animate()
-            .alpha(0.3f)
-            .scaleX(1.6f)
-            .scaleY(1.6f)
-            .setDuration(800)
-            .withLayer()
-            .setInterpolator(android.view.animation.AccelerateDecelerateInterpolator())
-            .setRepeatCount(android.view.animation.Animation.INFINITE)
-            .setRepeatMode(android.view.animation.Animation.REVERSE)
-            .start()
+        val animator = android.animation.AnimatorInflater.loadAnimator(
+            dot.context, R.animator.pulse_live
+        ) as? android.animation.AnimatorSet ?: return
+        animator.setTarget(dot)
+        animator.start()
     }
 
     fun fadeInView(view: View, duration: Long = 300) {
