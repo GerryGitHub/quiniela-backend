@@ -166,7 +166,8 @@ class PronosticoService(
                 equipoVisitanteId = partido.equipoVisitante.id,
                 golesLocalReal = partido.golesLocalReal,
                 golesVisitanteReal = partido.golesVisitanteReal,
-                estado = partido.estado.name
+                estado = partido.estado.name,
+                minutosJugados = partido.minutosJugados
             ),
             pronosticos = pronosticosDTO
         )
@@ -192,7 +193,8 @@ class PronosticoService(
                 equipoVisitanteId = partido.equipoVisitante.id,
                 golesLocalReal = partido.golesLocalReal,
                 golesVisitanteReal = partido.golesVisitanteReal,
-                estado = partido.estado.name
+                estado = partido.estado.name,
+                minutosJugados = partido.minutosJugados
             ),
             golesLocalPredicho = golesLocalPredicho,
             golesVisitantePredicho = golesVisitantePredicho,

@@ -24,6 +24,7 @@ class Partido(
     val fechaHora: LocalDateTime,
     var golesLocalReal: Int? = null,
     var golesVisitanteReal: Int? = null,
+    var minutosJugados: Int? = null,
     @Enumerated(EnumType.STRING)
     var estado: EstadoPartido = EstadoPartido.PENDIENTE
 )

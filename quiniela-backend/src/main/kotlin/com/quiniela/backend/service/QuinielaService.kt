@@ -116,7 +116,8 @@ class QuinielaService(
                     equipoVisitanteId = p.equipoVisitante.id,
                     golesLocalReal = p.golesLocalReal,
                     golesVisitanteReal = p.golesVisitanteReal,
-                    estado = p.estado.name
+                    estado = p.estado.name,
+                    minutosJugados = p.minutosJugados
                 )
             }
 

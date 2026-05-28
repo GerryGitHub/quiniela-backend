@@ -12,7 +12,8 @@ data class PartidoDTO(
     val golesLocalReal: Int?,
     val golesVisitanteReal: Int?,
     val estado: String,
-    val minutosParaInicio: Int? = null
+    val minutosParaInicio: Int? = null,
+    val minutosJugados: Int? = null
 ) {
     companion object {
         const val ESTADO_PENDIENTE = "PENDIENTE"

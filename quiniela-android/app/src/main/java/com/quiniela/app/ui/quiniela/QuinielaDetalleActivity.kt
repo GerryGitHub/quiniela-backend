@@ -395,34 +395,26 @@ class PartidosConPronosticoAdapter(
         
         fun bind(item: PartidoConPronostico) {
             partidoActual = item
-            
-            binding.tvLocal.text = item.partido.equipoLocal
             val ctx = binding.root.context
+
+            binding.tvLocal.text = item.partido.equipoLocal
             val localFlag = CountryFlagResolver.getFlagDrawable(ctx, item.partido.equipoLocal)
             binding.tvLocal.setCompoundDrawablesRelativeWithIntrinsicBounds(localFlag, null, null, null)
             binding.tvVisitante.text = item.partido.equipoVisitante
             val visitFlag = CountryFlagResolver.getFlagDrawable(ctx, item.partido.equipoVisitante)
             binding.tvVisitante.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, visitFlag, null)
             binding.tvFecha.text = item.partido.fechaHora
-            
-            if (item.partido.golesLocalReal != null && item.partido.golesVisitanteReal != null) {
-                binding.tvResultadoReal.text = "Resultado: ${item.partido.golesLocalReal} - ${item.partido.golesVisitanteReal}"
-            } else {
-                binding.tvResultadoReal.text = "Resultado: Por jugar"
-            }
-            
-            binding.tvMiPronostico.text = "Tu pronóstico: ${item.golesLocalPredicho} - ${item.golesVisitantePredicho}"
-            
-            val esEditable = item.partido.estado == "PENDIENTE"
+
+            val esEditable = item.partido.estado == PartidoDTO.ESTADO_PENDIENTE
             binding.etGolesLocal.isEnabled = esEditable
             binding.etGolesVisitante.isEnabled = esEditable
-            
+
             binding.etGolesLocal.removeTextChangedListener(textWatcher)
             binding.etGolesVisitante.removeTextChangedListener(textWatcher)
-            
+
             binding.etGolesLocal.setText(item.golesLocalPredicho.toString())
             binding.etGolesVisitante.setText(item.golesVisitantePredicho.toString())
-            
+
             textWatcher = object : TextWatcher {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -433,14 +425,79 @@ class PartidosConPronosticoAdapter(
                         partido.golesLocalPredicho = local
                         partido.golesVisitantePredicho = visitante
                         partido.dirty = true
-                        binding.tvMiPronostico.text = "Tu pronóstico: $local - $visitante"
                         onDirtyChanged()
                     }
                 }
             }
-            
+
             binding.etGolesLocal.addTextChangedListener(textWatcher)
             binding.etGolesVisitante.addTextChangedListener(textWatcher)
+
+            when (item.partido.estado) {
+                PartidoDTO.ESTADO_EN_CURSO -> bindEnCurso(item)
+                PartidoDTO.ESTADO_FINALIZADO -> bindFinalizado(item)
+                else -> bindPendiente(item)
+            }
+        }
+
+        private fun bindPendiente(item: PartidoConPronostico) {
+            binding.layoutStateChip.visibility = View.GONE
+            binding.tvResultadoReal.text = "⏳ Por jugar"
+            binding.tvResultadoReal.setTextColor(0x99FFFFFF.toInt())
+            binding.tvResultadoReal.textSize = 14f
+            binding.tvMiPronostico.visibility = View.GONE
+        }
+
+        private fun bindEnCurso(item: PartidoConPronostico) {
+            val ctx = binding.root.context
+
+            binding.layoutStateChip.visibility = View.VISIBLE
+            binding.vLiveDot.visibility = View.VISIBLE
+            binding.tvEstado.text = "EN VIVO"
+            binding.tvEstado.setTextColor(androidx.core.content.ContextCompat.getColor(ctx, com.quiniela.app.R.color.error))
+
+            val mins = item.partido.minutosJugados
+            if (mins != null) {
+                binding.tvMinutos.text = " • $mins'"
+                binding.tvMinutos.visibility = View.VISIBLE
+                binding.tvMinutos.setTextColor(androidx.core.content.ContextCompat.getColor(ctx, com.quiniela.app.R.color.error))
+            } else {
+                binding.tvMinutos.visibility = View.GONE
+            }
+
+            val local = item.partido.golesLocalReal
+            val visitante = item.partido.golesVisitanteReal
+            if (local != null && visitante != null) {
+                binding.tvResultadoReal.text = "Resultado parcial: $local - $visitante"
+            } else {
+                binding.tvResultadoReal.text = "EN VIVO"
+            }
+            binding.tvResultadoReal.setTextColor(0xFFFFFFFF.toInt())
+            binding.tvResultadoReal.textSize = 15f
+            binding.tvMiPronostico.visibility = View.GONE
+        }
+
+        private fun bindFinalizado(item: PartidoConPronostico) {
+            val ctx = binding.root.context
+
+            binding.layoutStateChip.visibility = View.VISIBLE
+            binding.vLiveDot.visibility = View.GONE
+            binding.tvEstado.text = "FINALIZADO"
+            binding.tvEstado.setTextColor(androidx.core.content.ContextCompat.getColor(ctx, com.quiniela.app.R.color.text_secondary))
+            binding.tvMinutos.visibility = View.GONE
+
+            val local = item.partido.golesLocalReal
+            val visitante = item.partido.golesVisitanteReal
+            if (local != null && visitante != null) {
+                binding.tvResultadoReal.text = "Resultado final: $local - $visitante"
+            } else {
+                binding.tvResultadoReal.text = "FINALIZADO"
+            }
+            binding.tvResultadoReal.setTextColor(0xFFFFFFFF.toInt())
+            binding.tvResultadoReal.textSize = 15f
+
+            binding.tvMiPronostico.visibility = View.VISIBLE
+            binding.tvMiPronostico.text = "Tu pronóstico: ${item.golesLocalPredicho} - ${item.golesVisitantePredicho}"
         }
     }
 }

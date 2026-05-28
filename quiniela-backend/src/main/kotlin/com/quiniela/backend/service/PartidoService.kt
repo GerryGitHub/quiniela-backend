@@ -132,7 +132,8 @@ class PartidoService(
             golesLocalReal = golesLocalReal,
             golesVisitanteReal = golesVisitanteReal,
             estado = estado.name,
-            minutosParaInicio = minutosParaInicio
+            minutosParaInicio = minutosParaInicio,
+            minutosJugados = minutosJugados
         )
     }
 }
