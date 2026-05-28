@@ -6,7 +6,6 @@ import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.lifecycleScope
@@ -18,6 +17,7 @@ import com.quiniela.app.repository.PronosticoRepository
 import com.quiniela.app.repository.QuinielaRepository
 import com.quiniela.app.repository.Result
 import com.quiniela.app.util.CountryFlagResolver
+import com.quiniela.app.util.UiUtils
 import kotlinx.coroutines.launch
 
 class QuinielaDetalleActivity : AppCompatActivity() {
@@ -124,7 +124,7 @@ when (val pronosResult = pronosticoRepository.getMisPronosticosByQuiniela(quinie
                     }
                 }
                 is Result.Error -> {
-                    Toast.makeText(this@QuinielaDetalleActivity, result.message, Toast.LENGTH_LONG).show()
+                    UiUtils.showErrorSnackbar(binding.root, result.message)
                 }
             }
             
@@ -233,7 +233,7 @@ when (val pronosResult = pronosticoRepository.getMisPronosticosByQuiniela(quinie
         val pronosticosModificados = partidosAdapter.getDirtyPronosticos()
         
         if (pronosticosModificados.isEmpty()) {
-            Toast.makeText(this, "No hay cambios para guardar", Toast.LENGTH_SHORT).show()
+            UiUtils.showWarningSnackbar(binding.root, "No hay cambios para guardar")
             return
         }
 
@@ -252,10 +252,10 @@ when (val pronosResult = pronosticoRepository.getMisPronosticosByQuiniela(quinie
             when (val result = pronosticoRepository.crearPronosticosBatch(quinielaId, items)) {
                 is Result.Success -> {
                     partidosAdapter.clearDirtyFlags()
-                    Toast.makeText(this@QuinielaDetalleActivity, "Pronósticos guardados: ${result.data.pronosticosGuardados}", Toast.LENGTH_SHORT).show()
+                    UiUtils.showSuccessSnackbar(binding.root, "Pronósticos guardados: ${result.data.pronosticosGuardados}")
                 }
                 is Result.Error -> {
-                    Toast.makeText(this@QuinielaDetalleActivity, result.message, Toast.LENGTH_LONG).show()
+                    UiUtils.showErrorSnackbar(binding.root, result.message)
                 }
             }
             binding.progressBar.visibility = View.GONE
@@ -453,6 +453,7 @@ class PartidosConPronosticoAdapter(
 
             binding.layoutStateChip.visibility = View.VISIBLE
             binding.vLiveDot.visibility = View.VISIBLE
+            UiUtils.startLivePulse(binding.vLiveDot)
             binding.tvEstado.text = "EN VIVO"
             binding.tvEstado.setTextColor(androidx.core.content.ContextCompat.getColor(ctx, com.quiniela.app.R.color.error))
 

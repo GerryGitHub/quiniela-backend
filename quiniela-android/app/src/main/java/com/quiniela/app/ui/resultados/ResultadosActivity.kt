@@ -2,13 +2,13 @@ package com.quiniela.app.ui.resultados
 
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.quiniela.app.databinding.ActivityResultadosBinding
 import com.quiniela.app.repository.PartidoRepository
 import com.quiniela.app.repository.Result
+import com.quiniela.app.util.UiUtils
 import kotlinx.coroutines.launch
 
 class ResultadosActivity : AppCompatActivity() {
@@ -28,11 +28,16 @@ class ResultadosActivity : AppCompatActivity() {
         lifecycleScope.launch {
             when (val result = repository.getResultados()) {
                 is Result.Success -> {
-                    binding.rvResultados.layoutManager = LinearLayoutManager(this@ResultadosActivity)
-                    binding.rvResultados.adapter = ResultadoAdapter(result.data)
+                    if (result.data.isEmpty()) {
+                        binding.layoutEmpty.visibility = View.VISIBLE
+                        binding.rvResultados.visibility = View.GONE
+                    } else {
+                        binding.rvResultados.layoutManager = LinearLayoutManager(this@ResultadosActivity)
+                        binding.rvResultados.adapter = ResultadoAdapter(result.data)
+                    }
                 }
                 is Result.Error -> {
-                    Toast.makeText(this@ResultadosActivity, result.message, Toast.LENGTH_SHORT).show()
+                    UiUtils.showErrorSnackbar(binding.root, result.message)
                 }
             }
             binding.progressBar.visibility = View.GONE

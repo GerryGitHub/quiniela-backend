@@ -2,7 +2,6 @@ package com.quiniela.app.ui.pronosticos
 
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -10,6 +9,7 @@ import com.quiniela.app.databinding.ActivityPronosticosBinding
 import com.quiniela.app.model.PronosticoDTO
 import com.quiniela.app.repository.PronosticoRepository
 import com.quiniela.app.repository.Result
+import com.quiniela.app.util.UiUtils
 import kotlinx.coroutines.launch
 
 class PronosticosActivity : AppCompatActivity() {
@@ -37,11 +37,17 @@ class PronosticosActivity : AppCompatActivity() {
         lifecycleScope.launch {
             when (val result = repository.getMisPronosticos()) {
                 is Result.Success -> {
-                    val items = crearListaAgrupada(result.data.pronosticos)
-                    adapter.submitList(items)
+                    val pronosticos = result.data.pronosticos
+                    if (pronosticos.isEmpty()) {
+                        binding.layoutEmpty.visibility = View.VISIBLE
+                        binding.rvPronosticos.visibility = View.GONE
+                    } else {
+                        val items = crearListaAgrupada(pronosticos)
+                        adapter.submitList(items)
+                    }
                 }
                 is Result.Error -> {
-                    Toast.makeText(this@PronosticosActivity, result.message, Toast.LENGTH_SHORT).show()
+                    UiUtils.showErrorSnackbar(binding.root, result.message)
                 }
             }
             binding.progressBar.visibility = View.GONE

@@ -11,6 +11,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.quiniela.app.util.UiUtils
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.quiniela.app.R
 import com.quiniela.app.databinding.ActivityDashboardBinding
@@ -97,7 +98,7 @@ class DashboardActivity : AppCompatActivity() {
                     }
                 }
                 is Result.Error -> {
-                    Toast.makeText(this@DashboardActivity, result.message, Toast.LENGTH_SHORT).show()
+                    UiUtils.showErrorSnackbar(binding.root, result.message)
                 }
             }
             binding.progressBar.visibility = View.GONE

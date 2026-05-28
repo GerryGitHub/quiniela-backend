@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.quiniela.app.R
 import com.quiniela.app.databinding.ItemPartidoEnVivoBinding
 import com.quiniela.app.model.PartidoDTO
+import com.quiniela.app.util.UiUtils
 
 class PartidoEnVivoAdapter(
     private val onClick: (PartidoDTO) -> Unit = {}
@@ -108,6 +109,7 @@ class PartidoEnVivoAdapter(
         private fun bindEnCurso(partido: PartidoDTO) {
             binding.layoutStatus.visibility = View.VISIBLE
             binding.vLiveDot.visibility = View.VISIBLE
+            UiUtils.startLivePulse(binding.vLiveDot)
             binding.tvEstado.text = "EN VIVO"
             binding.tvEstado.setTextColor(ContextCompat.getColor(binding.root.context, R.color.error))
 
