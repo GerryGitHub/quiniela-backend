@@ -21,4 +21,7 @@ interface PronosticoRepository : JpaRepository<Pronostico, Long> {
 
     @Query("SELECT p FROM Pronostico p JOIN p.participacion pa JOIN pa.usuario u WHERE u.email = :email")
     fun findByUsuarioEmail(email: String): List<Pronostico>
+
+    @Query("SELECT COUNT(p) FROM Pronostico p WHERE p.participacion.id = :participacionId AND p.puntosObtenidos > 0")
+    fun countAciertosByParticipacionId(participacionId: Long): Long
 }

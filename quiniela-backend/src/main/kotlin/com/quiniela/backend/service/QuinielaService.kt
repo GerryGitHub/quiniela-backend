@@ -13,7 +13,8 @@ class QuinielaService(
     private val quinielaRepository: QuinielaRepository,
     private val usuarioRepository: UsuarioRepository,
     private val participacionRepository: ParticipacionRepository,
-    private val partidoRepository: PartidoRepository
+    private val partidoRepository: PartidoRepository,
+    private val pronosticoRepository: PronosticoRepository
 ) {
 
     fun getQuinielas(email: String): List<QuinielaResumenDTO> {
@@ -180,12 +181,13 @@ class QuinielaService(
     }
 
     fun getLeaderboard(quinielaId: Long): List<LeaderboardEntryDTO> {
-      quinielaRepository.findById(quinielaId)
+        quinielaRepository.findById(quinielaId)
             .orElseThrow { NotFoundException("Quiniela no encontrada") }
 
         val participantes = participacionRepository.findByQuinielaIdOrderByPuntosDesc(quinielaId)
 
         return participantes.mapIndexed { index, p ->
+            val aciertos = pronosticoRepository.countAciertosByParticipacionId(p.id).toInt()
             LeaderboardEntryDTO(
                 posicion = index + 1,
                 usuario = UsuarioDTO(
@@ -193,7 +195,8 @@ class QuinielaService(
                     nombre = p.usuario.nombre,
                     email = p.usuario.email
                 ),
-                puntosTotales = p.puntosTotales
+                puntosTotales = p.puntosTotales,
+                aciertos = aciertos
             )
         }
     }

@@ -99,6 +99,7 @@ class AuthRepository(private val apiService: ApiService = RetrofitClient.apiServ
                     response.body()?.let {
                         TokenManager.setToken(it.accessToken)
                         it.refreshToken?.let { rt -> TokenManager.setRefreshToken(rt) }
+                        TokenManager.setUsuario(it.usuario.email, it.usuario.nombre)
                         Result.Success(it)
                     } ?: Result.Error("Error del servidor. Intenta nuevamente.")
                 } else {
@@ -130,8 +131,7 @@ class AuthRepository(private val apiService: ApiService = RetrofitClient.apiServ
     }
 
     fun logout() {
-        TokenManager.clearToken()
-        TokenManager.clearRefreshToken()
+        TokenManager.clearAll()
     }
 
     fun isLoggedIn(): Boolean = TokenManager.getToken() != null

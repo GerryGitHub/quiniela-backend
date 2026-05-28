@@ -81,7 +81,8 @@ data class QuinielaDetalleDTO(
 data class LeaderboardEntryDTO(
     val posicion: Int,
     val usuario: UsuarioDTO,
-    val puntosTotales: Int
+    val puntosTotales: Int,
+    val aciertos: Int = 0
 )
 
 data class MessageResponse(
