@@ -6,7 +6,8 @@ struct LoginView: View {
     @State private var email: String = ""
     @State private var password: String = ""
     @State private var showError: Bool = false
-    
+    @State private var showVerifiedSuccess: Bool = false
+
     var body: some View {
         NavigationView {
             ScrollView {
@@ -15,25 +16,25 @@ struct LoginView: View {
                         .font(.system(size: 80))
                         .foregroundColor(Color(hex: "1E88E5"))
                         .padding(.top, 40)
-                    
+
                     Text("Quiniela")
                         .font(.largeTitle)
                         .fontWeight(.bold)
                         .foregroundColor(Color(hex: "1E88E5"))
-                    
+
                     VStack(spacing: 16) {
                         TextField("Correo electrónico", text: $email)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .textContentType(.emailAddress)
                             .autocapitalization(.none)
                             .keyboardType(.emailAddress)
-                        
+
                         SecureField("Contraseña", text: $password)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .textContentType(.password)
                     }
                     .padding(.horizontal)
-                    
+
                     Button(action: login) {
                         Text("Iniciar Sesión")
                             .font(.headline)
@@ -45,7 +46,7 @@ struct LoginView: View {
                     }
                     .disabled(email.isEmpty || password.isEmpty)
                     .padding(.horizontal)
-                    
+
                     if canUseBiometrics {
                         Button(action: authenticateWithBiometrics) {
                             HStack {
@@ -57,8 +58,8 @@ struct LoginView: View {
                             .padding(.top, 8)
                         }
                     }
-                    
-                    NavigationLink(destination: RegisterView()) {
+
+                    NavigationLink(destination: RegisterView().environmentObject(authManager)) {
                         Text("¿No tienes cuenta? Regístrate")
                             .foregroundColor(Color(hex: "757575"))
                             .padding(.top, 20)
@@ -71,6 +72,11 @@ struct LoginView: View {
             } message: {
                 Text(authManager.errorMessage ?? "Error desconocido")
             }
+            .alert("Verificado", isPresented: $showVerifiedSuccess) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("Correo verificado exitosamente. Ahora puedes iniciar sesión.")
+            }
             .overlay {
                 if authManager.isLoading {
                     ProgressView()
@@ -80,13 +86,18 @@ struct LoginView: View {
                 }
             }
         }
+        .onOpenURL { url in
+            if url.absoluteString.contains("verified_success") {
+                showVerifiedSuccess = true
+            }
+        }
     }
-    
+
     private var canUseBiometrics: Bool {
         let context = LAContext()
         return context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil)
     }
-    
+
     private func login() {
         Task {
             await authManager.login(email: email, password: password)
@@ -95,7 +106,7 @@ struct LoginView: View {
             }
         }
     }
-    
+
     private func authenticateWithBiometrics() {
         Task {
             _ = await authManager.authenticateWithBiometrics()

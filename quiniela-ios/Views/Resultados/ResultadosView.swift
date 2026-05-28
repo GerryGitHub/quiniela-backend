@@ -1,32 +1,40 @@
 import SwiftUI
 
 struct ResultadosView: View {
+    @EnvironmentObject var authManager: AuthManager
     @StateObject private var viewModel = ResultadosViewModel()
-    
+
     var body: some View {
         NavigationView {
-            List {
-                if viewModel.partidos.isEmpty {
-                    VStack {
-                        Spacer()
-                        Text("No hay resultados disponibles")
+            Group {
+                if viewModel.partidos.isEmpty && !viewModel.isLoading {
+                    VStack(spacing: 16) {
+                        Image(systemName: "sportscourt")
+                            .font(.system(size: 48))
                             .foregroundColor(.gray)
-                        Spacer()
+                        Text("No hay resultados aún")
+                            .font(.headline)
+                            .foregroundColor(.gray)
+                        Text("Los resultados aparecerán cuando los partidos finalicen")
+                            .font(.caption)
+                            .foregroundColor(.gray.opacity(0.7))
+                            .multilineTextAlignment(.center)
                     }
+                    .padding(.horizontal, 40)
                 } else {
-                    ForEach(viewModel.partidos) { partido in
-                        ResultadoRow(partido: partido)
+                    List {
+                        ForEach(viewModel.partidos) { partido in
+                            ResultadoRow(partido: partido)
+                        }
                     }
                 }
             }
             .navigationTitle("Resultados")
             .onAppear {
-                viewModel.loadResultados()
+                viewModel.loadResultados(token: authManager.token)
             }
             .overlay {
-                if viewModel.isLoading {
-                    ProgressView()
-                }
+                if viewModel.isLoading { ProgressView() }
             }
         }
     }
@@ -34,7 +42,7 @@ struct ResultadosView: View {
 
 struct ResultadoRow: View {
     let partido: PartidoDTO
-    
+
     var body: some View {
         VStack(spacing: 8) {
             HStack {
@@ -52,11 +60,6 @@ struct ResultadoRow: View {
                 Text("\(partido.golesVisitanteReal ?? 0)")
                     .font(.headline)
                     .fontWeight(.bold)
-            }
-            if let fecha = partido.fecha {
-                Text(fecha)
-                    .font(.caption)
-                    .foregroundColor(.gray)
             }
         }
         .padding(.vertical, 4)

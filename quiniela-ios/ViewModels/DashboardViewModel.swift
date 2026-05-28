@@ -1,41 +1,29 @@
 import Foundation
-import Combine
 
 class DashboardViewModel: ObservableObject {
-    @Published var quinielas: [QuinielaResumen] = []
+    @Published var quinielas: [QuinielaResumenDTO] = []
     @Published var partidosEnVivo: [PartidoDTO] = []
-    @Published var isLoading: Bool = false
+    @Published var isLoading = false
     @Published var errorMessage: String?
-    
-    private let authManager = AuthManager()
-    
-    func loadData() {
+
+    func loadData(token: String?) {
         Task {
             await MainActor.run { isLoading = true }
-            
             do {
-                guard let token = authManager.token else { return }
-                
-                let user: User = try await APIService.shared.request(
-                    endpoint: "/auth/perfil",
-                    method: .GET,
-                    token: token
-                )
-                
-                let partidosEnVivo: [PartidoDTO] = try await APIService.shared.request(
-                    endpoint: "/resultados/en-vivo",
-                    method: .GET,
-                    token: token
-                )
-                
+                guard let token = token else { return }
+                let user: UsuarioPerfilDTO = try await APIService.shared.request(
+                    endpoint: "auth/me", token: token)
+                let enVivo: [PartidoDTO] = try await APIService.shared.request(
+                    endpoint: "api/resultados/en-vivo", token: token)
+
                 await MainActor.run {
-                    self.quinielas = user.quinielas ?? []
-                    self.partidosEnVivo = partidosEnVivo.filter { $0.estado == "EN_CURSO" }
+                    self.quinielas = user.quinielas
+                    self.partidosEnVivo = enVivo
                     self.isLoading = false
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = error.localizedDescription
+                    self.errorMessage = "Error al cargar datos"
                     self.isLoading = false
                 }
             }
