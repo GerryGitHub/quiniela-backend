@@ -37,44 +37,40 @@ object RetrofitClient {
 }
 
 object TokenManager {
-    private var token: String? = null
-    private var refreshToken: String? = null
-    private var usuarioEmail: String? = null
-    private var usuarioNombre: String? = null
+    private const val PREF_NAME = "quiniela_session"
+    private const val KEY_TOKEN = "access_token"
+    private const val KEY_REFRESH_TOKEN = "refresh_token"
+    private const val KEY_EMAIL = "usuario_email"
+    private const val KEY_NOMBRE = "usuario_nombre"
 
-    fun setToken(token: String?) {
-        this.token = token
+    private var prefs: android.content.SharedPreferences? = null
+
+    fun init(context: android.content.Context) {
+        prefs = context.getSharedPreferences(PREF_NAME, android.content.Context.MODE_PRIVATE)
     }
 
-    fun getToken(): String? = token
+    private fun p() = prefs ?: throw IllegalStateException("TokenManager not initialized")
 
-    fun clearToken() {
-        token = null
-    }
+    fun setToken(token: String?) { p().edit().putString(KEY_TOKEN, token).apply() }
+    fun getToken(): String? = p().getString(KEY_TOKEN, null)
+    fun clearToken() { p().edit().remove(KEY_TOKEN).apply() }
 
-    fun setRefreshToken(refreshToken: String?) {
-        this.refreshToken = refreshToken
-    }
-
-    fun getRefreshToken(): String? = refreshToken
-
-    fun clearRefreshToken() {
-        refreshToken = null
-    }
+    fun setRefreshToken(refreshToken: String?) { p().edit().putString(KEY_REFRESH_TOKEN, refreshToken).apply() }
+    fun getRefreshToken(): String? = p().getString(KEY_REFRESH_TOKEN, null)
+    fun clearRefreshToken() { p().edit().remove(KEY_REFRESH_TOKEN).apply() }
 
     fun setUsuario(email: String?, nombre: String?) {
-        usuarioEmail = email
-        usuarioNombre = nombre
+        p().edit().putString(KEY_EMAIL, email).putString(KEY_NOMBRE, nombre).apply()
     }
-
-    fun getUsuarioEmail(): String? = usuarioEmail
-
-    fun getUsuarioNombre(): String? = usuarioNombre
+    fun getUsuarioEmail(): String? = p().getString(KEY_EMAIL, null)
+    fun getUsuarioNombre(): String? = p().getString(KEY_NOMBRE, null)
 
     fun clearAll() {
-        token = null
-        refreshToken = null
-        usuarioEmail = null
-        usuarioNombre = null
+        p().edit()
+            .remove(KEY_TOKEN)
+            .remove(KEY_REFRESH_TOKEN)
+            .remove(KEY_EMAIL)
+            .remove(KEY_NOMBRE)
+            .apply()
     }
 }
