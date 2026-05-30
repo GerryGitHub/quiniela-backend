@@ -335,6 +335,81 @@
   text-align: center;
 }
 
+/* Activity Section */
+.activity-section {
+  margin-bottom: 32px;
+}
+
+.activity-section h3 {
+  color: #333;
+  margin-bottom: 16px;
+  font-size: 18px;
+}
+
+.activity-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.activity-column {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.activity-column h4 {
+  color: #555;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 12px 0;
+}
+
+.activity-column ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.activity-column li {
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+  color: #333;
+  font-size: 14px;
+}
+
+.activity-column li:last-child {
+  border-bottom: none;
+}
+
+.activity-admin {
+  color: #999;
+  font-size: 12px;
+}
+
+.activity-estado {
+  font-size: 11px;
+  color: #888;
+  background: #f5f5f5;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-left: 6px;
+}
+
+.activity-empty {
+  color: #ccc;
+  font-size: 13px;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .activity-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Admin Dashboard */
 .admin-dashboard {
   padding: 20px;

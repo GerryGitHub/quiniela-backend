@@ -7,3 +7,28 @@ data class AdminDashboardDTO(
     val pronosticos: Long,
     val partidosLive: Long
 )
+
+data class AdminUserDTO(
+    val id: Long,
+    val nombre: String,
+    val email: String
+)
+
+data class AdminQuinielaDTO(
+    val id: Long,
+    val nombre: String,
+    val administrador: String
+)
+
+data class AdminPartidoDTO(
+    val id: Long,
+    val local: String,
+    val visitante: String,
+    val estado: String
+)
+
+data class AdminActivityDTO(
+    val usuarios: List<AdminUserDTO>,
+    val quinielas: List<AdminQuinielaDTO>,
+    val partidos: List<AdminPartidoDTO>
+)

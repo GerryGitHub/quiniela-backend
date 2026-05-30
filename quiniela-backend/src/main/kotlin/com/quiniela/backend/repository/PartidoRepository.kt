@@ -18,4 +18,5 @@ interface PartidoRepository : JpaRepository<Partido, Long> {
     fun countByEstado(estado: EstadoPartido): Long
 
     fun findAllByOrderByFechaHoraAsc(): List<Partido>
+    fun findTop10ByOrderByIdDesc(): List<Partido>
 }

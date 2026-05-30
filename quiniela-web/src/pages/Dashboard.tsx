@@ -17,6 +17,7 @@ export default function Dashboard() {
   const [partidosEnVivo, setPartidosEnVivo] = useState<any[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [metrics, setMetrics] = useState<any>(null);
+  const [activity, setActivity] = useState<any>(null);
 
   useEffect(() => {
     fetchPerfil();
@@ -48,6 +49,9 @@ export default function Dashboard() {
       api.get('/admin/dashboard')
         .then(res => setMetrics(res.data))
         .catch(err => console.log('Error cargando métricas:', err));
+      api.get('/admin/activity')
+        .then(res => setActivity(res.data))
+        .catch(err => console.log('Error cargando actividad:', err));
     }
 
     return () => {
@@ -142,6 +146,36 @@ export default function Dashboard() {
                 <span className="metric-icon">🔴</span>
                 <span className="metric-value">{metrics?.partidosLive ?? '-'}</span>
                 <span className="metric-label">Partidos en vivo</span>
+              </div>
+            </div>
+
+            <div className="activity-section">
+              <h3>Actividad Reciente</h3>
+              <div className="activity-grid">
+                <div className="activity-column">
+                  <h4>Últimos usuarios</h4>
+                  {activity?.usuarios?.length > 0 ? (
+                    <ul>{activity.usuarios.map((u: any) => (
+                      <li key={u.id}>{u.nombre}</li>
+                    ))}</ul>
+                  ) : <p className="activity-empty">Sin usuarios</p>}
+                </div>
+                <div className="activity-column">
+                  <h4>Últimas quinielas</h4>
+                  {activity?.quinielas?.length > 0 ? (
+                    <ul>{activity.quinielas.map((q: any) => (
+                      <li key={q.id}>{q.nombre} <span className="activity-admin">({q.administrador})</span></li>
+                    ))}</ul>
+                  ) : <p className="activity-empty">Sin quinielas</p>}
+                </div>
+                <div className="activity-column">
+                  <h4>Últimos partidos</h4>
+                  {activity?.partidos?.length > 0 ? (
+                    <ul>{activity.partidos.map((p: any) => (
+                      <li key={p.id}>{p.local} vs {p.visitante} <span className="activity-estado">{p.estado}</span></li>
+                    ))}</ul>
+                  ) : <p className="activity-empty">Sin partidos</p>}
+                </div>
               </div>
             </div>
 

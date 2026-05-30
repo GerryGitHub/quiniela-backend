@@ -1,5 +1,6 @@
 package com.quiniela.backend.controller
 
+import com.quiniela.backend.dto.AdminActivityDTO
 import com.quiniela.backend.dto.AdminDashboardDTO
 import com.quiniela.backend.service.AdminService
 import com.quiniela.backend.service.PartidoService
@@ -20,6 +21,12 @@ class AdminController(
     @Operation(summary = "Dashboard de métricas", description = "Devuelve conteos de usuarios, quinielas, pronósticos y partidos en vivo")
     fun getDashboard(): ResponseEntity<AdminDashboardDTO> {
         return ResponseEntity.ok(adminService.getDashboard())
+    }
+
+    @GetMapping("/activity")
+    @Operation(summary = "Actividad reciente", description = "Últimos usuarios, quinielas y partidos (máx. 10 cada uno)")
+    fun getActivity(): ResponseEntity<AdminActivityDTO> {
+        return ResponseEntity.ok(adminService.getActivity())
     }
 
     @PostMapping("/calculate-scores/{partidoId}")
