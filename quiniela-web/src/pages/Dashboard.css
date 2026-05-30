@@ -410,6 +410,29 @@
   }
 }
 
+/* Loading & Error sections */
+.loading-section {
+  background: white;
+  border-radius: 12px;
+  padding: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  grid-column: 1 / -1;
+}
+
+.error-section {
+  background: #fff0f0;
+  border: 1px solid #ffcdd2;
+  border-radius: 12px;
+  padding: 20px;
+  color: #c62828;
+  text-align: center;
+  font-size: 14px;
+  grid-column: 1 / -1;
+}
+
 /* System Status */
 .system-section {
   margin-bottom: 32px;

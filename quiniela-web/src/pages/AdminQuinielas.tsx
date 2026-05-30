@@ -13,6 +13,7 @@ export default function AdminQuinielas() {
   const [sort, setSort] = useState('');
   const [order, setOrder] = useState('desc');
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState('');
 
   useEffect(() => {
     if (usuario && usuario.rol !== 'ADMIN') {
@@ -24,6 +25,7 @@ export default function AdminQuinielas() {
 
   const fetchQuinielas = async () => {
     setLoading(true);
+    setFetchError('');
     try {
       const params: any = {};
       if (search.trim()) params.search = search.trim();
@@ -32,8 +34,11 @@ export default function AdminQuinielas() {
 
       const res = await api.get('/admin/quinielas', { params });
       setQuinielas(res.data);
-    } catch (err) {
-      console.log('Error cargando quinielas:', err);
+    } catch (err: any) {
+      const msg = err?.response?.status === 401 || err?.response?.status === 403
+        ? 'Tu sesión expiró. Inicia sesión nuevamente.'
+        : 'Error al cargar quinielas. Intenta más tarde.';
+      setFetchError(msg);
     } finally {
       setLoading(false);
     }
@@ -80,6 +85,8 @@ export default function AdminQuinielas() {
 
         {loading ? (
           <div className="loading-container"><Spinner /></div>
+        ) : fetchError ? (
+          <div className="error-section">{fetchError}</div>
         ) : quinielas.length === 0 ? (
           <div className="empty-state">
             <p>No se encontraron quinielas</p>
