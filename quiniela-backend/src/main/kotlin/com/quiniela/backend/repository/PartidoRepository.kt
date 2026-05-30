@@ -15,5 +15,7 @@ interface PartidoRepository : JpaRepository<Partido, Long> {
     @Query("SELECT p FROM Partido p WHERE p.estado = :estado")
     fun findByEstado(estado: EstadoPartido): List<Partido>
 
+    fun countByEstado(estado: EstadoPartido): Long
+
     fun findAllByOrderByFechaHoraAsc(): List<Partido>
 }

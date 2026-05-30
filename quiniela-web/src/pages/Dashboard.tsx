@@ -16,6 +16,7 @@ export default function Dashboard() {
   const [error, setError] = useState('');
   const [partidosEnVivo, setPartidosEnVivo] = useState<any[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [metrics, setMetrics] = useState<any>(null);
 
   useEffect(() => {
     fetchPerfil();
@@ -41,6 +42,13 @@ export default function Dashboard() {
         return [...prev, partido];
       });
     });
+
+    // Cargar métricas del dashboard si es admin
+    if (usuario?.rol === 'ADMIN') {
+      api.get('/admin/dashboard')
+        .then(res => setMetrics(res.data))
+        .catch(err => console.log('Error cargando métricas:', err));
+    }
 
     return () => {
       disconnectWebSocket();
@@ -107,8 +115,36 @@ export default function Dashboard() {
         <main className="main-content">
           <div className="admin-dashboard">
             <h2>Bienvenido, Administrador</h2>
-            <p className="admin-desc">Gestiona los resultados de los partidos y monitorea el mundial.</p>
+            <p className="admin-desc">Monitorea la plataforma QGol.</p>
             
+            <div className="metrics-grid">
+              <div className="metric-card">
+                <span className="metric-icon">👤</span>
+                <span className="metric-value">{metrics?.usuarios ?? '-'}</span>
+                <span className="metric-label">Usuarios registrados</span>
+              </div>
+              <div className="metric-card">
+                <span className="metric-icon">✅</span>
+                <span className="metric-value">{metrics?.usuariosVerificados ?? '-'}</span>
+                <span className="metric-label">Usuarios verificados</span>
+              </div>
+              <div className="metric-card">
+                <span className="metric-icon">🏆</span>
+                <span className="metric-value">{metrics?.quinielas ?? '-'}</span>
+                <span className="metric-label">Quinielas creadas</span>
+              </div>
+              <div className="metric-card">
+                <span className="metric-icon">⚽</span>
+                <span className="metric-value">{metrics?.pronosticos ?? '-'}</span>
+                <span className="metric-label">Pronósticos enviados</span>
+              </div>
+              <div className="metric-card">
+                <span className="metric-icon">🔴</span>
+                <span className="metric-value">{metrics?.partidosLive ?? '-'}</span>
+                <span className="metric-label">Partidos en vivo</span>
+              </div>
+            </div>
+
             <div className="admin-cards">
               <Link to="/grupos" className="admin-card">
                 <div className="admin-icon">🌐</div>
