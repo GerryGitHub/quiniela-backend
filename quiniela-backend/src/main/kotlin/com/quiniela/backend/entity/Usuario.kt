@@ -1,6 +1,7 @@
 package com.quiniela.backend.entity
 
 import jakarta.persistence.*
+import java.time.LocalDateTime
 
 @Entity
 class Usuario(
@@ -13,5 +14,7 @@ class Usuario(
     var password: String = "",
     var rol: String = "USER",  // USER o ADMIN
     @Column(name = "email_verified")
-    var emailVerified: Boolean = false
+    var emailVerified: Boolean = false,
+    @Column(name = "fecha_registro")
+    var fechaRegistro: LocalDateTime? = null
 )

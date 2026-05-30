@@ -32,3 +32,12 @@ data class AdminActivityDTO(
     val quinielas: List<AdminQuinielaDTO>,
     val partidos: List<AdminPartidoDTO>
 )
+
+data class AdminUserListDTO(
+    val id: Long,
+    val nombre: String,
+    val email: String,
+    val verificado: Boolean,
+    val fechaRegistro: String?,
+    val quinielas: Long
+)

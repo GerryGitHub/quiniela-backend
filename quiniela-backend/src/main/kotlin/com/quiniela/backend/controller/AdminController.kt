@@ -2,6 +2,7 @@ package com.quiniela.backend.controller
 
 import com.quiniela.backend.dto.AdminActivityDTO
 import com.quiniela.backend.dto.AdminDashboardDTO
+import com.quiniela.backend.dto.AdminUserListDTO
 import com.quiniela.backend.service.AdminService
 import com.quiniela.backend.service.PartidoService
 import io.swagger.v3.oas.annotations.Operation
@@ -27,6 +28,15 @@ class AdminController(
     @Operation(summary = "Actividad reciente", description = "Últimos usuarios, quinielas y partidos (máx. 10 cada uno)")
     fun getActivity(): ResponseEntity<AdminActivityDTO> {
         return ResponseEntity.ok(adminService.getActivity())
+    }
+
+    @GetMapping("/users")
+    @Operation(summary = "Lista de usuarios", description = "Usuarios registrados con búsqueda y filtro")
+    fun getUsers(
+        @RequestParam(required = false) search: String?,
+        @RequestParam(required = false) verificado: Boolean?
+    ): ResponseEntity<List<AdminUserListDTO>> {
+        return ResponseEntity.ok(adminService.getUsers(search, verificado))
     }
 
     @PostMapping("/calculate-scores/{partidoId}")

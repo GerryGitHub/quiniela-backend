@@ -109,6 +109,7 @@ export default function Dashboard() {
           <div className="header-actions">
             <Link to="/grupos" className="btn-grupos">Grupos FIFA</Link>
             <Link to="/resultados" className="btn-grupos">Resultados</Link>
+            <Link to="/admin/users" className="btn-grupos">Usuarios</Link>
             <div className="header-right">
               <span className="user-info">{usuario?.nombre}</span>
               <button onClick={logout} className="btn-logout">Cerrar Sesión</button>
@@ -190,6 +191,11 @@ export default function Dashboard() {
                 <div className="admin-icon">⚽</div>
                 <h3>Resultados</h3>
                 <p>Actualizar marcadores de partidos</p>
+              </Link>
+              <Link to="/admin/users" className="admin-card">
+                <div className="admin-icon">👥</div>
+                <h3>Usuarios</h3>
+                <p>Gestionar usuarios registrados</p>
               </Link>
             </div>
           </div>
