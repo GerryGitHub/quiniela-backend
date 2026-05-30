@@ -17,13 +17,13 @@ export default function Dashboard() {
   const [partidosEnVivo, setPartidosEnVivo] = useState<any[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [metrics, setMetrics] = useState<any>(null);
-  const [metricsLoading, setMetricsLoading] = useState(false);
+  const [metricsLoading, setMetricsLoading] = useState(true);
   const [metricsError, setMetricsError] = useState('');
   const [activity, setActivity] = useState<any>(null);
-  const [activityLoading, setActivityLoading] = useState(false);
+  const [activityLoading, setActivityLoading] = useState(true);
   const [activityError, setActivityError] = useState('');
   const [system, setSystem] = useState<any>(null);
-  const [systemLoading, setSystemLoading] = useState(false);
+  const [systemLoading, setSystemLoading] = useState(true);
   const [systemError, setSystemError] = useState('');
 
   useEffect(() => {
@@ -57,22 +57,19 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (usuario?.rol === 'ADMIN') {
-      setMetricsLoading(true);
       api.get('/admin/dashboard')
         .then(res => { setMetrics(res.data); setMetricsError(''); })
-        .catch(err => setMetricsError('Error al cargar métricas'))
+        .catch(() => setMetricsError('Error al cargar métricas'))
         .finally(() => setMetricsLoading(false));
 
-      setActivityLoading(true);
       api.get('/admin/activity')
         .then(res => { setActivity(res.data); setActivityError(''); })
-        .catch(err => setActivityError('Error al cargar actividad'))
+        .catch(() => setActivityError('Error al cargar actividad'))
         .finally(() => setActivityLoading(false));
 
-      setSystemLoading(true);
       api.get('/admin/system')
         .then(res => { setSystem(res.data); setSystemError(''); })
-        .catch(err => setSystemError('Error al cargar estado del sistema'))
+        .catch(() => setSystemError('Error al cargar estado del sistema'))
         .finally(() => setSystemLoading(false));
     }
   }, [usuario]);
