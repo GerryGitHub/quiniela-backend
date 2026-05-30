@@ -88,7 +88,7 @@ export default function Users() {
               <tbody>
                 {users.map((u: any) => (
                   <tr key={u.id}>
-                    <td>{u.nombre}</td>
+                    <td><Link to={`/admin/users/${u.id}`} className="user-link">{u.nombre}</Link></td>
                     <td>{u.email}</td>
                     <td>{u.verificado ? <span className="badge-verified">Sí</span> : <span className="badge-unverified">No</span>}</td>
                     <td>{u.fechaRegistro ? new Date(u.fechaRegistro).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'}</td>

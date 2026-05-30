@@ -6,6 +6,7 @@ import com.quiniela.backend.dto.AdminPartidoDTO
 import com.quiniela.backend.dto.AdminQuinielaDTO
 import com.quiniela.backend.dto.AdminUserDTO
 import com.quiniela.backend.dto.AdminQuinielaListDTO
+import com.quiniela.backend.dto.AdminUserDetailDTO
 import com.quiniela.backend.dto.AdminUserListDTO
 import com.quiniela.backend.entity.EstadoPartido
 import com.quiniela.backend.entity.Quiniela
@@ -86,6 +87,22 @@ class AdminService(
                 createdAt = it.createdAt?.toString()?.replace("T", " ")
             )
         }
+    }
+
+    fun getUserDetail(id: Long): AdminUserDetailDTO? {
+        val user = usuarioRepository.findById(id).orElse(null) ?: return null
+        val quinielas = quinielaRepository.findByParticipanteId(id).map {
+            AdminQuinielaDTO(id = it.id, nombre = it.nombre, administrador = it.administrador.nombre)
+        }
+        return AdminUserDetailDTO(
+            id = user.id,
+            nombre = user.nombre,
+            email = user.email,
+            verificado = user.emailVerified,
+            fechaRegistro = user.fechaRegistro?.toString()?.replace("T", " "),
+            cantidadQuinielas = participacionRepository.countByUsuarioId(user.id),
+            quinielas = quinielas
+        )
     }
 
     fun getUsers(search: String? = null, verificado: Boolean? = null): List<AdminUserListDTO> {

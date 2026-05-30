@@ -3,6 +3,7 @@ package com.quiniela.backend.controller
 import com.quiniela.backend.dto.AdminActivityDTO
 import com.quiniela.backend.dto.AdminDashboardDTO
 import com.quiniela.backend.dto.AdminQuinielaListDTO
+import com.quiniela.backend.dto.AdminUserDetailDTO
 import com.quiniela.backend.dto.AdminUserListDTO
 import com.quiniela.backend.service.AdminService
 import com.quiniela.backend.service.PartidoService
@@ -39,6 +40,13 @@ class AdminController(
         @RequestParam(required = false) order: String?
     ): ResponseEntity<List<AdminQuinielaListDTO>> {
         return ResponseEntity.ok(adminService.getQuinielas(search, sort, order))
+    }
+
+    @GetMapping("/users/{id}")
+    @Operation(summary = "Detalle de usuario", description = "Información detallada de un usuario y sus quinielas")
+    fun getUserDetail(@PathVariable id: Long): ResponseEntity<AdminUserDetailDTO> {
+        val detail = adminService.getUserDetail(id) ?: return ResponseEntity.notFound().build()
+        return ResponseEntity.ok(detail)
     }
 
     @GetMapping("/users")
