@@ -1,19 +1,20 @@
 import SwiftUI
 
 struct CreateQuinielaView: View {
+    @EnvironmentObject var authManager: AuthManager
     @Environment(\.dismiss) var dismiss
     @StateObject private var viewModel = CreateQuinielaViewModel()
     @State private var nombre: String = ""
-    
+
     var body: some View {
         NavigationView {
             Form {
                 Section {
                     TextField("Nombre de la Quiniela", text: $nombre)
                 }
-                
+
                 Section {
-                    Button(action: createQuiniela) {
+                    Button(action: create) {
                         HStack {
                             Spacer()
                             if viewModel.isLoading {
@@ -40,10 +41,8 @@ struct CreateQuinielaView: View {
             }
         }
     }
-    
-    private func createQuiniela() {
-        Task {
-            await viewModel.createQuiniela(nombre: nombre)
-        }
+
+    private func create() {
+        viewModel.createQuiniela(nombre: nombre, token: authManager.token)
     }
 }

@@ -15,4 +15,6 @@ interface ParticipacionRepository : JpaRepository<Participacion, Long> {
     @Query("SELECT p FROM Participacion p WHERE p.quiniela.id = :quinielaId ORDER BY p.puntosTotales DESC")
     fun findByQuinielaIdOrderByPuntosDesc(quinielaId: Long): List<Participacion>
 
+    fun countByUsuarioId(usuarioId: Long): Long
+    fun countByQuinielaId(quinielaId: Long): Long
 }

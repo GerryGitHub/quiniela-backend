@@ -125,12 +125,12 @@ class PartidoEnVivoAdapter(
             binding.layoutStatus.visibility = View.VISIBLE
             binding.vLiveDot.visibility = View.GONE
             binding.tvEstado.text = "FINALIZADO"
-            binding.tvEstado.setTextColor(ContextCompat.getColor(binding.root.context, R.color.text_secondary))
+            binding.tvEstado.setTextColor(ContextCompat.getColor(binding.root.context, R.color.white))
 
             val finishedBg = ContextCompat.getDrawable(binding.root.context, R.drawable.chip_default_background)
             binding.tvMarcador.background = finishedBg
             binding.tvMarcador.text = "${partido.golesLocalReal ?: 0} - ${partido.golesVisitanteReal ?: 0}"
-            binding.tvMarcador.setTextColor(ContextCompat.getColor(binding.root.context, R.color.text_primary))
+            binding.tvMarcador.setTextColor(ContextCompat.getColor(binding.root.context, R.color.white))
 
             binding.tvCountdown.visibility = View.GONE
         }

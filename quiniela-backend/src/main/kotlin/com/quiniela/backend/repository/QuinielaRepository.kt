@@ -17,4 +17,5 @@ interface QuinielaRepository : JpaRepository<Quiniela, Long> {
     fun findByParticipanteId(usuarioId: Long): List<Quiniela>
 
     fun existsByNombre(nombre: String): Boolean
+    fun findTop10ByOrderByIdDesc(): List<Quiniela>
 }

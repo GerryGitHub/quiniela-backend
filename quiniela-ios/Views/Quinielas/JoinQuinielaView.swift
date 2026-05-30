@@ -1,10 +1,11 @@
 import SwiftUI
 
 struct JoinQuinielaView: View {
+    @EnvironmentObject var authManager: AuthManager
     @Environment(\.dismiss) var dismiss
     @StateObject private var viewModel = JoinQuinielaViewModel()
     @State private var codigo: String = ""
-    
+
     var body: some View {
         NavigationView {
             Form {
@@ -16,9 +17,9 @@ struct JoinQuinielaView: View {
                 } footer: {
                     Text("Ingresa el código que te compartieron para unirte a una quiniela")
                 }
-                
+
                 Section {
-                    Button(action: joinQuiniela) {
+                    Button(action: join) {
                         HStack {
                             Spacer()
                             if viewModel.isLoading {
@@ -45,10 +46,8 @@ struct JoinQuinielaView: View {
             }
         }
     }
-    
-    private func joinQuiniela() {
-        Task {
-            await viewModel.joinQuiniela(codigo: codigo)
-        }
+
+    private func join() {
+        viewModel.joinQuiniela(codigo: codigo, token: authManager.token)
     }
 }

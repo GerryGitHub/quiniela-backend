@@ -125,12 +125,14 @@ class DashboardActivity : AppCompatActivity() {
                         binding.cardPartidosEnVivo.visibility = View.VISIBLE
                         adapterPartidosEnVivo.submitList(partidos)
 
+                        val hasLiveOrUpcoming = liveCount > 0 || upcomingCount > 0
+                        binding.layoutLiveSectionHeader.visibility = if (hasLiveOrUpcoming) View.VISIBLE else View.GONE
+
                         val headerText = when {
                             liveCount > 0 && upcomingCount > 0 -> "🔴 En Vivo · ⏳ Próximos"
                             liveCount > 0 -> "🔴 En Vivo"
                             upcomingCount > 0 -> "⏳ Próximos"
-                            finishedCount > 0 -> "FINALIZADOS"
-                            else -> "Partidos"
+                            else -> ""
                         }
                         binding.tvLiveHeader.text = headerText
                         adapterPartidosEnVivo.notifyDataSetChanged()

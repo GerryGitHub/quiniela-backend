@@ -10,6 +10,8 @@ import java.util.Optional
 interface UsuarioRepository : JpaRepository<Usuario, Long> {
     fun findByEmail(email: String): Optional<Usuario>
     fun existsByEmail(email: String): Boolean
+    fun countByEmailVerifiedTrue(): Long
+    fun findTop10ByOrderByIdDesc(): List<Usuario>
 
     @Query("SELECT COALESCE(SUM(p.puntosTotales), 0) FROM Participacion p WHERE p.usuario.id = :usuarioId")
     fun puntosTotalesGlobales(usuarioId: Long): Int
