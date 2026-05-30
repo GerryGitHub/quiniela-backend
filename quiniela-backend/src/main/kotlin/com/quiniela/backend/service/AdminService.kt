@@ -6,6 +6,7 @@ import com.quiniela.backend.dto.AdminPartidoDTO
 import com.quiniela.backend.dto.AdminQuinielaDTO
 import com.quiniela.backend.dto.AdminUserDTO
 import com.quiniela.backend.dto.AdminQuinielaListDTO
+import com.quiniela.backend.dto.AdminSystemDTO
 import com.quiniela.backend.dto.AdminUserDetailDTO
 import com.quiniela.backend.dto.AdminUserListDTO
 import com.quiniela.backend.entity.EstadoPartido
@@ -33,6 +34,25 @@ class AdminService(
             quinielas = quinielaRepository.count(),
             pronosticos = pronosticoRepository.count(),
             partidosLive = partidoRepository.countByEstado(EstadoPartido.EN_CURSO)
+        )
+    }
+
+    fun getSystemStatus(): AdminSystemDTO {
+        val dbOnline = try {
+            usuarioRepository.count()
+            true
+        } catch (e: Exception) {
+            false
+        }
+        val ultimaActualizacion = try {
+            partidoRepository.findUltimaActualizacion()?.toString()?.replace("T", " ")
+        } catch (e: Exception) {
+            null
+        }
+        return AdminSystemDTO(
+            api = "ONLINE",
+            database = if (dbOnline) "ONLINE" else "OFFLINE",
+            ultimaActualizacion = ultimaActualizacion
         )
     }
 

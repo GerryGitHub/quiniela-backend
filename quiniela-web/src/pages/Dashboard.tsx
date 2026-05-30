@@ -18,6 +18,7 @@ export default function Dashboard() {
   const [submitting, setSubmitting] = useState(false);
   const [metrics, setMetrics] = useState<any>(null);
   const [activity, setActivity] = useState<any>(null);
+  const [system, setSystem] = useState<any>(null);
 
   useEffect(() => {
     fetchPerfil();
@@ -52,6 +53,9 @@ export default function Dashboard() {
       api.get('/admin/activity')
         .then(res => setActivity(res.data))
         .catch(err => console.log('Error cargando actividad:', err));
+      api.get('/admin/system')
+        .then(res => setSystem(res.data))
+        .catch(err => console.log('Error cargando sistema:', err));
     }
 
     return () => {
@@ -177,6 +181,30 @@ export default function Dashboard() {
                       <li key={p.id}>{p.local} vs {p.visitante} <span className="activity-estado">{p.estado}</span></li>
                     ))}</ul>
                   ) : <p className="activity-empty">Sin partidos</p>}
+                </div>
+              </div>
+            </div>
+
+            <div className="system-section">
+              <h3>Estado del Sistema</h3>
+              <div className="system-grid">
+                <div className="system-item">
+                  <span className={`system-dot ${system?.api === 'ONLINE' ? 'dot-online' : 'dot-offline'}`}></span>
+                  <span className="system-label">API</span>
+                  <span className={`system-status ${system?.api === 'ONLINE' ? 'text-online' : 'text-offline'}`}>{system?.api ?? '—'}</span>
+                </div>
+                <div className="system-item">
+                  <span className={`system-dot ${system?.database === 'ONLINE' ? 'dot-online' : 'dot-offline'}`}></span>
+                  <span className="system-label">Base de datos</span>
+                  <span className={`system-status ${system?.database === 'ONLINE' ? 'text-online' : 'text-offline'}`}>{system?.database ?? '—'}</span>
+                </div>
+                <div className="system-item">
+                  <span className="system-label" style={{ gridColumn: 'span 2' }}>Última actualización</span>
+                  <span className="system-value">
+                    {system?.ultimaActualizacion
+                      ? new Date(system.ultimaActualizacion).toLocaleString('es-MX')
+                      : '—'}
+                  </span>
                 </div>
               </div>
             </div>

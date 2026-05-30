@@ -19,4 +19,7 @@ interface PartidoRepository : JpaRepository<Partido, Long> {
 
     fun findAllByOrderByFechaHoraAsc(): List<Partido>
     fun findTop10ByOrderByIdDesc(): List<Partido>
+
+    @Query("SELECT MAX(p.fechaHora) FROM Partido p WHERE p.estado = 'FINALIZADO' OR p.estado = 'EN_CURSO'")
+    fun findUltimaActualizacion(): LocalDateTime?
 }

@@ -59,3 +59,9 @@ data class AdminUserDetailDTO(
     val cantidadQuinielas: Long,
     val quinielas: List<AdminQuinielaDTO>
 )
+
+data class AdminSystemDTO(
+    val api: String,
+    val database: String,
+    val ultimaActualizacion: String?
+)
