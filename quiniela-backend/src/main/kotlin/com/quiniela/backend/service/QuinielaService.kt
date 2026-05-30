@@ -6,6 +6,7 @@ import com.quiniela.backend.entity.Quiniela
 import com.quiniela.backend.exception.NotFoundException
 import com.quiniela.backend.repository.*
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 import org.springframework.transaction.annotation.Transactional
 
 @Service
@@ -69,7 +70,8 @@ class QuinielaService(
         val quiniela = Quiniela(
             nombre = request.nombre,
             codigoInvitacion = request.codigoInvitacion,
-            administrador = usuario
+            administrador = usuario,
+            createdAt = LocalDateTime.now()
         )
         val quinielaGuardada = quinielaRepository.save(quiniela)
 

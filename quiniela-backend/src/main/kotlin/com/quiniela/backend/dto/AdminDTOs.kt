@@ -41,3 +41,11 @@ data class AdminUserListDTO(
     val fechaRegistro: String?,
     val quinielas: Long
 )
+
+data class AdminQuinielaListDTO(
+    val id: Long,
+    val nombre: String,
+    val creador: String,
+    val participantes: Long,
+    val createdAt: String?
+)

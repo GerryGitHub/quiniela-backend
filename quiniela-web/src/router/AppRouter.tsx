@@ -8,6 +8,7 @@ import Pronosticos from '../pages/Pronosticos';
 import Grupos from '../pages/Grupos';
 import Resultados from '../pages/Resultados';
 import Users from '../pages/Users';
+import AdminQuinielas from '../pages/AdminQuinielas';
 
 const router = createBrowserRouter([
   {
@@ -49,6 +50,10 @@ const router = createBrowserRouter([
       {
         path: 'admin/users',
         element: <Users />,
+      },
+      {
+        path: 'admin/quinielas',
+        element: <AdminQuinielas />,
       },
     ],
   },

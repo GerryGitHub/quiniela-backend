@@ -16,4 +16,5 @@ interface ParticipacionRepository : JpaRepository<Participacion, Long> {
     fun findByQuinielaIdOrderByPuntosDesc(quinielaId: Long): List<Participacion>
 
     fun countByUsuarioId(usuarioId: Long): Long
+    fun countByQuinielaId(quinielaId: Long): Long
 }

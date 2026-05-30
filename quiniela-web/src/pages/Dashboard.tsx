@@ -110,6 +110,7 @@ export default function Dashboard() {
             <Link to="/grupos" className="btn-grupos">Grupos FIFA</Link>
             <Link to="/resultados" className="btn-grupos">Resultados</Link>
             <Link to="/admin/users" className="btn-grupos">Usuarios</Link>
+            <Link to="/admin/quinielas" className="btn-grupos">Quinielas</Link>
             <div className="header-right">
               <span className="user-info">{usuario?.nombre}</span>
               <button onClick={logout} className="btn-logout">Cerrar Sesión</button>
@@ -196,6 +197,11 @@ export default function Dashboard() {
                 <div className="admin-icon">👥</div>
                 <h3>Usuarios</h3>
                 <p>Gestionar usuarios registrados</p>
+              </Link>
+              <Link to="/admin/quinielas" className="admin-card">
+                <div className="admin-icon">📋</div>
+                <h3>Quinielas</h3>
+                <p>Visualizar quinielas existentes</p>
               </Link>
             </div>
           </div>

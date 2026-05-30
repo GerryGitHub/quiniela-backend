@@ -1,6 +1,7 @@
 package com.quiniela.backend.entity
 
 import jakarta.persistence.*
+import java.time.LocalDateTime
 
 @Entity
 class Quiniela(
@@ -10,5 +11,7 @@ class Quiniela(
     val nombre: String,
     val codigoInvitacion: String,
     @ManyToOne
-    val administrador: Usuario
+    val administrador: Usuario,
+    @Column(name = "created_at")
+    var createdAt: LocalDateTime? = null
 )

@@ -5,8 +5,10 @@ import com.quiniela.backend.dto.AdminDashboardDTO
 import com.quiniela.backend.dto.AdminPartidoDTO
 import com.quiniela.backend.dto.AdminQuinielaDTO
 import com.quiniela.backend.dto.AdminUserDTO
+import com.quiniela.backend.dto.AdminQuinielaListDTO
 import com.quiniela.backend.dto.AdminUserListDTO
 import com.quiniela.backend.entity.EstadoPartido
+import com.quiniela.backend.entity.Quiniela
 import com.quiniela.backend.repository.ParticipacionRepository
 import com.quiniela.backend.repository.PartidoRepository
 import com.quiniela.backend.repository.PronosticoRepository
@@ -49,6 +51,41 @@ class AdminService(
             )
         }
         return AdminActivityDTO(usuarios = usuarios, quinielas = quinielas, partidos = partidos)
+    }
+
+    fun getQuinielas(
+        search: String? = null,
+        sort: String? = null,
+        order: String? = null
+    ): List<AdminQuinielaListDTO> {
+        var quinielas = quinielaRepository.findAll()
+
+        if (!search.isNullOrBlank()) {
+            val q = search.lowercase()
+            quinielas = quinielas.filter {
+                it.nombre.lowercase().contains(q) || it.administrador.nombre.lowercase().contains(q)
+            }
+        }
+
+        val comparator: Comparator<Quiniela> = when (sort?.lowercase()) {
+            "nombre" -> compareBy { it.nombre.lowercase() }
+            "creador" -> compareBy { it.administrador.nombre.lowercase() }
+            "fecha" -> compareBy { it.createdAt }
+            else -> compareByDescending { it.id }
+        }
+
+        quinielas = if (order?.lowercase() == "asc") quinielas.sortedWith(comparator)
+        else quinielas.sortedWith(comparator.reversed())
+
+        return quinielas.map {
+            AdminQuinielaListDTO(
+                id = it.id,
+                nombre = it.nombre,
+                creador = it.administrador.nombre,
+                participantes = participacionRepository.countByQuinielaId(it.id),
+                createdAt = it.createdAt?.toString()?.replace("T", " ")
+            )
+        }
     }
 
     fun getUsers(search: String? = null, verificado: Boolean? = null): List<AdminUserListDTO> {
