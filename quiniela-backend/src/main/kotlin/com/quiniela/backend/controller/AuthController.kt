@@ -2,6 +2,8 @@ package com.quiniela.backend.controller
 
 import com.quiniela.backend.dto.*
 import com.quiniela.backend.service.AuthService
+import com.quiniela.backend.service.PasswordResetService
+import com.quiniela.backend.service.PerfilService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
@@ -14,7 +16,9 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/auth")
 @Tag(name = "Autenticación", description = "Endpoints para registro, inicio de sesión, refresh token y recuperación de contraseña")
 class AuthController(
-    private val authService: AuthService
+    private val authService: AuthService,
+    private val passwordResetService: PasswordResetService,
+    private val perfilService: PerfilService
 ) {
 
     @PostMapping("/register")
@@ -50,13 +54,13 @@ class AuthController(
     @PostMapping("/forgot-password")
     @Operation(summary = "Solicitar restablecimiento de contraseña")
     fun forgotPassword(@Valid @RequestBody request: ForgotPasswordRequest): ResponseEntity<MessageResponse> {
-        return ResponseEntity.ok(authService.forgotPassword(request))
+        return ResponseEntity.ok(passwordResetService.forgotPassword(request))
     }
 
     @PostMapping("/reset-password")
     @Operation(summary = "Restablecer contraseña con token")
     fun resetPassword(@Valid @RequestBody request: ResetPasswordRequest): ResponseEntity<MessageResponse> {
-        return ResponseEntity.ok(authService.resetPassword(request))
+        return ResponseEntity.ok(passwordResetService.resetPassword(request))
     }
 
     @GetMapping("/me")
@@ -65,6 +69,6 @@ class AuthController(
         if (userDetails == null) {
             return ResponseEntity.status(401).build()
         }
-        return ResponseEntity.ok(authService.getPerfil(userDetails.username))
+        return ResponseEntity.ok(perfilService.getPerfil(userDetails.username))
     }
 }

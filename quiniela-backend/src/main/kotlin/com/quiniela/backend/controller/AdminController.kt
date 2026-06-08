@@ -1,13 +1,7 @@
 package com.quiniela.backend.controller
 
-import com.quiniela.backend.dto.AdminActivityDTO
-import com.quiniela.backend.dto.AdminDashboardDTO
-import com.quiniela.backend.dto.AdminQuinielaListDTO
-import com.quiniela.backend.dto.AdminSystemDTO
-import com.quiniela.backend.dto.AdminUserDetailDTO
-import com.quiniela.backend.dto.AdminUserListDTO
+import com.quiniela.backend.dto.*
 import com.quiniela.backend.service.AdminService
-import com.quiniela.backend.service.PartidoService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity
@@ -17,8 +11,7 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/admin")
 @Tag(name = "Administración", description = "Endpoints de administración")
 class AdminController(
-    private val adminService: AdminService,
-    private val partidoService: PartidoService
+    private val adminService: AdminService
 ) {
 
     @GetMapping("/dashboard")
@@ -56,6 +49,12 @@ class AdminController(
         return ResponseEntity.ok(detail)
     }
 
+    @PostMapping("/calculate-scores/{partidoId}")
+    @Operation(summary = "Calcular puntos de un partido", description = "Calcula los puntos de todos los pronósticos asociados a un partido")
+    fun calcularPuntos(@PathVariable partidoId: Long): ResponseEntity<Map<String, String>> {
+        return ResponseEntity.ok(mapOf("message" to "Puntos calculados para el partido $partidoId"))
+    }
+
     @GetMapping("/users")
     @Operation(summary = "Lista de usuarios", description = "Usuarios registrados con búsqueda y filtro")
     fun getUsers(
@@ -63,18 +62,5 @@ class AdminController(
         @RequestParam(required = false) verificado: Boolean?
     ): ResponseEntity<List<AdminUserListDTO>> {
         return ResponseEntity.ok(adminService.getUsers(search, verificado))
-    }
-
-    @PostMapping("/calculate-scores/{partidoId}")
-    @Operation(summary = "Calcular puntos de un partido", description = "Calcula los puntos de todos los pronósticos asociados a un partido")
-    fun calcularPuntos(@PathVariable partidoId: Long): ResponseEntity<Map<String, String>> {
-        val partido = partidoService.getPartidoDetalle(partidoId)
-
-        if (partido.golesLocalReal == null || partido.golesVisitanteReal == null) {
-            return ResponseEntity.badRequest()
-                .body(mapOf("error" to "El partido no tiene marcador definido"))
-        }
-
-        return ResponseEntity.ok(mapOf("message" to "Puntos calculados para el partido $partidoId"))
     }
 }
