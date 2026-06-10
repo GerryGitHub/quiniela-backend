@@ -49,7 +49,8 @@ data class PronosticoItemRequest(
 
 data class CrearPronosticosBatchRequest(
     val idQuiniela: Long,
-    val pronosticos: List<PronosticoItemRequest>
+    val pronosticos: List<PronosticoItemRequest>,
+    val idParticipacion: Long? = null
 )
 
 data class CrearPronosticosBatchResponse(

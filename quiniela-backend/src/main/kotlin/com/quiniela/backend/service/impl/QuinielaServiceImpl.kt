@@ -97,6 +97,11 @@ class QuinielaServiceImpl(
         val quiniela = quinielaRepository.findById(id)
             .orElseThrow { NotFoundException("Quiniela no encontrada") }
 
+        val usuario = usuarioRepository.findByEmail(email)
+            .orElseThrow { IllegalArgumentException("Usuario no encontrado") }
+
+        val participacionActual = participacionRepository.findByUsuario_IdAndQuiniela_Id(usuario.id, quiniela.id)
+
         val participantes = participacionRepository.findByQuinielaIdOrderByPuntosDesc(id)
             .map { p ->
                 UsuarioDTO(
@@ -120,7 +125,8 @@ class QuinielaServiceImpl(
                 quiniela.administrador.email
             ),
             participantes = participantes,
-            partidos = partidos
+            partidos = partidos,
+            participacionId = participacionActual.map { it.id }.orElse(null)
         )
     }
 

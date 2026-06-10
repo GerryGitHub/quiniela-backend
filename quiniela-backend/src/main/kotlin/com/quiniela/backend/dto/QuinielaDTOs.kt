@@ -41,5 +41,6 @@ data class QuinielaDetalleDTO(
     val codigoInvitacion: String,
     val administrador: UsuarioDTO,
     val participantes: List<UsuarioDTO>,
-    val partidos: List<PartidoDTO>
+    val partidos: List<PartidoDTO>,
+    val participacionId: Long? = null
 )
