@@ -121,21 +121,22 @@ class QuinielaDetalleActivity : AppCompatActivity() {
                     val detalle = result.data
                     binding.toolbar.title = detalle.nombre
                     
-when (val pronosResult = pronosticoRepository.getMisPronosticosByQuiniela(quinielaId)) {
+ when (val pronosResult = pronosticoRepository.getMisPronosticosByQuiniela(quinielaId)) {
                         is Result.Success -> {
                             val totalPartidos = detalle.partidos.size
-                            val completados = pronosResult.data.pronosticos.size
-                            actualizarProgresoPronosticos(completados, totalPartidos)
-
                             val pronosticosMap = pronosResult.data.pronosticos.associateBy { it.partido.id }
                             val partidosConPronostico = detalle.partidos.map { partido ->
                                 val pronostico = pronosticosMap[partido.id]
                                 PartidoConPronostico(
                                     partido = partido,
-                                    golesLocalPredicho = pronostico?.golesLocalPredicho ?: 0,
-                                    golesVisitantePredicho = pronostico?.golesVisitantePredicho ?: 0
+                                    golesLocalPredicho = pronostico?.golesLocalPredicho,
+                                    golesVisitantePredicho = pronostico?.golesVisitantePredicho
                                 )
                             }
+                            val completados = partidosConPronostico.count {
+                                it.golesLocalPredicho != null && it.golesVisitantePredicho != null
+                            }
+                            actualizarProgresoPronosticos(completados, totalPartidos)
                             val itemsAgrupados = crearListaAgrupada(partidosConPronostico)
                             partidosAdapter = PartidosConPronosticoAdapter(itemsAgrupados) { actualizarBotonGuardar() }
                             binding.rvPartidos.adapter = partidosAdapter
@@ -143,7 +144,7 @@ when (val pronosResult = pronosticoRepository.getMisPronosticosByQuiniela(quinie
                         }
                         is Result.Error -> {
                             val partidosConPronostico = detalle.partidos.map { partido ->
-                                PartidoConPronostico(partido = partido, golesLocalPredicho = 0, golesVisitantePredicho = 0)
+                                PartidoConPronostico(partido = partido)
                             }
                             val itemsAgrupados = crearListaAgrupada(partidosConPronostico)
                             partidosAdapter = PartidosConPronosticoAdapter(itemsAgrupados) { actualizarBotonGuardar() }
@@ -311,12 +312,20 @@ when (val pronosResult = pronosticoRepository.getMisPronosticosByQuiniela(quinie
         binding.btnGuardarPronosticos.isEnabled = false
 
         lifecycleScope.launch {
-            val items = pronosticosModificados.map { pp ->
-                PronosticoItemRequest(
-                    idPartido = pp.partido.id,
-                    golesLocalPredicho = pp.golesLocalPredicho,
-                    golesVisitantePredicho = pp.golesVisitantePredicho
-                )
+            val items = pronosticosModificados
+                .filter { it.golesLocalPredicho != null && it.golesVisitantePredicho != null }
+                .map { pp ->
+                    PronosticoItemRequest(
+                        idPartido = pp.partido.id,
+                        golesLocalPredicho = pp.golesLocalPredicho!!,
+                        golesVisitantePredicho = pp.golesVisitantePredicho!!
+                    )
+                }
+            if (items.isEmpty()) {
+                UiUtils.showWarningSnackbar(binding.root, "Llena los marcadores antes de guardar")
+                binding.progressBar.visibility = View.GONE
+                binding.btnGuardarPronosticos.isEnabled = true
+                return@launch
             }
             
             when (val result = pronosticoRepository.crearPronosticosBatch(quinielaId, items)) {
@@ -346,8 +355,8 @@ when (val pronosResult = pronosticoRepository.getMisPronosticosByQuiniela(quinie
 
 data class PartidoConPronostico(
     val partido: PartidoDTO,
-    var golesLocalPredicho: Int = 0,
-    var golesVisitantePredicho: Int = 0,
+    var golesLocalPredicho: Int? = null,
+    var golesVisitantePredicho: Int? = null,
     var dirty: Boolean = false
 )
 
@@ -492,18 +501,16 @@ class PartidosConPronosticoAdapter(
             binding.etGolesLocal.removeTextChangedListener(textWatcher)
             binding.etGolesVisitante.removeTextChangedListener(textWatcher)
 
-            binding.etGolesLocal.setText(item.golesLocalPredicho.toString())
-            binding.etGolesVisitante.setText(item.golesVisitantePredicho.toString())
+            binding.etGolesLocal.setText(item.golesLocalPredicho?.toString() ?: "")
+            binding.etGolesVisitante.setText(item.golesVisitantePredicho?.toString() ?: "")
 
             textWatcher = object : TextWatcher {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
                 override fun afterTextChanged(s: Editable?) {
                     partidoActual?.let { partido ->
-                        val local = binding.etGolesLocal.text.toString().toIntOrNull() ?: 0
-                        val visitante = binding.etGolesVisitante.text.toString().toIntOrNull() ?: 0
-                        partido.golesLocalPredicho = local
-                        partido.golesVisitantePredicho = visitante
+                        partido.golesLocalPredicho = binding.etGolesLocal.text.toString().toIntOrNull()
+                        partido.golesVisitantePredicho = binding.etGolesVisitante.text.toString().toIntOrNull()
                         partido.dirty = true
                         onDirtyChanged()
                     }
