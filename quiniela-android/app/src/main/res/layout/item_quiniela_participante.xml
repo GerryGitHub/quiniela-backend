@@ -28,15 +28,30 @@
             android:textStyle="bold"
             android:textColor="#FFFFFF" />
 
-        <!-- Name -->
-        <TextView
-            android:id="@+id/tvNombre"
+        <!-- Name + Diferencia -->
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textSize="15sp"
-            android:textColor="#FFFFFF"
-            android:layout_marginStart="12dp" />
+            android:orientation="vertical"
+            android:layout_marginStart="12dp">
+
+            <TextView
+                android:id="@+id/tvNombre"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="15sp"
+                android:textColor="#FFFFFF" />
+
+            <TextView
+                android:id="@+id/tvDiferencia"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="9sp"
+                android:textColor="@color/success"
+                android:textStyle="bold"
+                android:visibility="gone" />
+        </LinearLayout>
 
         <!-- Points + Aciertos -->
         <LinearLayout

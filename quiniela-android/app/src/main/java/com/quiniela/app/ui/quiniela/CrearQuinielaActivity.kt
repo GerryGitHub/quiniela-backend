@@ -1,26 +1,25 @@
 package com.quiniela.app.ui.quiniela
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.google.zxing.BarcodeFormat
-import com.google.zxing.MultiFormatWriter
-import com.google.zxing.common.BitMatrix
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import com.quiniela.app.databinding.ActivityCrearQuinielaBinding
+import com.quiniela.app.model.QuinielaDTO
 import com.quiniela.app.repository.QuinielaRepository
 import com.quiniela.app.repository.Result
+import com.quiniela.app.util.QrUtils
+import com.quiniela.app.util.ShareUtils
 import kotlinx.coroutines.launch
 
 class CrearQuinielaActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCrearQuinielaBinding
     private val quinielaRepository = QuinielaRepository()
     private var modo: String = "crear"
-    private var codigoCreado: String? = null
+    private var quinielaCreada: QuinielaDTO? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,8 +73,8 @@ class CrearQuinielaActivity : AppCompatActivity() {
         lifecycleScope.launch {
             when (val result = quinielaRepository.crearQuiniela(nombre, "")) {
                 is Result.Success -> {
-                    codigoCreado = result.data.codigoInvitacion
-                    showQRCode(result.data.codigoInvitacion)
+                    quinielaCreada = result.data
+                    showQRCode(result.data)
                 }
                 is Result.Error -> {
                     Toast.makeText(this@CrearQuinielaActivity, result.message, Toast.LENGTH_LONG).show()
@@ -86,46 +85,22 @@ class CrearQuinielaActivity : AppCompatActivity() {
         }
     }
 
-    private fun showQRCode(codigo: String) {
+    private fun showQRCode(quiniela: QuinielaDTO) {
         binding.cardCrear.visibility = View.GONE
         binding.cardQR.visibility = View.VISIBLE
         
-        binding.tvCodigo.text = codigo
+        binding.tvCodigo.text = quiniela.codigoInvitacion
         
-        try {
-            val size = 400
-            val bitMatrix: BitMatrix = MultiFormatWriter().encode(
-                codigo,
-                BarcodeFormat.QR_CODE,
-                size,
-                size
-            )
-            val bitmap = android.graphics.Bitmap.createBitmap(
-                size, size, android.graphics.Bitmap.Config.ARGB_8888
-            )
-            for (x in 0 until size) {
-                for (y in 0 until size) {
-                    bitmap.setPixel(x, y, if (bitMatrix[x, y]) 0xFF000000.toInt() else 0xFFFFFFFF.toInt())
-                }
-            }
+        val bitmap = QrUtils.generateQrBitmap(quiniela.codigoInvitacion, 400)
+        if (bitmap != null) {
             binding.ivQR.setImageBitmap(bitmap)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Toast.makeText(this, "Error QR: ${e.message}", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "Error al generar QR", Toast.LENGTH_SHORT).show()
         }
         
-        binding.btnCompartir.setOnClickListener { compartirCodigo(codigo) }
-    }
-
-    private fun compartirCodigo(codigo: String) {
-        val mensaje = "Únete a mi quiniela! Usa el código: $codigo\n\nO escanea el código QR de la app Quiniela"
-        
-        val intent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(Intent.EXTRA_TEXT, mensaje)
+        binding.btnCompartir.setOnClickListener {
+            ShareUtils.shareQuiniela(this, quiniela.nombre, quiniela.codigoInvitacion)
         }
-        
-        startActivity(Intent.createChooser(intent, "Compartir con"))
     }
 
     private fun unirseQuiniela(codigo: String) {

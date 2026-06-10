@@ -10,8 +10,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import android.view.MenuItem
+import android.widget.Toast
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.quiniela.app.R
 import com.quiniela.app.api.TokenManager
 import com.quiniela.app.databinding.ActivityQuinielaDetalleBinding
+import com.quiniela.app.databinding.DialogQrBinding
+import com.quiniela.app.util.QrUtils
+import com.quiniela.app.util.ShareUtils
 import com.quiniela.app.model.*
 import com.quiniela.app.repository.PronosticoRepository
 import com.quiniela.app.repository.QuinielaRepository
@@ -40,6 +47,24 @@ class QuinielaDetalleActivity : AppCompatActivity() {
         
         binding.toolbar.title = nombreQuiniela
         binding.toolbar.setNavigationOnClickListener { finish() }
+        binding.toolbar.inflateMenu(R.menu.quiniela_detalle_menu)
+        binding.toolbar.setOnMenuItemClickListener { item: MenuItem ->
+            when (item.itemId) {
+                R.id.action_qr -> {
+                    val nombre = intent.getStringExtra("quinielaNombre") ?: "Quiniela"
+                    val codigo = intent.getStringExtra("quinielaCodigo") ?: ""
+                    if (codigo.isNotEmpty()) {
+                        showQRDialog(nombre, codigo)
+                    }
+                    true
+                }
+                R.id.action_info -> {
+                    showPuntosInfoDialog()
+                    true
+                }
+                else -> false
+            }
+        }
 
         setupTabs()
         setupRecyclerViews()
@@ -98,6 +123,10 @@ class QuinielaDetalleActivity : AppCompatActivity() {
                     
 when (val pronosResult = pronosticoRepository.getMisPronosticosByQuiniela(quinielaId)) {
                         is Result.Success -> {
+                            val totalPartidos = detalle.partidos.size
+                            val completados = pronosResult.data.pronosticos.size
+                            actualizarProgresoPronosticos(completados, totalPartidos)
+
                             val pronosticosMap = pronosResult.data.pronosticos.associateBy { it.partido.id }
                             val partidosConPronostico = detalle.partidos.map { partido ->
                                 val pronostico = pronosticosMap[partido.id]
@@ -162,7 +191,15 @@ when (val pronosResult = pronosticoRepository.getMisPronosticosByQuiniela(quinie
                         if (currentEmail != null) {
                             val miEntry = data.find { it.usuario.email == currentEmail }
                             if (miEntry != null) {
+                                val miIdx = data.indexOf(miEntry)
+                                val nextEntry = if (miIdx >= 0 && miIdx < data.size - 1) data[miIdx + 1] else null
+                                val diff = nextEntry?.let { miEntry.puntosTotales - it.puntosTotales }
+
                                 binding.tvMiPosicion.text = "Tu posición: #${miEntry.posicion}"
+                                binding.tvDiferenciaPosicion.visibility = if (diff != null && diff > 0) View.VISIBLE else View.GONE
+                                if (diff != null && diff > 0) {
+                                    binding.tvDiferenciaPosicion.text = "$diff pts por delante del siguiente puesto"
+                                }
                                 binding.layoutMiPosicion.visibility = View.VISIBLE
                             } else {
                                 binding.layoutMiPosicion.visibility = View.GONE
@@ -229,6 +266,39 @@ when (val pronosResult = pronosticoRepository.getMisPronosticosByQuiniela(quinie
         leaderboardHandler.removeCallbacks(leaderboardPolling)
     }
 
+    private fun showPuntosInfoDialog() {
+        val dialogBinding = com.quiniela.app.databinding.DialogPuntosInfoBinding.inflate(layoutInflater)
+        val dialog = MaterialAlertDialogBuilder(this)
+            .setView(dialogBinding.root)
+            .create()
+        dialog.window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(0xE80B1220.toInt()))
+        dialog.window?.setDimAmount(0.6f)
+        dialog.show()
+    }
+
+    private fun showQRDialog(nombre: String, codigo: String) {
+        val dialogBinding = DialogQrBinding.inflate(layoutInflater)
+        val dialog = MaterialAlertDialogBuilder(this)
+            .setView(dialogBinding.root)
+            .create()
+
+        dialogBinding.tvCodigo.text = codigo
+
+        val bitmap = QrUtils.generateQrBitmap(codigo, 500)
+        if (bitmap != null) {
+            dialogBinding.ivQR.setImageBitmap(bitmap)
+        } else {
+            Toast.makeText(this, "Error al generar QR", Toast.LENGTH_SHORT).show()
+        }
+
+        dialogBinding.btnCompartir.setOnClickListener {
+            ShareUtils.shareQuiniela(this, nombre, codigo)
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
     private fun guardarPronosticos() {
         val pronosticosModificados = partidosAdapter.getDirtyPronosticos()
         
@@ -253,14 +323,24 @@ when (val pronosResult = pronosticoRepository.getMisPronosticosByQuiniela(quinie
                 is Result.Success -> {
                     partidosAdapter.clearDirtyFlags()
                     UiUtils.showSuccessSnackbar(binding.root, "Pronósticos guardados: ${result.data.pronosticosGuardados}")
+                    loadData()
                 }
                 is Result.Error -> {
                     UiUtils.showErrorSnackbar(binding.root, result.message)
+                    binding.progressBar.visibility = View.GONE
+                    binding.btnGuardarPronosticos.isEnabled = true
                 }
             }
-            binding.progressBar.visibility = View.GONE
-            binding.btnGuardarPronosticos.isEnabled = true
         }
+    }
+
+    private fun actualizarProgresoPronosticos(completados: Int, total: Int) {
+        binding.progressPronosticos.progress = if (total > 0) (completados * 100 / total) else 0
+        binding.tvProgresoContador.text = "$completados/$total"
+        binding.tvProgresoCompletados.text = "$completados completados"
+        binding.tvProgresoPendientes.text = "${total - completados} pendientes"
+        binding.tvProgresoPendientes.visibility = if (total - completados > 0) View.VISIBLE else View.GONE
+        binding.layoutProgresoPronosticos.visibility = if (total > 0) View.VISIBLE else View.GONE
     }
 }
 
@@ -526,23 +606,24 @@ class ParticipantesAdapter(private var participantes: List<LeaderboardEntryDTO>)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(participantes[position], position + 1)
+        val nextPts = if (position < participantes.size - 1) participantes[position + 1].puntosTotales else null
+        holder.bind(participantes[position], position + 1, nextPts)
     }
 
     override fun getItemCount() = participantes.size
 
     inner class ViewHolder(private val binding: com.quiniela.app.databinding.ItemQuinielaParticipanteBinding) : 
         androidx.recyclerview.widget.RecyclerView.ViewHolder(binding.root) {
-        fun bind(entry: LeaderboardEntryDTO, posicion: Int) {
+        fun bind(entry: LeaderboardEntryDTO, posicion: Int, nextPts: Int? = null) {
             val context = binding.root.context
 
             if (posicion <= 3) {
                 binding.cardRoot.strokeColor = posicionColors[posicion - 1]
                 binding.cardRoot.strokeWidth = (2 * context.resources.displayMetrics.density).toInt()
                 binding.tvPosicion.text = when (posicion) {
-                    1 -> "🥇"
-                    2 -> "🥈"
-                    3 -> "🥉"
+                    1 -> "\uD83E\uDD47"
+                    2 -> "\uD83E\uDD48"
+                    3 -> "\uD83E\uDD49"
                     else -> posicion.toString()
                 }
             } else {
@@ -553,15 +634,19 @@ class ParticipantesAdapter(private var participantes: List<LeaderboardEntryDTO>)
 
             binding.tvNombre.text = entry.usuario.nombre
 
-            if (posicion == 1) {
-                binding.tvPuntos.text = "${entry.puntosTotales} pts"
-                binding.tvPuntos.setTextSize(18f)
-            } else {
-                binding.tvPuntos.text = "${entry.puntosTotales} pts"
-                binding.tvPuntos.setTextSize(16f)
-            }
+            val ptsText = "${entry.puntosTotales} pts"
+            binding.tvPuntos.text = ptsText
+            binding.tvPuntos.setTextSize(if (posicion == 1) 18f else 16f)
 
             binding.tvAciertos.text = "${entry.aciertos} aciertos"
+
+            val diff = nextPts?.let { entry.puntosTotales - it }
+            if (diff != null && diff > 0) {
+                binding.tvDiferencia.text = "+$diff pts al siguiente"
+                binding.tvDiferencia.visibility = View.VISIBLE
+            } else {
+                binding.tvDiferencia.visibility = View.GONE
+            }
         }
     }
 }

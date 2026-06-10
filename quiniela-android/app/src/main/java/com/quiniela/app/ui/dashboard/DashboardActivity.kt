@@ -3,6 +3,7 @@ package com.quiniela.app.ui.dashboard
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.os.Handler
 import android.os.Looper
 import android.view.Menu
@@ -12,6 +13,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.quiniela.app.util.UiUtils
+import com.quiniela.app.util.ShareUtils
+import com.quiniela.app.util.QrUtils
+import com.quiniela.app.util.CountryFlagResolver
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.quiniela.app.R
 import com.quiniela.app.databinding.ActivityDashboardBinding
@@ -23,16 +27,12 @@ import com.quiniela.app.ui.auth.LoginActivity
 import com.quiniela.app.ui.quiniela.CrearQuinielaActivity
 import com.quiniela.app.ui.quiniela.QuinielaDetalleActivity
 import com.quiniela.app.ui.quiniela.QuinielaAdapter
-import com.google.zxing.BarcodeFormat
-import com.google.zxing.MultiFormatWriter
-import com.google.zxing.common.BitMatrix
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.quiniela.app.databinding.DialogQrBinding
 import com.quiniela.app.model.PartidoDTO
 import com.quiniela.app.model.QuinielaResumenDTO
+import com.quiniela.app.model.QuinielaDetalleDTO
 import kotlinx.coroutines.launch
-import androidx.core.graphics.createBitmap
-import androidx.core.graphics.set
 
 class DashboardActivity : AppCompatActivity() {
     private lateinit var binding: ActivityDashboardBinding
@@ -43,6 +43,10 @@ class DashboardActivity : AppCompatActivity() {
     private lateinit var adapterPartidosEnVivo: PartidoEnVivoAdapter
     private var lastPartidosHash: Int = 0
     private var isFirstLoad = true
+    private var countdownTimer: CountDownTimer? = null
+    private var proximoPartido: PartidoDTO? = null
+    private var proximaQuinielaId: Long = 0
+    private var proximaQuinielaNombre: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,6 +61,7 @@ class DashboardActivity : AppCompatActivity() {
                 val intent = Intent(this, QuinielaDetalleActivity::class.java)
                 intent.putExtra("quinielaId", quiniela.id)
                 intent.putExtra("quinielaNombre", quiniela.nombre)
+                intent.putExtra("quinielaCodigo", quiniela.codigoInvitacion)
                 startActivity(intent)
             },
             onShareClick = { quiniela ->
@@ -95,6 +100,7 @@ class DashboardActivity : AppCompatActivity() {
                         binding.tvEmpty.visibility = View.GONE
                         binding.rvQuinielas.visibility = View.VISIBLE
                         adapter.submitList(quinielas)
+                        cargarProximoPartido(quinielas[0].id, quinielas[0].nombre)
                     }
                 }
                 is Result.Error -> {
@@ -149,6 +155,96 @@ class DashboardActivity : AppCompatActivity() {
         }
     }
 
+    private fun cargarProximoPartido(quinielaId: Long, quinielaNombre: String) {
+        lifecycleScope.launch {
+            when (val result = quinielaRepository.getQuinielaDetalle(quinielaId)) {
+                is Result.Success -> {
+                    val partidos = result.data.partidos
+                        .filter { it.estado == PartidoDTO.ESTADO_PENDIENTE }
+                        .sortedBy { it.fechaHora }
+                    val match = partidos.firstOrNull()
+                    if (match != null) {
+                        proximoPartido = match
+                        proximaQuinielaId = quinielaId
+                        proximaQuinielaNombre = quinielaNombre
+                        setupProximoPartidoCard(match, quinielaNombre)
+                    } else {
+                        binding.cardProximoPartido.visibility = View.GONE
+                    }
+                }
+                is Result.Error -> {
+                    binding.cardProximoPartido.visibility = View.GONE
+                }
+            }
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun setupProximoPartidoCard(match: PartidoDTO, quinielaNombre: String) {
+        binding.cardProximoPartido.visibility = View.VISIBLE
+        binding.tvProximoQuiniela.text = quinielaNombre
+
+        val localFlag = CountryFlagResolver.getFlagDrawable(this, match.equipoLocal)
+        binding.ivProximoLocal.setImageDrawable(localFlag)
+        binding.tvProximoLocal.text = match.equipoLocal
+
+        val visitFlag = CountryFlagResolver.getFlagDrawable(this, match.equipoVisitante)
+        binding.ivProximoVisitante.setImageDrawable(visitFlag)
+        binding.tvProximoVisitante.text = match.equipoVisitante
+
+        binding.tvProximoFecha.text = try {
+            val sdf = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault())
+            val date = sdf.parse(match.fechaHora)
+            val out = java.text.SimpleDateFormat("d 'de' MMMM '—' HH:mm", java.util.Locale("es", "MX"))
+            out.format(date!!)
+        } catch (e: Exception) {
+            match.fechaHora
+        }
+
+        iniciarCuentaRegresiva(match.fechaHora)
+
+        binding.btnPronosticarProximo.setOnClickListener {
+            countdownTimer?.cancel()
+            val intent = Intent(this, QuinielaDetalleActivity::class.java)
+            intent.putExtra("quinielaId", proximaQuinielaId)
+            intent.putExtra("quinielaNombre", proximaQuinielaNombre)
+            intent.putExtra("quinielaCodigo", "")
+            startActivity(intent)
+        }
+    }
+
+    private fun iniciarCuentaRegresiva(fechaHora: String) {
+        countdownTimer?.cancel()
+        countdownTimer = object : CountDownTimer(Long.MAX_VALUE, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                val diff = try {
+                    val sdf = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault())
+                    sdf.parse(fechaHora)?.time?.minus(System.currentTimeMillis()) ?: 0L
+                } catch (e: Exception) { 0L }
+
+                if (diff <= 0) {
+                    binding.layoutCuentaRegresiva.visibility = View.GONE
+                    return
+                }
+
+                binding.layoutCuentaRegresiva.visibility = View.VISIBLE
+                val dias = diff / 86400000
+                val horas = (diff % 86400000) / 3600000
+                val minutos = (diff % 3600000) / 60000
+                val segundos = (diff % 60000) / 1000
+
+                binding.tvCountdownDias.text = String.format("%02d", dias)
+                binding.tvCountdownHoras.text = String.format("%02d", horas)
+                binding.tvCountdownMinutos.text = String.format("%02d", minutos)
+                binding.tvCountdownSegundos.text = String.format("%02d", segundos)
+            }
+
+            override fun onFinish() {
+                binding.layoutCuentaRegresiva.visibility = View.GONE
+            }
+        }.start()
+    }
+
     private fun showQRDialog(quiniela: QuinielaResumenDTO) {
         val dialogBinding = DialogQrBinding.inflate(layoutInflater)
         val dialog = MaterialAlertDialogBuilder(this)
@@ -157,41 +253,19 @@ class DashboardActivity : AppCompatActivity() {
 
         dialogBinding.tvCodigo.text = quiniela.codigoInvitacion
 
-        try {
-            val size = 500
-            val bitMatrix: BitMatrix = MultiFormatWriter().encode(
-                quiniela.codigoInvitacion,
-                BarcodeFormat.QR_CODE,
-                size,
-                size
-            )
-            val bitmap = createBitmap(size, size)
-            for (x in 0 until size) {
-                for (y in 0 until size) {
-                    bitmap[x, y] = if (bitMatrix[x, y]) 0xFF000000.toInt() else 0xFFFFFFFF.toInt()
-                }
-            }
+        val bitmap = QrUtils.generateQrBitmap(quiniela.codigoInvitacion, 500)
+        if (bitmap != null) {
             dialogBinding.ivQR.setImageBitmap(bitmap)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Toast.makeText(this, "Error QR: ${e.message}", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "Error al generar QR", Toast.LENGTH_SHORT).show()
         }
 
         dialogBinding.btnCompartir.setOnClickListener {
-            compartirCodigo(quiniela.codigoInvitacion)
+            ShareUtils.shareQuiniela(this, quiniela.nombre, quiniela.codigoInvitacion)
             dialog.dismiss()
         }
 
         dialog.show()
-    }
-
-    private fun compartirCodigo(codigo: String) {
-        val mensaje = "Únete a mi quiniela! Usa el código: $codigo\n\nO escanea el código QR de la app Quiniela"
-        val intent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(Intent.EXTRA_TEXT, mensaje)
-        }
-        startActivity(Intent.createChooser(intent, "Compartir con"))
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -211,6 +285,16 @@ class DashboardActivity : AppCompatActivity() {
         }
     }
 
+    private fun showPuntosInfoDialog() {
+        val dialogBinding = com.quiniela.app.databinding.DialogPuntosInfoBinding.inflate(layoutInflater)
+        val dialog = MaterialAlertDialogBuilder(this)
+            .setView(dialogBinding.root)
+            .create()
+        dialog.window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(0xE80B1220.toInt()))
+        dialog.window?.setDimAmount(0.6f)
+        dialog.show()
+    }
+
     private fun setupButtons() {
         binding.btnCrearQuiniela.setOnClickListener {
             val intent = Intent(this, CrearQuinielaActivity::class.java)
@@ -223,6 +307,8 @@ class DashboardActivity : AppCompatActivity() {
             intent.putExtra("modo", "unirse")
             startActivity(intent)
         }
+
+        binding.cardPuntosInfo.setOnClickListener { showPuntosInfoDialog() }
     }
 
     private val handler = Handler(Looper.getMainLooper())
@@ -241,7 +327,13 @@ class DashboardActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
+        countdownTimer?.cancel()
         handler.removeCallbacks(pollingRunnable)
         adapterPartidosEnVivo.cleanup()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        countdownTimer?.cancel()
     }
 }
