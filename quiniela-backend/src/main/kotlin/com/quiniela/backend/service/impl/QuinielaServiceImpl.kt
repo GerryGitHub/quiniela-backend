@@ -28,7 +28,7 @@ class QuinielaServiceImpl(
 
         val comoAdmin = quinielaRepository.findByAdministradorId(usuario.id)
         comoAdmin.forEach { q ->
-            val participacion = participacionRepository.findByUsuarioIdAndQuinielaId(usuario.id, q.id)
+            val participacion = participacionRepository.findByUsuario_IdAndQuiniela_Id(usuario.id, q.id)
             resultado.add(
                 QuinielaResumenDTO(
                     id = q.id,
@@ -42,7 +42,7 @@ class QuinielaServiceImpl(
         val comoParticipante = quinielaRepository.findByParticipanteId(usuario.id)
         comoParticipante.forEach { q ->
             if (resultado.none { it.id == q.id }) {
-                val participacion = participacionRepository.findByUsuarioIdAndQuinielaId(usuario.id, q.id)
+                val participacion = participacionRepository.findByUsuario_IdAndQuiniela_Id(usuario.id, q.id)
                 resultado.add(
                     QuinielaResumenDTO(
                         id = q.id,

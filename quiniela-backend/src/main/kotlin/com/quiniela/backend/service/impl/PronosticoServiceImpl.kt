@@ -82,7 +82,7 @@ class PronosticoServiceImpl(
         val usuario = usuarioRepository.findByEmail(email)
             .orElseThrow { IllegalArgumentException("Usuario no encontrado") }
 
-        val participacion = participacionRepository.findByUsuarioIdAndQuinielaId(usuario.id, request.idQuiniela)
+        val participacion = participacionRepository.findByUsuario_IdAndQuiniela_Id(usuario.id, request.idQuiniela)
             .orElseThrow { NotFoundException("No participas en esta quiniela") }
 
         val pronosticosGuardados = mutableListOf<PronosticoDTO>()

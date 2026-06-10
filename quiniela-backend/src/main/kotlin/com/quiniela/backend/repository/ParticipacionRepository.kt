@@ -8,7 +8,7 @@ import java.util.Optional
 
 @Repository
 interface ParticipacionRepository : JpaRepository<Participacion, Long> {
-    fun findByUsuarioIdAndQuinielaId(usuarioId: Long, quinielaId: Long): Optional<Participacion>
+    fun findByUsuario_IdAndQuiniela_Id(usuarioId: Long, quinielaId: Long): Optional<Participacion>
 
     fun existsByUsuarioIdAndQuinielaId(usuarioId: Long, quinielaId: Long): Boolean
 
