@@ -312,20 +312,12 @@ class QuinielaDetalleActivity : AppCompatActivity() {
         binding.btnGuardarPronosticos.isEnabled = false
 
         lifecycleScope.launch {
-            val items = pronosticosModificados
-                .filter { it.golesLocalPredicho != null && it.golesVisitantePredicho != null }
-                .map { pp ->
-                    PronosticoItemRequest(
-                        idPartido = pp.partido.id,
-                        golesLocalPredicho = pp.golesLocalPredicho!!,
-                        golesVisitantePredicho = pp.golesVisitantePredicho!!
-                    )
-                }
-            if (items.isEmpty()) {
-                UiUtils.showWarningSnackbar(binding.root, "Llena los marcadores antes de guardar")
-                binding.progressBar.visibility = View.GONE
-                binding.btnGuardarPronosticos.isEnabled = true
-                return@launch
+            val items = pronosticosModificados.map { pp ->
+                PronosticoItemRequest(
+                    idPartido = pp.partido.id,
+                    golesLocalPredicho = pp.golesLocalPredicho ?: 0,
+                    golesVisitantePredicho = pp.golesVisitantePredicho ?: 0
+                )
             }
             
             when (val result = pronosticoRepository.crearPronosticosBatch(quinielaId, items)) {
