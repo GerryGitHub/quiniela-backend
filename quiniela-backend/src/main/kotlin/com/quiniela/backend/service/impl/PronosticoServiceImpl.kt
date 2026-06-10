@@ -68,7 +68,8 @@ class PronosticoServiceImpl(
                 partido = partido,
                 golesLocalPredicho = request.golesLocalPredicho,
                 golesVisitantePredicho = request.golesVisitantePredicho,
-                puntosObtenidos = 0
+                puntosObtenidos = 0,
+                quiniela = participacion.quiniela
             )
         }
 
@@ -113,7 +114,8 @@ class PronosticoServiceImpl(
                     partido = partido,
                     golesLocalPredicho = item.golesLocalPredicho,
                     golesVisitantePredicho = item.golesVisitantePredicho,
-                    puntosObtenidos = 0
+                    puntosObtenidos = 0,
+                    quiniela = participacion.quiniela
                 )
             }
 
@@ -168,7 +170,8 @@ class PronosticoServiceImpl(
             partido = partido.toPartidoDTO(),
             golesLocalPredicho = golesLocalPredicho,
             golesVisitantePredicho = golesVisitantePredicho,
-            puntosObtenidos = puntosObtenidos
+            puntosObtenidos = puntosObtenidos,
+            quinielaId = quiniela?.id
         )
     }
 }

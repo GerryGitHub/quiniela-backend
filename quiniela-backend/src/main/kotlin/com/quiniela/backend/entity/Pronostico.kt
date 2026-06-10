@@ -13,7 +13,9 @@ class Pronostico(
     val partido: Partido,
     var golesLocalPredicho: Int,
     var golesVisitantePredicho: Int,
-    var puntosObtenidos: Int = 0
+    var puntosObtenidos: Int = 0,
+    @ManyToOne
+    val quiniela: Quiniela? = null
 ) {
     fun calcularPuntos(): Int {
         val realLocal = partido.golesLocalReal ?: return 0

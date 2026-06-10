@@ -30,7 +30,8 @@ data class PronosticoDTO(
     val partido: PartidoDTO,
     val golesLocalPredicho: Int,
     val golesVisitantePredicho: Int,
-    val puntosObtenidos: Int
+    val puntosObtenidos: Int,
+    val quinielaId: Long? = null
 )
 
 data class CrearPronosticoRequest(
