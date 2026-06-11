@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository
 interface PronosticoRepository : JpaRepository<Pronostico, Long> {
     fun findByParticipacionIdAndPartidoId(participacionId: Long, partidoId: Long): Pronostico?
 
-    @Query("SELECT p FROM Pronostico p WHERE p.quiniela.id = :quinielaId AND p.participacion.usuario.email = :email")
+    @Query("SELECT p FROM Pronostico p WHERE p.participacion.quiniela.id = :quinielaId AND p.participacion.usuario.email = :email")
     fun findByQuinielaIdAndUsuarioEmail(quinielaId: Long, email: String): List<Pronostico>
 
     @Query("SELECT p FROM Pronostico p WHERE p.partido.id = :partidoId")
