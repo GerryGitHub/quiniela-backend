@@ -11,6 +11,8 @@ import com.quiniela.app.databinding.ItemGrupoHeaderBinding
 import com.quiniela.app.databinding.ItemPronosticarBinding
 import com.quiniela.app.model.PartidoDTO
 import com.quiniela.app.util.CountryFlagResolver
+import java.text.SimpleDateFormat
+import java.util.*
 
 sealed class PronosticoItem {
     data class Header(val grupo: String) : PronosticoItem()
@@ -104,7 +106,7 @@ class PronosticarAdapter : ListAdapter<PronosticoItem, RecyclerView.ViewHolder>(
             binding.tvFlagLocal.setImageResource(CountryFlagResolver.getFlagResource(partido.equipoLocal))
             binding.tvFlagVisitante.setImageResource(CountryFlagResolver.getFlagResource(partido.equipoVisitante))
             
-            val esEditable = partido.estado == "PENDIENTE"
+            val esEditable = partido.estado == "PENDIENTE" && !partidoYaComenzo(partido.fechaHora)
             binding.etGolesLocal.isEnabled = esEditable
             binding.etGolesVisitante.isEnabled = esEditable
             
@@ -156,5 +158,15 @@ class PronosticarAdapter : ListAdapter<PronosticoItem, RecyclerView.ViewHolder>(
         override fun areContentsTheSame(oldItem: PronosticoItem, newItem: PronosticoItem): Boolean {
             return oldItem == newItem
         }
+    }
+}
+
+private fun partidoYaComenzo(fechaHora: String): Boolean {
+    return try {
+        val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
+        val fecha = sdf.parse(fechaHora)
+        fecha != null && fecha.before(Date())
+    } catch (e: Exception) {
+        false
     }
 }

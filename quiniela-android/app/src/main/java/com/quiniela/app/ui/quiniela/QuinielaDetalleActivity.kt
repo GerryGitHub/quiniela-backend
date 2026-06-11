@@ -26,6 +26,8 @@ import com.quiniela.app.repository.Result
 import com.quiniela.app.util.CountryFlagResolver
 import com.quiniela.app.util.UiUtils
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
 
 class QuinielaDetalleActivity : AppCompatActivity() {
     private lateinit var binding: ActivityQuinielaDetalleBinding
@@ -330,9 +332,20 @@ class QuinielaDetalleActivity : AppCompatActivity() {
                     UiUtils.showErrorSnackbar(binding.root, result.message)
                     binding.progressBar.visibility = View.GONE
                     binding.btnGuardarPronosticos.isEnabled = true
-                }
-            }
         }
+
+    }
+}
+
+private fun partidoYaComenzo(fechaHora: String): Boolean {
+    return try {
+        val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
+        val fecha = sdf.parse(fechaHora)
+        fecha != null && fecha.before(Date())
+    } catch (e: Exception) {
+        false
+    }
+}
     }
 
     private fun actualizarProgresoPronosticos(completados: Int, total: Int) {
@@ -486,7 +499,7 @@ class PartidosConPronosticoAdapter(
             binding.tvVisitante.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, visitFlag, null)
             binding.tvFecha.text = item.partido.fechaHora
 
-            val esEditable = item.partido.estado == PartidoDTO.ESTADO_PENDIENTE
+            val esEditable = item.partido.estado == PartidoDTO.ESTADO_PENDIENTE && !partidoYaComenzo(item.partido.fechaHora)
             binding.etGolesLocal.isEnabled = esEditable
             binding.etGolesVisitante.isEnabled = esEditable
 
