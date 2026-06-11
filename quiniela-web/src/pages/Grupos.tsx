@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { gruposService } from '../services/api';
 import './Grupos.css';
 
 interface Seleccion {
@@ -43,8 +44,7 @@ export default function Grupos() {
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('https://api.gjapps.com/api/grupos')
-      .then(res => res.json())
+    gruposService.getGrupos()
       .then(data => {
         setGrupos(data.grupos);
         setLoading(false);

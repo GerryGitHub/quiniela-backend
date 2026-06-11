@@ -22,11 +22,11 @@ class GrupoServiceImpl(
         val grupos = grupoRepository.findAll()
 
         val gruposDTO = grupos.map { grupo ->
-            val equipos = equipoRepository.findByGrupoId(grupo.id).map { it.toSeleccionDTO() }
-            val partidos = partidoRepository.findAll()
+            val partidosEntity = partidoRepository.findAll()
                 .filter { it.grupo.id == grupo.id }
                 .sortedBy { it.fechaHora }
-                .map { it.toPartidoDTO() }
+            val equipos = equipoRepository.findByGrupoId(grupo.id).map { it.toSeleccionDTO(partidosEntity) }
+            val partidos = partidosEntity.map { it.toPartidoDTO() }
 
             GrupoDTO(
                 id = grupo.id,
@@ -42,11 +42,11 @@ class GrupoServiceImpl(
 
     override fun getGrupo(nombre: String): GrupoDTO {
         val grupo = grupoRepository.findByNombre(nombre) ?: throw NotFoundException("Grupo no encontrado")
-        val equipos = equipoRepository.findByGrupoId(grupo.id).map { it.toSeleccionDTO() }
-        val partidos = partidoRepository.findAll()
+        val partidosEntity = partidoRepository.findAll()
             .filter { it.grupo.id == grupo.id }
             .sortedBy { it.fechaHora }
-            .map { it.toPartidoDTO() }
+        val equipos = equipoRepository.findByGrupoId(grupo.id).map { it.toSeleccionDTO(partidosEntity) }
+        val partidos = partidosEntity.map { it.toPartidoDTO() }
 
         return GrupoDTO(
             id = grupo.id,
@@ -73,19 +73,49 @@ class GrupoServiceImpl(
         return partidoRepository.findAllByOrderByFechaHoraAsc().map { it.toPartidoDTO() }
     }
 
-    private fun com.quiniela.backend.entity.Equipo.toSeleccionDTO() = SeleccionDTO(
-        id = id,
-        nombre = nombre,
-        pais = nombre,
-        grupo = grupo?.nombre ?: "",
-        bandera = banderaUrl,
-        partidosJugados = 0,
-        partidosGanados = 0,
-        partidosEmpatados = 0,
-        partidosPerdidos = 0,
-        golesAFavor = 0,
-        golesEnContra = 0,
-        puntos = 0,
-        diferenciaGoles = 0
-    )
+    private fun com.quiniela.backend.entity.Equipo.toSeleccionDTO(partidos: List<com.quiniela.backend.entity.Partido>): SeleccionDTO {
+        var pj = 0; var pg = 0; var pe = 0; var pp = 0
+        var gf = 0; var gc = 0
+
+        for (partido in partidos) {
+            val golesL = partido.golesLocalReal ?: continue
+            val golesV = partido.golesVisitanteReal ?: continue
+            val esLocal = partido.equipoLocal.id == id
+            val esVisitante = partido.equipoVisitante.id == id
+            if (!esLocal && !esVisitante) continue
+
+            pj++
+            if (esLocal) {
+                gf += golesL; gc += golesV
+                when {
+                    golesL > golesV -> pg++
+                    golesL == golesV -> pe++
+                    else -> pp++
+                }
+            } else {
+                gf += golesV; gc += golesL
+                when {
+                    golesV > golesL -> pg++
+                    golesV == golesL -> pe++
+                    else -> pp++
+                }
+            }
+        }
+
+        return SeleccionDTO(
+            id = id,
+            nombre = nombre,
+            pais = nombre,
+            grupo = grupo?.nombre ?: "",
+            bandera = banderaUrl,
+            partidosJugados = pj,
+            partidosGanados = pg,
+            partidosEmpatados = pe,
+            partidosPerdidos = pp,
+            golesAFavor = gf,
+            golesEnContra = gc,
+            puntos = pg * 3 + pe,
+            diferenciaGoles = gf - gc
+        )
+    }
 }

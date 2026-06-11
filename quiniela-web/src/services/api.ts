@@ -83,6 +83,13 @@ export const quinielaService = {
   },
 };
 
+export const gruposService = {
+  getGrupos: async () => {
+    const response = await api.get('/api/grupos');
+    return response.data;
+  },
+};
+
 export const partidoService = {
   getPartidos: async () => {
     const response = await api.get('/partidos');
