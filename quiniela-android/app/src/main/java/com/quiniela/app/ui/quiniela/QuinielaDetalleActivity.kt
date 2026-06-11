@@ -335,6 +335,15 @@ class QuinielaDetalleActivity : AppCompatActivity() {
                 }
             }
     }
+
+    private fun actualizarProgresoPronosticos(completados: Int, total: Int) {
+        binding.progressPronosticos.progress = if (total > 0) (completados * 100 / total) else 0
+        binding.tvProgresoContador.text = "$completados/$total"
+        binding.tvProgresoCompletados.text = "$completados completados"
+        binding.tvProgresoPendientes.text = "${total - completados} pendientes"
+        binding.tvProgresoPendientes.visibility = if (total - completados > 0) View.VISIBLE else View.GONE
+        binding.layoutProgresoPronosticos.visibility = if (total > 0) View.VISIBLE else View.GONE
+    }
 }
 
 private fun partidoYaComenzo(fechaHora: String): Boolean {
@@ -344,16 +353,6 @@ private fun partidoYaComenzo(fechaHora: String): Boolean {
         fecha != null && fecha.before(Date())
     } catch (e: Exception) {
         false
-    }
-}
-
-    private fun actualizarProgresoPronosticos(completados: Int, total: Int) {
-        binding.progressPronosticos.progress = if (total > 0) (completados * 100 / total) else 0
-        binding.tvProgresoContador.text = "$completados/$total"
-        binding.tvProgresoCompletados.text = "$completados completados"
-        binding.tvProgresoPendientes.text = "${total - completados} pendientes"
-        binding.tvProgresoPendientes.visibility = if (total - completados > 0) View.VISIBLE else View.GONE
-        binding.layoutProgresoPronosticos.visibility = if (total > 0) View.VISIBLE else View.GONE
     }
 }
 
