@@ -71,6 +71,7 @@ class PronosticarActivity : AppCompatActivity() {
         
         binding.spQuiniela.setOnItemClickListener { _, _, position, _ ->
             selectedQuinielaId = quinielas[position].id
+            selectedQuinielaId?.let { cargarPronosticos(it) }
         }
     }
 
@@ -126,6 +127,22 @@ class PronosticarActivity : AppCompatActivity() {
         }
         
         return result
+    }
+
+    private fun cargarPronosticos(quinielaId: Long) {
+        lifecycleScope.launch {
+            when (val result = pronosticoRepository.getMisPronosticosByQuiniela(quinielaId)) {
+                is Result.Success -> {
+                    val data = result.data.pronosticos.associate { 
+                        it.partido.id to Pair(it.golesLocalPredicho, it.golesVisitantePredicho)
+                    }
+                    adapter.cargarPronosticos(data)
+                }
+                is Result.Error -> {
+                    UiUtils.showErrorSnackbar(binding.root, "Error al cargar pronósticos")
+                }
+            }
+        }
     }
 
     private fun guardarPronosticos() {

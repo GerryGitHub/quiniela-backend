@@ -69,6 +69,16 @@ class PronosticarAdapter : ListAdapter<PronosticoItem, RecyclerView.ViewHolder>(
         return pronosticos.values.filter { it.partido.estado == "PENDIENTE" }.toList()
     }
 
+    fun cargarPronosticos(pronosticosData: Map<Long, Pair<Int, Int>>) {
+        for ((idPartido, goles) in pronosticosData) {
+            val partido = (currentList.find {
+                it is PronosticoItem.PartidoItem && (it as PronosticoItem.PartidoItem).partido.id == idPartido
+            } as? PronosticoItem.PartidoItem)?.partido ?: continue
+            pronosticos[idPartido] = PartidoConPronostico(partido, goles.first, goles.second)
+        }
+        notifyItemRangeChanged(0, currentList.size)
+    }
+
     inner class HeaderViewHolder(private val binding: ItemGrupoHeaderBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(grupo: String) {
             binding.tvHeader.text = "Grupo $grupo"
