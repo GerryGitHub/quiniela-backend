@@ -334,6 +334,7 @@ class QuinielaDetalleActivity : AppCompatActivity() {
                     binding.btnGuardarPronosticos.isEnabled = true
                 }
             }
+        }
     }
 
     private fun actualizarProgresoPronosticos(completados: Int, total: Int) {
