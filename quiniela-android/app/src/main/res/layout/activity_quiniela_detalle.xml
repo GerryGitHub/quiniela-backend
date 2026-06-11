@@ -108,6 +108,81 @@
                     android:paddingBottom="8dp"
                     android:clipToPadding="false"/>
 
+                <LinearLayout
+                    android:id="@+id/layoutProgresoPronosticos"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="#4D1A1A2E"
+                    android:gravity="center_vertical"
+                    android:padding="12dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginBottom="8dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Pronósticos"
+                            android:textSize="12sp"
+                            android:textColor="#99FFFFFF"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:id="@+id/tvProgresoContador"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0/0"
+                            android:textSize="12sp"
+                            android:textColor="#FFFFFF"
+                            android:textStyle="bold"/>
+                    </LinearLayout>
+
+                    <ProgressBar
+                        android:id="@+id/progressPronosticos"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="6dp"
+                        android:layout_marginTop="8dp"
+                        android:max="100"
+                        android:progress="0"
+                        android:progressTint="#0D5BFF"
+                        android:progressBackgroundTint="#15FFFFFF"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:id="@+id/tvProgresoCompletados"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="0 completados"
+                            android:textSize="10sp"
+                            android:textColor="@color/success"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:id="@+id/tvProgresoPendientes"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0 pendientes"
+                            android:textSize="10sp"
+                            android:textColor="#66FFFFFF"/>
+                    </LinearLayout>
+
+                </LinearLayout>
+
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnGuardarPronosticos"
                     android:layout_width="match_parent"
@@ -134,9 +209,9 @@
                     android:id="@+id/layoutMiPosicion"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
+                    android:orientation="vertical"
                     android:gravity="center"
-                    android:paddingVertical="12dp"
+                    android:paddingVertical="10dp"
                     android:paddingHorizontal="20dp"
                     android:background="#330D5BFF"
                     android:visibility="gone">
@@ -148,6 +223,16 @@
                         android:textSize="15sp"
                         android:textStyle="bold"
                         android:textColor="#FFFFFF" />
+
+                    <TextView
+                        android:id="@+id/tvDiferenciaPosicion"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="11sp"
+                        android:textColor="@color/success"
+                        android:textStyle="bold"
+                        android:layout_marginTop="2dp"
+                        android:visibility="gone"/>
                 </LinearLayout>
 
                 <!-- Empty state -->

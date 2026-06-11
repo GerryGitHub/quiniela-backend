@@ -10,6 +10,7 @@ object CountryFlagResolver {
     private val flagMap = mapOf(
         "MÉXICO" to R.drawable.mex,
         "SUDÁFICA" to R.drawable.rsa,
+        "SUDÁFRICA" to R.drawable.rsa,
         "REPÚBLICA DE COREA" to R.drawable.kor,
         "REPÚBLICA CHECA" to R.drawable.cze,
         "CANADÁ" to R.drawable.can,
@@ -37,6 +38,7 @@ object CountryFlagResolver {
         "BÉLGICA" to R.drawable.bel,
         "EGIPTO" to R.drawable.egy,
         "ARABIA SAUDÍ" to R.drawable.ksa,
+        "ARABIA SAUDITA" to R.drawable.ksa,
         "URUGUAY" to R.drawable.uru,
         "RI DE IRÁN" to R.drawable.irn,
         "NUEVA ZELANDA" to R.drawable.nzl,

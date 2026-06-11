@@ -1,30 +1,19 @@
-import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { useStore } from '../store/useStore';
 import Spinner from '../components/Spinner';
 import './Login.css';
 
 export default function Login() {
-  const navigate = useNavigate();
   const { login, loading } = useStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-
-  const [successMsg, setSuccessMsg] = useState('');
 
   const sessionExpired = localStorage.getItem('sessionExpired');
   if (sessionExpired) {
     localStorage.removeItem('sessionExpired');
     setTimeout(() => setError('Tu sesión expiró. Por favor inicia sesión nuevamente.'), 100);
   }
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('registered') === 'true') {
-      setSuccessMsg('Cuenta creada correctamente. Revisa tu correo para verificar tu cuenta con el código OTP.');
-    }
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,7 +32,6 @@ export default function Login() {
         <h1>Quiniela</h1>
         <h2>Iniciar Sesión</h2>
         
-        {successMsg && <div className="success-message">{successMsg}</div>}
         {error && <div className="error-message">{error}</div>}
         
         <form onSubmit={handleSubmit}>
@@ -77,7 +65,7 @@ export default function Login() {
         </form>
         
         <p className="link-text">
-          ¿No tienes cuenta? <Link to="/register">Regístrate</Link>
+          Panel de administración — solo para administradores
         </p>
       </div>
     </div>
