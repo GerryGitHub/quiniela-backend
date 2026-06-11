@@ -122,7 +122,8 @@ class PronosticoService(
                     partido = partido,
                     golesLocalPredicho = item.golesLocalPredicho,
                     golesVisitantePredicho = item.golesVisitantePredicho,
-                    puntosObtenidos = 0
+                    puntosObtenidos = 0,
+                    quiniela = participacion.quiniela
                 )
             }
 
@@ -203,7 +204,8 @@ class PronosticoService(
             ),
             golesLocalPredicho = golesLocalPredicho,
             golesVisitantePredicho = golesVisitantePredicho,
-            puntosObtenidos = puntosObtenidos
+            puntosObtenidos = puntosObtenidos,
+            quinielaId = quiniela?.id
         )
     }
 }
