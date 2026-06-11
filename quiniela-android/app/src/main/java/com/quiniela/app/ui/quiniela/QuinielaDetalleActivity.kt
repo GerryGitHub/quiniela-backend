@@ -332,8 +332,8 @@ class QuinielaDetalleActivity : AppCompatActivity() {
                     UiUtils.showErrorSnackbar(binding.root, result.message)
                     binding.progressBar.visibility = View.GONE
                     binding.btnGuardarPronosticos.isEnabled = true
-        }
-
+                }
+            }
     }
 }
 
@@ -346,7 +346,6 @@ private fun partidoYaComenzo(fechaHora: String): Boolean {
         false
     }
 }
-    }
 
     private fun actualizarProgresoPronosticos(completados: Int, total: Int) {
         binding.progressPronosticos.progress = if (total > 0) (completados * 100 / total) else 0
