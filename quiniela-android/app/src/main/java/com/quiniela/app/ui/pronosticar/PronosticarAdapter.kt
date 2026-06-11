@@ -161,7 +161,7 @@ class PronosticarAdapter : ListAdapter<PronosticoItem, RecyclerView.ViewHolder>(
     }
 }
 
-private fun partidoYaComenzo(fechaHora: String): Boolean {
+internal fun partidoYaComenzo(fechaHora: String): Boolean {
     return try {
         val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
         val fecha = sdf.parse(fechaHora)

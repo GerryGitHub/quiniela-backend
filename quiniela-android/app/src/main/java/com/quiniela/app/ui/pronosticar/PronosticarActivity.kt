@@ -135,7 +135,7 @@ class PronosticarActivity : AppCompatActivity() {
         }
 
         val pronosticosItems = adapter.getPronosticos()
-            .filter { it.partido.estado == "PENDIENTE" }
+            .filter { it.partido.estado == "PENDIENTE" && !partidoYaComenzo(it.partido.fechaHora) }
             .map { pronostico ->
             PronosticoItemRequest(
                 idPartido = pronostico.partido.id,
