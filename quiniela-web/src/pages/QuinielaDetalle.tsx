@@ -11,10 +11,15 @@ export default function QuinielaDetalle() {
   const [activeTab, setActiveTab] = useState<'partidos' | 'participantes'>('partidos');
 
   useEffect(() => {
-    if (id) {
-      fetchQuinielaDetalle(parseInt(id));
-      fetchLeaderboard(parseInt(id));
-    }
+    if (!id) return;
+    const quinielaId = parseInt(id);
+    const fetch = () => {
+      fetchQuinielaDetalle(quinielaId);
+      fetchLeaderboard(quinielaId);
+    };
+    fetch();
+    const interval = setInterval(fetch, 30000);
+    return () => clearInterval(interval);
   }, [id]);
 
   if (!quinielaDetalle) {
