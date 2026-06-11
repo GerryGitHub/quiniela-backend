@@ -263,12 +263,12 @@ class AuthService(
 
         val puntosGlobales = usuarioRepository.puntosTotalesGlobales(usuario.id)
 
-        val participaciones = participacionRepository.findByUsuarioIdAndQuinielaId(usuario.id, 0L)
+        val participaciones = participacionRepository.findByUsuario_IdAndQuiniela_Id(usuario.id, 0L)
         val quinielas = mutableListOf<QuinielaResumenDTO>()
 
         val misQuinielasAdmin = quinielaRepository.findByAdministradorId(usuario.id)
         misQuinielasAdmin.forEach { q ->
-            val participacion = participacionRepository.findByUsuarioIdAndQuinielaId(usuario.id, q.id)
+            val participacion = participacionRepository.findByUsuario_IdAndQuiniela_Id(usuario.id, q.id)
             quinielas.add(
                 QuinielaResumenDTO(
                     id = q.id,
@@ -282,7 +282,7 @@ class AuthService(
         val misQuinielas = quinielaRepository.findByParticipanteId(usuario.id)
         misQuinielas.forEach { q ->
             if (quinielas.none { it.id == q.id }) {
-                val participacion = participacionRepository.findByUsuarioIdAndQuinielaId(usuario.id, q.id)
+                val participacion = participacionRepository.findByUsuario_IdAndQuiniela_Id(usuario.id, q.id)
                 quinielas.add(
                     QuinielaResumenDTO(
                         id = q.id,

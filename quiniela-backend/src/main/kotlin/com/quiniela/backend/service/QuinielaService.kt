@@ -26,7 +26,7 @@ class QuinielaService(
 
         val comoAdmin = quinielaRepository.findByAdministradorId(usuario.id)
         comoAdmin.forEach { q ->
-            val participacion = participacionRepository.findByUsuarioIdAndQuinielaId(usuario.id, q.id)
+            val participacion = participacionRepository.findByUsuario_IdAndQuiniela_Id(usuario.id, q.id)
             resultado.add(
                 QuinielaResumenDTO(
                     id = q.id,
@@ -40,7 +40,7 @@ class QuinielaService(
         val comoParticipante = quinielaRepository.findByParticipanteId(usuario.id)
         comoParticipante.forEach { q ->
             if (resultado.none { it.id == q.id }) {
-                val participacion = participacionRepository.findByUsuarioIdAndQuinielaId(usuario.id, q.id)
+                val participacion = participacionRepository.findByUsuario_IdAndQuiniela_Id(usuario.id, q.id)
                 resultado.add(
                     QuinielaResumenDTO(
                         id = q.id,
@@ -95,6 +95,11 @@ class QuinielaService(
         val quiniela = quinielaRepository.findById(id)
             .orElseThrow { NotFoundException("Quiniela no encontrada") }
 
+        val usuario = usuarioRepository.findByEmail(email)
+            .orElseThrow { IllegalArgumentException("Usuario no encontrado") }
+
+        val participacionActual = participacionRepository.findByUsuario_IdAndQuiniela_Id(usuario.id, quiniela.id)
+
         val participantes = participacionRepository.findByQuinielaIdOrderByPuntosDesc(id)
             .map { p ->
                 UsuarioDTO(
@@ -133,7 +138,8 @@ class QuinielaService(
                 quiniela.administrador.email
             ),
             participantes = participantes,
-            partidos = partidos
+            partidos = partidos,
+            participacionId = participacionActual.map { it.id }.orElse(null)
         )
     }
 
@@ -149,7 +155,7 @@ class QuinielaService(
 
         println("UnirseQuiniela - usuario: ${usuario.id}, quiniela: ${quiniela.id}")
 
-        if (participacionRepository.existsByUsuarioIdAndQuinielaId(usuario.id, quiniela.id)) {
+        if (participacionRepository.existsByUsuario_IdAndQuiniela_Id(usuario.id, quiniela.id)) {
             throw IllegalArgumentException("Ya estás participando en esta quiniela")
         }
 
