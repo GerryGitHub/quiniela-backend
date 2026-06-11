@@ -1,5 +1,6 @@
 package com.quiniela.backend.controller
 
+import com.quiniela.backend.domain.mapper.toCommand
 import com.quiniela.backend.dto.*
 import com.quiniela.backend.service.AuthService
 import com.quiniela.backend.service.PasswordResetService
@@ -24,43 +25,43 @@ class AuthController(
     @PostMapping("/register")
     @Operation(summary = "Registrar nuevo usuario")
     fun register(@Valid @RequestBody request: RegisterRequest): ResponseEntity<RegisterResponse> {
-        return ResponseEntity.ok(authService.register(request))
+        return ResponseEntity.ok(authService.register(request.toCommand()))
     }
 
     @PostMapping("/login")
     @Operation(summary = "Iniciar sesión")
     fun login(@Valid @RequestBody request: LoginRequest): ResponseEntity<AuthResponse> {
-        return ResponseEntity.ok(authService.login(request))
+        return ResponseEntity.ok(authService.login(request.toCommand()))
     }
 
     @PostMapping("/refresh")
     @Operation(summary = "Renovar access token mediante refresh token")
     fun refresh(@Valid @RequestBody request: RefreshTokenRequest): ResponseEntity<RefreshTokenResponse> {
-        return ResponseEntity.ok(authService.refreshAccessToken(request))
+        return ResponseEntity.ok(authService.refreshAccessToken(request.toCommand()))
     }
 
     @PostMapping("/verify-registration-otp")
     @Operation(summary = "Verificar cuenta con código OTP")
     fun verifyRegistrationOtp(@Valid @RequestBody request: VerifyRegistrationOtpRequest): ResponseEntity<MessageResponse> {
-        return ResponseEntity.ok(authService.verifyRegistrationOtp(request))
+        return ResponseEntity.ok(authService.verifyRegistrationOtp(request.toCommand()))
     }
 
     @PostMapping("/resend-verification")
     @Operation(summary = "Reenviar correo de verificación")
     fun resendVerification(@Valid @RequestBody request: ResendVerificationRequest): ResponseEntity<MessageResponse> {
-        return ResponseEntity.ok(authService.resendVerification(request))
+        return ResponseEntity.ok(authService.resendVerification(request.toCommand()))
     }
 
     @PostMapping("/forgot-password")
     @Operation(summary = "Solicitar restablecimiento de contraseña")
     fun forgotPassword(@Valid @RequestBody request: ForgotPasswordRequest): ResponseEntity<MessageResponse> {
-        return ResponseEntity.ok(passwordResetService.forgotPassword(request))
+        return ResponseEntity.ok(passwordResetService.forgotPassword(request.toCommand()))
     }
 
     @PostMapping("/reset-password")
     @Operation(summary = "Restablecer contraseña con token")
     fun resetPassword(@Valid @RequestBody request: ResetPasswordRequest): ResponseEntity<MessageResponse> {
-        return ResponseEntity.ok(passwordResetService.resetPassword(request))
+        return ResponseEntity.ok(passwordResetService.resetPassword(request.toCommand()))
     }
 
     @GetMapping("/me")

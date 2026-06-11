@@ -1,5 +1,7 @@
 package com.quiniela.backend.service
 
+import com.quiniela.backend.domain.CrearPronosticoCommand
+import com.quiniela.backend.domain.GuardarPronosticosCommand
 import com.quiniela.backend.dto.*
 import com.quiniela.backend.entity.EstadoPartido
 import com.quiniela.backend.entity.Pronostico
@@ -35,11 +37,11 @@ class PronosticoService(
     }
 
     @Transactional
-    fun crearOActualizarPronostico(request: CrearPronosticoRequest, email: String): PronosticoDTO {
+    fun crearOActualizarPronostico(command: CrearPronosticoCommand, email: String): PronosticoDTO {
         val usuario = usuarioRepository.findByEmail(email)
             .orElseThrow { IllegalArgumentException("Usuario no encontrado") }
 
-        val partido = partidoRepository.findById(request.idPartido)
+        val partido = partidoRepository.findById(command.idPartido)
             .orElseThrow { NotFoundException("Partido no encontrado") }
 
         if (partido.fechaHora.isBefore(LocalDateTime.now())) {
@@ -50,7 +52,7 @@ class PronosticoService(
             throw ForbiddenException("Solo puedes prognosticar partidos pendientes")
         }
 
-        val participacion = participacionRepository.findById(request.idParticipacion)
+        val participacion = participacionRepository.findById(command.idParticipacion)
             .orElseThrow { NotFoundException("Participación no encontrada") }
 
         if (participacion.usuario.id != usuario.id) {
@@ -58,20 +60,20 @@ class PronosticoService(
         }
 
         val pronosticoExistente = pronosticoRepository.findByParticipacionIdAndPartidoId(
-            request.idParticipacion,
-            request.idPartido
+            command.idParticipacion,
+            command.idPartido
         )
 
         val pronostico = if (pronosticoExistente != null) {
-            pronosticoExistente.golesLocalPredicho = request.golesLocalPredicho
-            pronosticoExistente.golesVisitantePredicho = request.golesVisitantePredicho
+            pronosticoExistente.golesLocalPredicho = command.golesLocal
+            pronosticoExistente.golesVisitantePredicho = command.golesVisitante
             pronosticoExistente
         } else {
             Pronostico(
                 participacion = participacion,
                 partido = partido,
-                golesLocalPredicho = request.golesLocalPredicho,
-                golesVisitantePredicho = request.golesVisitantePredicho,
+                golesLocalPredicho = command.golesLocal,
+                golesVisitantePredicho = command.golesVisitante,
                 puntosObtenidos = 0,
                 quiniela = participacion.quiniela
             )
@@ -82,21 +84,21 @@ class PronosticoService(
     }
 
     @Transactional
-    fun guardarPronosticosBatch(request: CrearPronosticosBatchRequest, email: String): CrearPronosticosBatchResponse {
+    fun guardarPronosticosBatch(command: GuardarPronosticosCommand, email: String): CrearPronosticosBatchResponse {
         val usuario = usuarioRepository.findByEmail(email)
             .orElseThrow { IllegalArgumentException("Usuario no encontrado") }
 
-        val participacion = if (request.idParticipacion != null) {
-            participacionRepository.findById(request.idParticipacion)
+        val participacion = if (command.participacionId != null) {
+            participacionRepository.findById(command.participacionId)
                 .orElseThrow { NotFoundException("Participación no encontrada") }
         } else {
-            participacionRepository.findByUsuario_IdAndQuiniela_Id(usuario.id, request.idQuiniela)
+            participacionRepository.findByUsuario_IdAndQuiniela_Id(usuario.id, command.quinielaId)
                 .orElseThrow { NotFoundException("No participas en esta quiniela") }
         }
 
         val pronosticosGuardados = mutableListOf<PronosticoDTO>()
 
-        for (item in request.pronosticos) {
+        for (item in command.pronosticos) {
             val partido = partidoRepository.findById(item.idPartido)
                 .orElseThrow { NotFoundException("Partido no encontrado: ${item.idPartido}") }
 
@@ -114,15 +116,15 @@ class PronosticoService(
             )
 
             val pronostico = if (pronosticoExistente != null) {
-                pronosticoExistente.golesLocalPredicho = item.golesLocalPredicho
-                pronosticoExistente.golesVisitantePredicho = item.golesVisitantePredicho
+                pronosticoExistente.golesLocalPredicho = item.golesLocal
+                pronosticoExistente.golesVisitantePredicho = item.golesVisitante
                 pronosticoExistente
             } else {
                 Pronostico(
                     participacion = participacion,
                     partido = partido,
-                    golesLocalPredicho = item.golesLocalPredicho,
-                    golesVisitantePredicho = item.golesVisitantePredicho,
+                    golesLocalPredicho = item.golesLocal,
+                    golesVisitantePredicho = item.golesVisitante,
                     puntosObtenidos = 0,
                     quiniela = participacion.quiniela
                 )

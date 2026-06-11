@@ -1,5 +1,6 @@
 package com.quiniela.backend.service
 
+import com.quiniela.backend.domain.*
 import com.quiniela.backend.dto.*
 import com.quiniela.backend.entity.EmailVerificationToken
 import com.quiniela.backend.entity.PasswordResetToken
@@ -41,24 +42,24 @@ class AuthService(
 ) {
 
     @Transactional
-    fun register(request: RegisterRequest): RegisterResponse {
-        if (request.email.isBlank() || !request.email.contains("@")) {
+    fun register(command: RegisterCommand): RegisterResponse {
+        if (command.email.isBlank() || !command.email.contains("@")) {
             throw IllegalArgumentException("Email inválido")
         }
-        if (request.password.length < 6) {
+        if (command.password.length < 6) {
             throw IllegalArgumentException("La contraseña debe tener al menos 6 caracteres")
         }
-        if (request.nombre.isBlank()) {
+        if (command.nombre.isBlank()) {
             throw IllegalArgumentException("El nombre es requerido")
         }
-        if (usuarioRepository.existsByEmail(request.email)) {
+        if (usuarioRepository.existsByEmail(command.email)) {
             throw IllegalArgumentException("El email ya está registrado")
         }
 
         val usuario = Usuario(
-            nombre = request.nombre,
-            email = request.email,
-            password = passwordEncoder.encode(request.password),
+            nombre = command.nombre,
+            email = command.email,
+            password = passwordEncoder.encode(command.password),
             emailVerified = false,
             fechaRegistro = LocalDateTime.now()
         )
@@ -82,15 +83,15 @@ class AuthService(
     }
 
     @Transactional
-    fun verifyRegistrationOtp(request: VerifyRegistrationOtpRequest): MessageResponse {
-        val usuario = usuarioRepository.findByEmail(request.email)
+    fun verifyRegistrationOtp(command: VerifyOtpCommand): MessageResponse {
+        val usuario = usuarioRepository.findByEmail(command.email)
             .orElseThrow { IllegalArgumentException("Usuario no encontrado") }
 
         if (usuario.emailVerified) {
             throw IllegalArgumentException("La cuenta ya está verificada")
         }
 
-        val verificationToken = emailVerificationTokenRepository.findByUsuarioAndToken(usuario, request.code)
+        val verificationToken = emailVerificationTokenRepository.findByUsuarioAndToken(usuario, command.code)
             .orElseThrow { IllegalArgumentException("Código inválido") }
 
         if (verificationToken.used) {
@@ -111,8 +112,8 @@ class AuthService(
     }
 
     @Transactional
-    fun login(request: LoginRequest): AuthResponse {
-        val usuario = usuarioRepository.findByEmail(request.email)
+    fun login(command: LoginCommand): AuthResponse {
+        val usuario = usuarioRepository.findByEmail(command.email)
             .orElseThrow { IllegalArgumentException("Usuario no encontrado") }
 
         if (!usuario.emailVerified) {
@@ -120,10 +121,10 @@ class AuthService(
         }
 
         authenticationManager.authenticate(
-            UsernamePasswordAuthenticationToken(request.email, request.password)
+            UsernamePasswordAuthenticationToken(command.email, command.password)
         )
 
-        val userDetails = userDetailsService.loadUserByUsername(request.email)
+        val userDetails = userDetailsService.loadUserByUsername(command.email)
         val accessToken = jwtService.generateToken(userDetails)
 
         val refreshTokenValue = UUID.randomUUID().toString()
@@ -147,8 +148,8 @@ class AuthService(
     }
 
     @Transactional
-    fun refreshAccessToken(request: RefreshTokenRequest): RefreshTokenResponse {
-        val storedToken = refreshTokenRepository.findByToken(request.refreshToken)
+    fun refreshAccessToken(command: RefreshTokenCommand): RefreshTokenResponse {
+        val storedToken = refreshTokenRepository.findByToken(command.refreshToken)
             .orElseThrow { IllegalArgumentException("Refresh token inválido") }
 
         if (storedToken.revoked) {
@@ -181,8 +182,8 @@ class AuthService(
     }
 
     @Transactional
-    fun resendVerification(request: ResendVerificationRequest): MessageResponse {
-        val usuario = usuarioRepository.findByEmail(request.email)
+    fun resendVerification(command: ResendVerificationCommand): MessageResponse {
+        val usuario = usuarioRepository.findByEmail(command.email)
 
         if (usuario.isPresent && !usuario.get().emailVerified) {
             val user = usuario.get()
@@ -207,8 +208,8 @@ class AuthService(
     }
 
     @Transactional
-    fun forgotPassword(request: ForgotPasswordRequest): MessageResponse {
-        val usuario = usuarioRepository.findByEmail(request.email)
+    fun forgotPassword(command: ForgotPasswordCommand): MessageResponse {
+        val usuario = usuarioRepository.findByEmail(command.email)
 
         if (usuario.isPresent && usuario.get().emailVerified) {
             val user = usuario.get()
@@ -233,11 +234,11 @@ class AuthService(
     }
 
     @Transactional
-    fun resetPassword(request: ResetPasswordRequest): MessageResponse {
-        val usuario = usuarioRepository.findByEmail(request.email)
+    fun resetPassword(command: ResetPasswordCommand): MessageResponse {
+        val usuario = usuarioRepository.findByEmail(command.email)
             .orElseThrow { IllegalArgumentException("Usuario no encontrado") }
 
-        val resetToken = passwordResetTokenRepository.findByUsuarioAndToken(usuario, request.code)
+        val resetToken = passwordResetTokenRepository.findByUsuarioAndToken(usuario, command.code)
             .orElseThrow { IllegalArgumentException("Código inválido") }
 
         if (resetToken.used) {
@@ -248,7 +249,7 @@ class AuthService(
             throw IllegalArgumentException("El código ha expirado")
         }
 
-        usuario.password = passwordEncoder.encode(request.newPassword)
+        usuario.password = passwordEncoder.encode(command.newPassword)
         resetToken.used = true
 
         usuarioRepository.save(usuario)

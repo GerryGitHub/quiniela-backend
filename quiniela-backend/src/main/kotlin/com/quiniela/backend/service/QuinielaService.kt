@@ -1,5 +1,7 @@
 package com.quiniela.backend.service
 
+import com.quiniela.backend.domain.CrearQuinielaCommand
+import com.quiniela.backend.domain.UnirseQuinielaCommand
 import com.quiniela.backend.dto.*
 import com.quiniela.backend.entity.Participacion
 import com.quiniela.backend.entity.Quiniela
@@ -56,11 +58,11 @@ class QuinielaService(
     }
 
     @Transactional
-    fun crearQuiniela(request: CrearQuinielaRequest, email: String): QuinielaDTO {
-        if (request.nombre.isBlank()) {
+    fun crearQuiniela(command: CrearQuinielaCommand, email: String): QuinielaDTO {
+        if (command.nombre.isBlank()) {
             throw IllegalArgumentException("El nombre de la quiniela es requerido")
         }
-        if (quinielaRepository.existsByNombre(request.nombre)) {
+        if (quinielaRepository.existsByNombre(command.nombre)) {
             throw IllegalArgumentException("Ya existe una quiniela con ese nombre")
         }
 
@@ -68,8 +70,8 @@ class QuinielaService(
             .orElseThrow { IllegalArgumentException("Usuario no encontrado") }
 
         val quiniela = Quiniela(
-            nombre = request.nombre,
-            codigoInvitacion = request.codigoInvitacion,
+            nombre = command.nombre,
+            codigoInvitacion = command.codigoInvitacion,
             administrador = usuario,
             createdAt = LocalDateTime.now()
         )
@@ -144,13 +146,13 @@ class QuinielaService(
     }
 
     @Transactional
-    fun unirseQuiniela(request: UnirseQuinielaRequest, email: String): QuinielaDTO {
-        println("UnirseQuiniela - email: $email, codigo: ${request.codigoInvitacion}")
-        
+    fun unirseQuiniela(command: UnirseQuinielaCommand, email: String): QuinielaDTO {
+        println("UnirseQuiniela - email: $email, codigo: ${command.codigoInvitacion}")
+
         val usuario = usuarioRepository.findByEmail(email)
             .orElseThrow { IllegalArgumentException("Usuario no encontrado") }
 
-        val quiniela = quinielaRepository.findByCodigoInvitacion(request.codigoInvitacion)
+        val quiniela = quinielaRepository.findByCodigoInvitacion(command.codigoInvitacion)
             .orElseThrow { NotFoundException("Quiniela no encontrada con ese código") }
 
         println("UnirseQuiniela - usuario: ${usuario.id}, quiniela: ${quiniela.id}")

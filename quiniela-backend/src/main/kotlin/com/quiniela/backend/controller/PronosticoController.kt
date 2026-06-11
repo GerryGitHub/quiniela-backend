@@ -1,5 +1,7 @@
 package com.quiniela.backend.controller
 
+import com.quiniela.backend.domain.mapper.toCommand
+import com.quiniela.backend.domain.mapper.toItem
 import com.quiniela.backend.dto.*
 import com.quiniela.backend.service.PronosticoService
 import io.swagger.v3.oas.annotations.Operation
@@ -48,7 +50,7 @@ class PronosticoController(
         @RequestBody request: CrearPronosticoRequest,
         @AuthenticationPrincipal userDetails: UserDetails
     ): ResponseEntity<PronosticoDTO> {
-        return ResponseEntity.ok(pronosticoService.crearOActualizarPronostico(request, userDetails.username))
+        return ResponseEntity.ok(pronosticoService.crearOActualizarPronostico(request.toCommand(), userDetails.username))
     }
 
     @PostMapping("/batch")
@@ -57,7 +59,7 @@ class PronosticoController(
         @RequestBody request: CrearPronosticosBatchRequest,
         @AuthenticationPrincipal userDetails: UserDetails
     ): ResponseEntity<CrearPronosticosBatchResponse> {
-        return ResponseEntity.ok(pronosticoService.guardarPronosticosBatch(request, userDetails.username))
+        return ResponseEntity.ok(pronosticoService.guardarPronosticosBatch(request.toCommand(), userDetails.username))
     }
 
     @GetMapping("/quiniela/{quinielaId}/partido/{partidoId}")

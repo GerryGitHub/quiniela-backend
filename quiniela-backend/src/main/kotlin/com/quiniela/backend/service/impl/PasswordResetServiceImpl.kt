@@ -1,5 +1,7 @@
 package com.quiniela.backend.service.impl
 
+import com.quiniela.backend.domain.ForgotPasswordCommand
+import com.quiniela.backend.domain.ResetPasswordCommand
 import com.quiniela.backend.dto.*
 import com.quiniela.backend.entity.PasswordResetToken
 import com.quiniela.backend.repository.PasswordResetTokenRepository
@@ -20,8 +22,8 @@ class PasswordResetServiceImpl(
 ) : PasswordResetService {
 
     @Transactional
-    override fun forgotPassword(request: ForgotPasswordRequest): MessageResponse {
-        val usuario = usuarioRepository.findByEmail(request.email)
+    override fun forgotPassword(command: ForgotPasswordCommand): MessageResponse {
+        val usuario = usuarioRepository.findByEmail(command.email)
 
         if (usuario.isPresent && usuario.get().emailVerified) {
             val user = usuario.get()
@@ -46,11 +48,11 @@ class PasswordResetServiceImpl(
     }
 
     @Transactional
-    override fun resetPassword(request: ResetPasswordRequest): MessageResponse {
-        val usuario = usuarioRepository.findByEmail(request.email)
+    override fun resetPassword(command: ResetPasswordCommand): MessageResponse {
+        val usuario = usuarioRepository.findByEmail(command.email)
             .orElseThrow { IllegalArgumentException("Usuario no encontrado") }
 
-        val resetToken = passwordResetTokenRepository.findByUsuarioAndToken(usuario, request.code)
+        val resetToken = passwordResetTokenRepository.findByUsuarioAndToken(usuario, command.code)
             .orElseThrow { IllegalArgumentException("Código inválido") }
 
         if (resetToken.used) {
@@ -61,7 +63,7 @@ class PasswordResetServiceImpl(
             throw IllegalArgumentException("El código ha expirado")
         }
 
-        usuario.password = passwordEncoder.encode(request.newPassword)
+        usuario.password = passwordEncoder.encode(command.newPassword)
         resetToken.used = true
 
         usuarioRepository.save(usuario)

@@ -1,5 +1,6 @@
 package com.quiniela.backend.controller
 
+import com.quiniela.backend.domain.mapper.toCommand
 import com.quiniela.backend.dto.*
 import com.quiniela.backend.service.QuinielaService
 import io.swagger.v3.oas.annotations.Operation
@@ -30,15 +31,14 @@ class QuinielaController(
         @AuthenticationPrincipal userDetails: UserDetails?
     ): ResponseEntity<QuinielaDTO> {
         if (userDetails == null) return ResponseEntity.status(401).build()
-        
-        val codigoGenerado = if (request.codigoInvitacion.isNullOrBlank()) {
+
+        val codigo = if (request.codigoInvitacion.isNullOrBlank()) {
             java.util.UUID.randomUUID().toString().take(8).uppercase()
         } else {
             request.codigoInvitacion
         }
-        
-        val requestConCodigo = CrearQuinielaRequest(request.nombre, codigoGenerado)
-        return ResponseEntity.ok(quinielaService.crearQuiniela(requestConCodigo, userDetails.username))
+        val command = request.copy(codigoInvitacion = codigo).toCommand()
+        return ResponseEntity.ok(quinielaService.crearQuiniela(command, userDetails.username))
     }
 
     @GetMapping("/{id}")
@@ -58,7 +58,7 @@ class QuinielaController(
         @AuthenticationPrincipal userDetails: UserDetails?
     ): ResponseEntity<QuinielaDTO> {
         if (userDetails == null) return ResponseEntity.status(401).build()
-        return ResponseEntity.ok(quinielaService.unirseQuiniela(request, userDetails.username))
+        return ResponseEntity.ok(quinielaService.unirseQuiniela(request.toCommand(), userDetails.username))
     }
 
     @GetMapping("/{id}/leaderboard")
