@@ -72,7 +72,8 @@ class PronosticoService(
                 partido = partido,
                 golesLocalPredicho = request.golesLocalPredicho,
                 golesVisitantePredicho = request.golesVisitantePredicho,
-                puntosObtenidos = 0
+                puntosObtenidos = 0,
+                quiniela = participacion.quiniela
             )
         }
 
