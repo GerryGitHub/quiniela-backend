@@ -41,7 +41,9 @@ class PronosticoController(
         @PathVariable quinielaId: Long,
         @AuthenticationPrincipal userDetails: UserDetails
     ): ResponseEntity<MisPronosticosDTO> {
-        return ResponseEntity.ok(pronosticoService.getMisPronosticos(quinielaId, userDetails.username))
+        return ResponseEntity.ok()
+            .cacheControl(org.springframework.http.CacheControl.noCache())
+            .body(pronosticoService.getMisPronosticos(quinielaId, userDetails.username))
     }
 
     @PostMapping
