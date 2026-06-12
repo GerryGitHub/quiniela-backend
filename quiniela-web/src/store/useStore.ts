@@ -114,7 +114,7 @@ export const useStore = create<AppState>((set, get) => ({
 
   fetchMisPronosticos: async (quinielaId: number) => {
     const response = await pronosticoService.getMisPronosticos(quinielaId);
-    set({ misPronosticos: response.pronosticos });
+    set({ misPronosticos: response?.pronosticos ?? [] });
   },
 
   guardarPronosticosBatch: async (idQuiniela: number, pronosticos: any[]) => {
