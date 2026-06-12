@@ -74,6 +74,15 @@ class QuinielaDetalleActivity : AppCompatActivity() {
         loadData()
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (com.quiniela.app.api.RetrofitClient.sessionExpired) {
+            com.quiniela.app.api.RetrofitClient.sessionExpired = false
+            startActivity(Intent(this, com.quiniela.app.ui.auth.LoginActivity::class.java))
+            finish()
+        }
+    }
+
     private fun setupTabs() {
         binding.tabLayout.addOnTabSelectedListener(object : com.google.android.material.tabs.TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: com.google.android.material.tabs.TabLayout.Tab?) {

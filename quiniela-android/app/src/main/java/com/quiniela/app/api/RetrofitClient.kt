@@ -13,6 +13,9 @@ object RetrofitClient {
         level = HttpLoggingInterceptor.Level.BODY
     }
 
+    var sessionExpired = false
+        private set
+
     private val okHttpClient = OkHttpClient.Builder()
         .addInterceptor(loggingInterceptor)
         .addInterceptor { chain ->
@@ -21,6 +24,14 @@ object RetrofitClient {
                 request.addHeader("Authorization", "Bearer $token")
             }
             chain.proceed(request.build())
+        }
+        .addInterceptor { chain ->
+            val response = chain.proceed(chain.request())
+            if (response.code == 401 || response.code == 403) {
+                TokenManager.clearAll()
+                sessionExpired = true
+            }
+            response
         }
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)

@@ -24,12 +24,14 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    const url = error.config?.url || '';
     const status = error.response?.status;
 
     if (status === 401 || status === 403) {
       localStorage.removeItem('token');
       localStorage.setItem('sessionExpired', 'true');
+      if (window.location.pathname !== '/') {
+        window.location.href = '/';
+      }
     }
 
     return Promise.reject(error);

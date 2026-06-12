@@ -48,6 +48,15 @@ class DashboardActivity : AppCompatActivity() {
     private var proximaQuinielaId: Long = 0
     private var proximaQuinielaNombre: String = ""
 
+    override fun onResume() {
+        super.onResume()
+        if (com.quiniela.app.api.RetrofitClient.sessionExpired) {
+            com.quiniela.app.api.RetrofitClient.sessionExpired = false
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityDashboardBinding.inflate(layoutInflater)
