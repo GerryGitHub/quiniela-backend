@@ -24,14 +24,12 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
+    const url = error.config?.url || '';
     const status = error.response?.status;
 
     if (status === 401 || status === 403) {
       localStorage.removeItem('token');
       localStorage.setItem('sessionExpired', 'true');
-      if (window.location.pathname !== '/') {
-        window.location.href = '/';
-      }
     }
 
     return Promise.reject(error);
@@ -81,13 +79,6 @@ export const quinielaService = {
 
   getLeaderboard: async (quinielaId: number) => {
     const response = await api.get(`/quinielas/${quinielaId}/leaderboard`);
-    return response.data;
-  },
-};
-
-export const gruposService = {
-  getGrupos: async () => {
-    const response = await api.get('/api/grupos');
     return response.data;
   },
 };

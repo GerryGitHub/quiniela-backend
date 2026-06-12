@@ -3,8 +3,6 @@ import App from '../App';
 import Login from '../pages/Login';
 import Dashboard from '../pages/Dashboard';
 import Grupos from '../pages/Grupos';
-import QuinielaDetalle from '../pages/QuinielaDetalle';
-import Pronosticos from '../pages/Pronosticos';
 import Resultados from '../pages/Resultados';
 import Users from '../pages/Users';
 import UserDetail from '../pages/UserDetail';
@@ -26,14 +24,6 @@ const router = createBrowserRouter([
       {
         path: 'dashboard',
         element: <Dashboard />,
-      },
-      {
-        path: 'quinielas/:id',
-        element: <QuinielaDetalle />,
-      },
-      {
-        path: 'pronosticos/:quinielaId',
-        element: <Pronosticos />,
       },
       {
         path: 'grupos',
