@@ -1,11 +1,13 @@
 package com.quiniela.app.ui.quiniela
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.lifecycleScope
@@ -41,6 +43,7 @@ class QuinielaDetalleActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         binding = ActivityQuinielaDetalleBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -74,14 +77,6 @@ class QuinielaDetalleActivity : AppCompatActivity() {
         loadData()
     }
 
-    override fun onResume() {
-        super.onResume()
-        if (com.quiniela.app.api.RetrofitClient.sessionExpired) {
-            com.quiniela.app.api.RetrofitClient.sessionExpired = false
-            startActivity(Intent(this, com.quiniela.app.ui.auth.LoginActivity::class.java))
-            finish()
-        }
-    }
 
     private fun setupTabs() {
         binding.tabLayout.addOnTabSelectedListener(object : com.google.android.material.tabs.TabLayout.OnTabSelectedListener {
@@ -270,6 +265,12 @@ class QuinielaDetalleActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        if (com.quiniela.app.api.RetrofitClient.sessionExpired) {
+            com.quiniela.app.api.RetrofitClient.sessionExpired = false
+            startActivity(Intent(this, com.quiniela.app.ui.auth.LoginActivity::class.java))
+            finish()
+            return
+        }
         leaderboardHandler.post(leaderboardPolling)
     }
 

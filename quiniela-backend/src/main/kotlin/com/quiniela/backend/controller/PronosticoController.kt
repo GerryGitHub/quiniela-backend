@@ -64,6 +64,18 @@ class PronosticoController(
         return ResponseEntity.ok(pronosticoService.guardarPronosticosBatch(request.toCommand(), userDetails.username))
     }
 
+    @GetMapping("/quiniela/{quinielaId}/usuario/{usuarioId}")
+    @Operation(summary = "Ver los pronósticos de un usuario en una quiniela", description = "Solo incluye partidos que ya comenzaron")
+    fun getPronosticosDeUsuario(
+        @PathVariable quinielaId: Long,
+        @PathVariable usuarioId: Long,
+        @AuthenticationPrincipal userDetails: UserDetails
+    ): ResponseEntity<MisPronosticosDTO> {
+        return ResponseEntity.ok(
+            pronosticoService.getPronosticosDeUsuario(quinielaId, usuarioId, userDetails.username)
+        )
+    }
+
     @GetMapping("/quiniela/{quinielaId}/partido/{partidoId}")
     @Operation(summary = "Ver todos los pronósticos de un partido", description = "Solo disponible después de que el partido comience")
     fun getPronosticosPorPartido(

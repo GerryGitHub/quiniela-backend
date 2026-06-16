@@ -10,6 +10,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.quiniela.app.util.UiUtils
@@ -48,17 +49,10 @@ class DashboardActivity : AppCompatActivity() {
     private var proximaQuinielaId: Long = 0
     private var proximaQuinielaNombre: String = ""
 
-    override fun onResume() {
-        super.onResume()
-        if (com.quiniela.app.api.RetrofitClient.sessionExpired) {
-            com.quiniela.app.api.RetrofitClient.sessionExpired = false
-            startActivity(Intent(this, LoginActivity::class.java))
-            finish()
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         binding = ActivityDashboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -330,6 +324,12 @@ class DashboardActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        if (com.quiniela.app.api.RetrofitClient.sessionExpired) {
+            com.quiniela.app.api.RetrofitClient.sessionExpired = false
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+            return
+        }
         loadData()
         handler.post(pollingRunnable)
     }

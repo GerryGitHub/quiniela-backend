@@ -136,6 +136,17 @@ class PronosticoService(
         )
     }
 
+    fun getPronosticosDeUsuario(quinielaId: Long, usuarioId: Long, email: String): MisPronosticosDTO {
+        val pronosticos = pronosticoRepository.findByQuinielaIdAndUsuarioId(quinielaId, usuarioId)
+        val pronosticosDTO = pronosticos
+            .filter { p ->
+                val partido = p.partido
+                partido.fechaHora.isBefore(LocalDateTime.now()) || partido.estado == EstadoPartido.EN_CURSO || partido.estado == EstadoPartido.FINALIZADO
+            }
+            .map { it.toDTO() }
+        return MisPronosticosDTO(pronosticos = pronosticosDTO)
+    }
+
     fun getPronosticosPorPartido(quinielaId: Long, partidoId: Long, email: String): PronosticosPorPartidoDTO {
         val partido = partidoRepository.findById(partidoId)
             .orElseThrow { NotFoundException("Partido no encontrado") }

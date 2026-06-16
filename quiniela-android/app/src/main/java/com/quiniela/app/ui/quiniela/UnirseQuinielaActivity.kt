@@ -3,6 +3,7 @@ package com.quiniela.app.ui.quiniela
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.quiniela.app.databinding.ActivityUnirseQuinielaBinding
@@ -16,6 +17,7 @@ class UnirseQuinielaActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         binding = ActivityUnirseQuinielaBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
