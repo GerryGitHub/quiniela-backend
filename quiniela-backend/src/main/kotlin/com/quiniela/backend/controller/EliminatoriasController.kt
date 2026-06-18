@@ -20,7 +20,7 @@ class EliminatoriasController(
 
     @GetMapping("/status")
     fun getStatus(): ResponseEntity<EliminatoriasStatusDTO> {
-        return ResponseEntity.ok(eliminatoriasService.getEliminatoriasStatus())
+        return ResponseEntity.ok(eliminatoriasService.getStatus())
     }
 
     @PostMapping("/crear")
