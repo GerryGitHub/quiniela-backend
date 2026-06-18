@@ -15,7 +15,9 @@ data class PartidoDTO(
     val golesVisitanteReal: Int?,
     val estado: String,
     val minutosParaInicio: Int? = null,
-    val minutosJugados: Int? = null
+    val minutosJugados: Int? = null,
+    val codigo: String? = null,
+    val quinielaId: Long? = null
 )
 
 data class ActualizarPartidoRequest(

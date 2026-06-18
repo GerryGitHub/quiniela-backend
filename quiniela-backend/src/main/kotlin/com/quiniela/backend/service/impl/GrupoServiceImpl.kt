@@ -23,7 +23,7 @@ class GrupoServiceImpl(
 
         val gruposDTO = grupos.map { grupo ->
             val partidosEntity = partidoRepository.findAll()
-                .filter { it.grupo.id == grupo.id }
+                .filter { it.grupo?.id == grupo.id }
                 .sortedBy { it.fechaHora }
             val equipos = equipoRepository.findByGrupoId(grupo.id).map { it.toSeleccionDTO(partidosEntity) }
             val partidos = partidosEntity.map { it.toPartidoDTO() }
@@ -43,7 +43,7 @@ class GrupoServiceImpl(
     override fun getGrupo(nombre: String): GrupoDTO {
         val grupo = grupoRepository.findByNombre(nombre) ?: throw NotFoundException("Grupo no encontrado")
         val partidosEntity = partidoRepository.findAll()
-            .filter { it.grupo.id == grupo.id }
+            .filter { it.grupo?.id == grupo.id }
             .sortedBy { it.fechaHora }
         val equipos = equipoRepository.findByGrupoId(grupo.id).map { it.toSeleccionDTO(partidosEntity) }
         val partidos = partidosEntity.map { it.toPartidoDTO() }
