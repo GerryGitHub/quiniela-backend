@@ -7,6 +7,7 @@ import Resultados from '../pages/Resultados';
 import Users from '../pages/Users';
 import UserDetail from '../pages/UserDetail';
 import AdminQuinielas from '../pages/AdminQuinielas';
+import EstadisticasEquipos from '../pages/EstadisticasEquipos';
 
 const router = createBrowserRouter([
   {
@@ -44,6 +45,10 @@ const router = createBrowserRouter([
       {
         path: 'admin/quinielas',
         element: <AdminQuinielas />,
+      },
+      {
+        path: 'admin/estadisticas',
+        element: <EstadisticasEquipos />,
       },
     ],
   },
