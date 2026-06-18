@@ -109,6 +109,8 @@ export default function Grupos() {
                       <th>GC</th>
                       <th>DG</th>
                       <th>Pts</th>
+                      <th>Rank</th>
+                      <th>FP</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -126,6 +128,8 @@ export default function Grupos() {
                           {sel.diferenciaGoles > 0 ? '+' : ''}{sel.diferenciaGoles}
                         </td>
                         <td className="puntos">{sel.puntos}</td>
+                        <td className="ranking">{sel.rankingFifa ?? '-'}</td>
+                        <td className="fairplay">{sel.puntosFairPlay}</td>
                       </tr>
                     ))}
                   </tbody>
