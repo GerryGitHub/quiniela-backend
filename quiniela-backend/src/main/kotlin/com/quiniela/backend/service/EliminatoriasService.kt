@@ -202,6 +202,11 @@ class EliminatoriasService(
             SlotPendiente(slot, grupos.toSet())
         }.sortedBy { it.pool.size }
 
+        // Maximum bipartite matching diagnostic
+        if (slotsPendientes.isNotEmpty() && clasificados.isNotEmpty()) {
+            maximumBipartiteMatching(slotsPendientes, clasificados)
+        }
+
         logger.info("=== GREEDY TERCEROS ===")
         for (sp in slotsPendientes) {
             val elegido = disponibles.filter { it.grupo in sp.pool }.minByOrNull { idxOf(clasificados, it) }
@@ -224,6 +229,81 @@ class EliminatoriasService(
     }
 
     data class SlotPendiente(val codigo: String, val pool: Set<String>)
+
+    /**
+     * Maximum bipartite matching usando DFS augmenting path (Kuhn algorithm).
+     * Lado izquierdo: slots (indice i)
+     * Lado derecho: terceros (indice j)
+     * Arista si tercero.grupo in slot.pool
+     *
+     * @return matchingMap: Map<codigoSlot, nombreEquipo> con el matching maximo encontrado.
+     */
+    private fun maximumBipartiteMatching(
+        slots: List<SlotPendiente>,
+        terceros: List<TerceroRankeado>
+    ): Map<String, String> {
+        val n = slots.size       // left side
+        val m = terceros.size    // right side
+
+        // adjacency: for each slot i, list of compatible tercero indices j
+        val adj = List(n) { i ->
+            (0 until m).filter { j ->
+                terceros[j].grupo in slots[i].pool
+            }.toMutableList()
+        }
+
+        // matchR[j] = which slot is matched to tercero j, or -1 if unmatched
+        val matchR = IntArray(m) { -1 }
+
+        fun dfs(u: Int, seen: BooleanArray): Boolean {
+            for (v in adj[u]) {
+                if (seen[v]) continue
+                seen[v] = true
+                if (matchR[v] == -1 || dfs(matchR[v], seen)) {
+                    matchR[v] = u
+                    return true
+                }
+            }
+            return false
+        }
+
+        for (u in 0 until n) {
+            val seen = BooleanArray(m)
+            dfs(u, seen)
+        }
+
+        // Build result map: slotCodigo -> tercero.nombreEquipo
+        val result = mutableMapOf<String, String>()
+        for (j in 0 until m) {
+            if (matchR[j] != -1) {
+                val slot = slots[matchR[j]]
+                result[slot.codigo] = terceros[j].nombreEquipo
+            }
+        }
+
+        // Log diagnostic
+        val cardinalidad = result.size
+        logger.info("=== MAX BIPARTITE MATCHING ===")
+        logger.info("Slots: $n, Terceros: $m")
+        logger.info("Cardinalidad maxima del matching: $cardinalidad")
+        for (i in 0 until n) {
+            val s = slots[i]
+            val adjGroups = adj[i].map { "${terceros[it].nombreEquipo}(${terceros[it].grupo})" }
+            logger.info("  ${s.codigo} pool=${s.pool.sorted().joinToString("")} -> compatible: ${adjGroups.joinToString(", ")}")
+        }
+        logger.info("Matching encontrado:")
+        result.forEach { (slot, eq) ->
+            logger.info("  $slot -> $eq")
+        }
+        if (cardinalidad < n) {
+            val unmatchedSlots = slots.filter { it.codigo !in result }.map { it.codigo }
+            val unmatchedTerceros = (0 until m).filter { matchR[it] == -1 }.map { "${terceros[it].nombreEquipo}(${terceros[it].grupo})" }
+            logger.warn("Slots sin match: ${unmatchedSlots.joinToString(", ")}")
+            logger.warn("Terceros sin match: ${unmatchedTerceros.joinToString(", ")}")
+        }
+
+        return result
+    }
 
     private fun idxOf(lista: List<TerceroRankeado>, item: TerceroRankeado): Int {
         return lista.indexOf(item)
