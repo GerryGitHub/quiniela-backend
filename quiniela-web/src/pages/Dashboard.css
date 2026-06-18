@@ -8,8 +8,24 @@
   color: white;
   padding: 16px 24px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 16px;
+}
+
+.btn-back {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.btn-back:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .header h1 {

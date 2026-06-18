@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import api from '../services/api';
 import Spinner from '../components/Spinner';
+import './Dashboard.css';
 
 interface EquipoEst {
   equipoId: number;
@@ -106,13 +107,11 @@ export default function EstadisticasEquipos() {
   return (
     <div className="dashboard">
       <header className="header">
+        <Link to="/dashboard" className="btn-back">← Volver</Link>
         <h1>Estadísticas de Equipos</h1>
-        <div className="header-actions">
-          <Link to="/dashboard" className="btn-grupos">Dashboard</Link>
-          <div className="header-right">
-            <span className="user-info">{usuario?.nombre}</span>
-            <button onClick={logoutAndRedirect} className="btn-logout">Cerrar Sesión</button>
-          </div>
+        <div className="header-right" style={{ marginLeft: 'auto' }}>
+          <span className="user-info">{usuario?.nombre}</span>
+          <button onClick={logoutAndRedirect} className="btn-logout">Cerrar Sesión</button>
         </div>
       </header>
       <main className="main-content">
