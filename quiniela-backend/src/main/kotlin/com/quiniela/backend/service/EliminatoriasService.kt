@@ -22,7 +22,9 @@ class EliminatoriasService(
 ) {
 
     fun getPreview(): BracketPreviewDTO {
+        val rondaOrder = listOf("R32", "R16", "QF", "SF", "3RD", "FINAL")
         val slots = bracketSlotRepository.findAllByOrderByRondaAscOrdenAsc()
+            .sortedBy { s -> rondaOrder.indexOf(s.ronda) * 100 + s.orden }
         val posiciones = getPosicionesGrupos()
 
         val tercerasRankeadas = rankearTercerasPosiciones(posiciones)
