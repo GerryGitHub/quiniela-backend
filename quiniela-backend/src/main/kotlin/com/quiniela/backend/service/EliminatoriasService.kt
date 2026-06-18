@@ -44,9 +44,15 @@ class EliminatoriasService(
         val equiposUsados = mutableSetOf<String>()
 
         for (slot in slots) {
-            val local = resolverEquipo(slot, true, posiciones, slotsMap, resultadosPorSlot, asignacion3ros, equiposUsados)
-            val visitante = resolverEquipo(slot, false, posiciones, slotsMap, resultadosPorSlot, asignacion3ros, equiposUsados)
-            resultadosPorSlot[slot.codigo] = Pair(local, visitante)
+            if (slot.ronda == "R32") {
+                val local = resolverEquipo(slot, true, posiciones, slotsMap, resultadosPorSlot, asignacion3ros, equiposUsados)
+                val visitante = resolverEquipo(slot, false, posiciones, slotsMap, resultadosPorSlot, asignacion3ros, equiposUsados)
+                resultadosPorSlot[slot.codigo] = Pair(local, visitante)
+            } else {
+                val local = resolverReferencia(slot, true)
+                val visitante = resolverReferencia(slot, false)
+                resultadosPorSlot[slot.codigo] = Pair(local, visitante)
+            }
         }
 
         val rondasMap = linkedMapOf<String, MutableList<BracketSlotPreviewDTO>>()
@@ -56,7 +62,7 @@ class EliminatoriasService(
                 codigo = slot.codigo, ronda = slot.ronda, orden = slot.orden,
                 equipoLocal = local, equipoVisitante = visitante,
                 localSlot = slotToOrigenDTO(slot, true), visitanteSlot = slotToOrigenDTO(slot, false),
-                resuelto = local != null && visitante != null
+                resuelto = slot.ronda == "R32" && local != null && visitante != null
             )
         }
 
@@ -188,6 +194,15 @@ class EliminatoriasService(
 
     private fun idxOf(lista: List<TerceroRankeado>, item: TerceroRankeado): Int {
         return lista.indexOf(item)
+    }
+
+    private fun resolverReferencia(slot: BracketSlot, isLocal: Boolean): String? {
+        val tipo = if (isLocal) slot.localTipo else slot.visitanteTipo
+        val partidoOrigen = if (isLocal) slot.localPartidoOrigen else slot.visitantePartidoOrigen
+        val esGanador = if (isLocal) slot.localEsGanador else slot.visitanteEsGanador
+        val prefijo = if (esGanador == true) "W" else if (esGanador == false) "L" else null ?: return null
+        val origen = partidoOrigen ?: return null
+        return "$prefijo${origen.codigo}"
     }
 
     private fun resolverEquipo(
