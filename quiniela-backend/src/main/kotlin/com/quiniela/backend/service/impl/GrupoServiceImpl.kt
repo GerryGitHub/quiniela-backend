@@ -34,7 +34,7 @@ class GrupoServiceImpl(
                 .sortedWith(compareByDescending<SeleccionDTO> { it.puntos }
                     .thenByDescending { it.diferenciaGoles }
                     .thenByDescending { it.golesAFavor }
-                    .thenBy { it.puntosFairPlay }
+                    .thenByDescending { it.puntosFairPlay }
                     .thenBy { it.rankingFifa ?: 999 })
             val partidos = partidosEntity.map { it.toPartidoDTO() }
 
@@ -61,7 +61,7 @@ class GrupoServiceImpl(
             .sortedWith(compareByDescending<SeleccionDTO> { it.puntos }
                 .thenByDescending { it.diferenciaGoles }
                 .thenByDescending { it.golesAFavor }
-                .thenBy { it.puntosFairPlay }
+                .thenByDescending { it.puntosFairPlay }
                 .thenBy { it.rankingFifa ?: 999 })
         val partidos = partidosEntity.map { it.toPartidoDTO() }
 

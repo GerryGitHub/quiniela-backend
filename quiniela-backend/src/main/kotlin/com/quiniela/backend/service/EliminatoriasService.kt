@@ -6,6 +6,7 @@ import com.quiniela.backend.exception.NotFoundException
 import com.quiniela.backend.repository.*
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 
 @Service
@@ -20,6 +21,10 @@ class EliminatoriasService(
     private val usuarioRepository: UsuarioRepository,
     private val equipoEstadisticasRepository: EquipoEstadisticasRepository
 ) {
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(EliminatoriasService::class.java)
+    }
 
     fun getPreview(): BracketPreviewDTO {
         val rondaOrder = listOf("R32", "R16", "QF", "SF", "3RD", "FINAL")
@@ -38,6 +43,8 @@ class EliminatoriasService(
         val asignacion3ros = asignarTercerosASlots(clasificados, slots.filter { s ->
             s.localTipo == "GRUPO_3" || s.visitanteTipo == "GRUPO_3"
         }, terceroMapping)
+        tercerosLog(clasificados)
+        asignacionLog(asignacion3ros, slots.filter { s -> s.localTipo == "GRUPO_3" || s.visitanteTipo == "GRUPO_3" })
 
         val slotsMap = slots.associateBy { it.codigo }
         val resultadosPorSlot = mutableMapOf<String, Pair<String?, String?>>()
@@ -120,10 +127,16 @@ class EliminatoriasService(
             }.sortedWith(compareByDescending<EquipoStats> { it.puntos }
                 .thenByDescending { it.dg }
                 .thenByDescending { it.gf }
-                .thenBy { it.fairPlay }
+                .thenByDescending { it.fairPlay }
                 .thenBy { it.ranking })
 
             posiciones[grupo.nombre] = tabla
+        }
+        logger.info("=== POSICIONES GRUPOS ===")
+        posiciones.forEach { (g, eqs) ->
+            eqs.forEachIndexed { i, e ->
+                logger.info("Grupo $g #${i+1}: ${e.nombre} pts=${e.puntos} dg=${e.dg} gf=${e.gf} fp=${e.fairPlay} rank=${e.ranking}")
+            }
         }
         return posiciones
     }
@@ -135,8 +148,24 @@ class EliminatoriasService(
         }.sortedWith(compareByDescending<TerceroRankeado> { it.puntos }
             .thenByDescending { it.dg }
             .thenByDescending { it.gf }
-            .thenBy { it.fairPlay }
+            .thenByDescending { it.fairPlay }
             .thenBy { it.ranking })
+    }
+
+    private fun tercerosLog(clasificados: List<TerceroRankeado>) {
+        logger.info("=== TERCEROS CLASIFICADOS ===")
+        clasificados.forEachIndexed { i, t ->
+            logger.info("#${i+1}: Grupo ${t.grupo} ${t.nombreEquipo} pts=${t.puntos} dg=${t.dg} gf=${t.gf} fp=${t.fairPlay} rank=${t.ranking}")
+        }
+    }
+
+    private fun asignacionLog(asignacion: Map<String, String>, slots3ros: List<BracketSlot>) {
+        logger.info("=== ASIGNACION TERCEROS ===")
+        slots3ros.forEach { slot ->
+            val eq = asignacion[slot.codigo]
+            val pool = if (slot.localTipo == "GRUPO_3") slot.localGrupos ?: "" else slot.visitanteGrupos ?: ""
+            logger.info("${slot.codigo} pool=$pool -> ${eq ?: "POR DEFINIR"}")
+        }
     }
 
     private fun asignarTercerosASlots(
@@ -173,11 +202,15 @@ class EliminatoriasService(
             SlotPendiente(slot, grupos.toSet())
         }.sortedBy { it.pool.size }
 
+        logger.info("=== GREEDY TERCEROS ===")
         for (sp in slotsPendientes) {
-            val elegido = disponibles.filter { it.grupo in sp.pool }.maxByOrNull { idxOf(clasificados, it) }
+            val elegido = disponibles.filter { it.grupo in sp.pool }.minByOrNull { idxOf(clasificados, it) }
             if (elegido != null) {
+                logger.info("  ${sp.codigo} pool=${sp.pool.sorted().joinToString("")} -> ${elegido.nombreEquipo} (grupo ${elegido.grupo}, idx ${idxOf(clasificados, elegido)})")
                 asignacion[sp.codigo] = elegido.nombreEquipo
                 disponibles.remove(elegido)
+            } else {
+                logger.warn("  ${sp.codigo} pool=${sp.pool.sorted().joinToString("")} -> SIN ASIGNACION (disponibles: ${disponibles.map { it.grupo }})")
             }
         }
 
