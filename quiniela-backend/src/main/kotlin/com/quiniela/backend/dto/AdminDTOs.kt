@@ -65,3 +65,16 @@ data class AdminSystemDTO(
     val database: String,
     val ultimaActualizacion: String?
 )
+
+data class EquipoEstadisticasDTO(
+    val equipoId: Long,
+    val nombre: String,
+    val grupo: String?,
+    val rankingFifa: Int?,
+    val puntosFairPlay: Int
+)
+
+data class UpdateEstadisticasRequest(
+    val rankingFifa: Int?,
+    val puntosFairPlay: Int?
+)
