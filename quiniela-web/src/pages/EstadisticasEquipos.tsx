@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import api from '../services/api';
@@ -20,7 +20,8 @@ export default function EstadisticasEquipos() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [editValues, setEditValues] = useState<Record<number, { rankingFifa: string; puntosFairPlay: string }>>({});
-  const [saving, setSaving] = useState<Record<number, boolean>>({});
+  const [dirty, setDirty] = useState<Set<number>>(new Set());
+  const [savingAll, setSavingAll] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
 
   useEffect(() => {
@@ -52,6 +53,7 @@ export default function EstadisticasEquipos() {
         };
       });
       setEditValues(vals);
+      setDirty(new Set());
     } catch {
       setError('Error al cargar equipos');
     } finally {
@@ -59,33 +61,37 @@ export default function EstadisticasEquipos() {
     }
   };
 
-  const handleSave = async (equipoId: number) => {
-    const vals = editValues[equipoId];
-    if (!vals) return;
-    setSaving((prev) => ({ ...prev, [equipoId]: true }));
+  const handleChange = (equipoId: number, field: 'rankingFifa' | 'puntosFairPlay', value: string) => {
+    setEditValues((prev) => ({ ...prev, [equipoId]: { ...prev[equipoId], [field]: value } }));
+    setDirty((prev) => new Set(prev).add(equipoId));
+  };
+
+  const handleSaveAll = async () => {
+    if (dirty.size === 0) return;
+    setSavingAll(true);
     setSuccessMsg('');
-    try {
-      await api.put(`/admin/equipos/${equipoId}/estadisticas`, {
-        rankingFifa: vals.rankingFifa ? parseInt(vals.rankingFifa, 10) : null,
-        puntosFairPlay: vals.puntosFairPlay ? parseInt(vals.puntosFairPlay, 10) : 0,
-      });
-      setSuccessMsg('Estadísticas guardadas');
-      setEquipos((prev) =>
-        prev.map((eq) =>
-          eq.equipoId === equipoId
-            ? {
-                ...eq,
-                rankingFifa: vals.rankingFifa ? parseInt(vals.rankingFifa, 10) : null,
-                puntosFairPlay: vals.puntosFairPlay ? parseInt(vals.puntosFairPlay, 10) : 0,
-              }
-            : eq,
-        ),
-      );
-    } catch {
-      setError('Error al guardar estadísticas');
-    } finally {
-      setSaving((prev) => ({ ...prev, [equipoId]: false }));
+    setError('');
+    let saved = 0;
+    for (const equipoId of dirty) {
+      const vals = editValues[equipoId];
+      if (!vals) continue;
+      try {
+        await api.put(`/admin/equipos/${equipoId}/estadisticas`, {
+          rankingFifa: vals.rankingFifa ? parseInt(vals.rankingFifa, 10) : null,
+          puntosFairPlay: vals.puntosFairPlay ? parseInt(vals.puntosFairPlay, 10) : 0,
+        });
+        saved++;
+      } catch {
+        setError(`Error al guardar ${equipos.find((e) => e.equipoId === equipoId)?.nombre || equipoId}`);
+      }
     }
+    if (saved > 0) {
+      setSuccessMsg(`${saved}/${dirty.size} equipos guardados`);
+      loadEquipos();
+    } else {
+      setDirty(new Set());
+    }
+    setSavingAll(false);
   };
 
   const logoutAndRedirect = () => {
@@ -121,66 +127,52 @@ export default function EstadisticasEquipos() {
           {loading ? (
             <div className="loading-section"><Spinner /></div>
           ) : (
-            <div className="table-container">
-              <table className="estadisticas-table">
-                <thead>
-                  <tr>
-                    <th>Equipo</th>
-                    <th>Grupo</th>
-                    <th>Ranking FIFA</th>
-                    <th>Puntos Fair Play</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sorted.map((eq) => (
-                    <tr key={eq.equipoId}>
-                      <td className="td-equipo">{eq.nombre}</td>
-                      <td className="td-grupo">{eq.grupo || '-'}</td>
-                      <td>
-                        <input
-                          type="number"
-                          className="est-input"
-                          value={editValues[eq.equipoId]?.rankingFifa ?? ''}
-                          onChange={(e) =>
-                            setEditValues((prev) => ({
-                              ...prev,
-                              [eq.equipoId]: { ...prev[eq.equipoId], rankingFifa: e.target.value },
-                            }))
-                          }
-                          min={0}
-                          max={3000}
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="number"
-                          className="est-input"
-                          value={editValues[eq.equipoId]?.puntosFairPlay ?? 0}
-                          onChange={(e) =>
-                            setEditValues((prev) => ({
-                              ...prev,
-                              [eq.equipoId]: { ...prev[eq.equipoId], puntosFairPlay: e.target.value },
-                            }))
-                          }
-                          min={-50}
-                          max={50}
-                        />
-                      </td>
-                      <td>
-                        <button
-                          className="btn-save"
-                          onClick={() => handleSave(eq.equipoId)}
-                          disabled={saving[eq.equipoId]}
-                        >
-                          {saving[eq.equipoId] ? 'Guardando...' : 'Guardar'}
-                        </button>
-                      </td>
+            <>
+              <div className="table-container">
+                <table className="estadisticas-table">
+                  <thead>
+                    <tr>
+                      <th>Equipo</th>
+                      <th>Grupo</th>
+                      <th>Ranking FIFA</th>
+                      <th>Puntos Fair Play</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {sorted.map((eq) => (
+                      <tr key={eq.equipoId} className={dirty.has(eq.equipoId) ? 'row-dirty' : ''}>
+                        <td className="td-equipo">{eq.nombre}</td>
+                        <td className="td-grupo">{eq.grupo || '-'}</td>
+                        <td>
+                          <input
+                            type="number"
+                            className="est-input"
+                            value={editValues[eq.equipoId]?.rankingFifa ?? ''}
+                            onChange={(e) => handleChange(eq.equipoId, 'rankingFifa', e.target.value)}
+                            min={0} max={3000}
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="number"
+                            className="est-input"
+                            value={editValues[eq.equipoId]?.puntosFairPlay ?? 0}
+                            onChange={(e) => handleChange(eq.equipoId, 'puntosFairPlay', e.target.value)}
+                            min={-50} max={50}
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="save-all-bar">
+                <span className="dirty-count">{dirty.size} equipo(s) modificado(s)</span>
+                <button className="btn-save-all" onClick={handleSaveAll} disabled={dirty.size === 0 || savingAll}>
+                  {savingAll ? 'Guardando...' : `Guardar Todo (${dirty.size})`}
+                </button>
+              </div>
+            </>
           )}
         </div>
       </main>

@@ -652,3 +652,46 @@
   font-size: 14px;
   font-weight: 500;
 }
+
+/* Save All Bar */
+.save-all-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding: 16px 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.dirty-count {
+  font-size: 14px;
+  color: #667eea;
+  font-weight: 600;
+}
+
+.btn-save-all {
+  background: #667eea;
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-save-all:hover {
+  background: #5568d3;
+}
+
+.btn-save-all:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.row-dirty {
+  background: #f0f4ff !important;
+}
