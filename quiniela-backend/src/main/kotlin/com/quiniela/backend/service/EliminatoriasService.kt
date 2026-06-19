@@ -35,14 +35,10 @@ class EliminatoriasService(
         val tercerasRankeadas = rankearTercerasPosiciones(posiciones)
         val clasificados = tercerasRankeadas.take(8)
         val gruposClasificados = clasificados.map { it.grupo }.sorted().joinToString("")
-        val terceroMapping = if (gruposClasificados.length >= 8) {
-            terceroMappingRepository.findByCombinacion(gruposClasificados)
-                .associate { it.slotCodigo to it.grupoOrigen }
-        } else emptyMap()
 
         val asignacion3ros = asignarTercerosASlots(clasificados, slots.filter { s ->
             s.localTipo == "GRUPO_3" || s.visitanteTipo == "GRUPO_3"
-        }, terceroMapping)
+        }, gruposClasificados)
         tercerosLog(clasificados)
         asignacionLog(asignacion3ros, slots.filter { s -> s.localTipo == "GRUPO_3" || s.visitanteTipo == "GRUPO_3" })
 
@@ -171,88 +167,38 @@ class EliminatoriasService(
     private fun asignarTercerosASlots(
         clasificados: List<TerceroRankeado>,
         slots3ros: List<BracketSlot>,
-        mapping: Map<String, String>
+        gruposClasificados: String
     ): Map<String, String> {
-        val asignacion = mutableMapOf<String, String>()
-        val disponibles = clasificados.toMutableList()
+        if (gruposClasificados.length < 8) return emptyMap()
 
-        val entryPoints = mutableListOf<Pair<String, String>>()
+        val asignacion = tercerosMappingCache[gruposClasificados]
+        if (asignacion == null) {
+            logger.warn("No hay mapping precomputado para combinacion $gruposClasificados")
+            return emptyMap()
+        }
 
-        for (slot in slots3ros) {
-            val gruposPool = if (slot.localTipo == "GRUPO_3") slot.localGrupos ?: "" else slot.visitanteGrupos ?: ""
-            val slotCodigo = slot.codigo
-
-            val grupoMapping = mapping[slotCodigo]
-            if (grupoMapping != null && grupoMapping.length == 1 && grupoMapping[0] in gruposPool) {
-                val tercero = disponibles.find { it.grupo == grupoMapping }
-                if (tercero != null) {
-                    entryPoints.add(Pair(slotCodigo, tercero.nombreEquipo))
-                    disponibles.remove(tercero)
-                    continue
-                }
+        return clasificados.filter { it.grupo in gruposClasificados }
+            .associate { tercero ->
+                val slot = asignacion.entries.first { it.value == tercero.grupo }.key
+                slot to tercero.nombreEquipo
             }
-            entryPoints.add(Pair(slotCodigo, gruposPool))
-        }
-
-        val unresolved = entryPoints.filter { it.second.all { c -> c.isUpperCase() } }
-        val resolved = entryPoints.filter { it.second.any { c -> !c.isUpperCase() || c in 'á'..'ú' } }
-
-        val slotsPendientes = unresolved.map { (slot, pool) ->
-            val grupos = pool.map { it.toString() }
-            SlotPendiente(slot, grupos.toSet())
-        }.sortedBy { it.pool.size }
-
-        // Maximum bipartite matching diagnostic
-        if (slotsPendientes.isNotEmpty() && clasificados.isNotEmpty()) {
-            maximumBipartiteMatching(slotsPendientes, clasificados)
-        }
-
-        logger.info("=== GREEDY TERCEROS ===")
-        for (sp in slotsPendientes) {
-            val elegido = disponibles.filter { it.grupo in sp.pool }.minByOrNull { idxOf(clasificados, it) }
-            if (elegido != null) {
-                logger.info("  ${sp.codigo} pool=${sp.pool.sorted().joinToString("")} -> ${elegido.nombreEquipo} (grupo ${elegido.grupo}, idx ${idxOf(clasificados, elegido)})")
-                asignacion[sp.codigo] = elegido.nombreEquipo
-                disponibles.remove(elegido)
-            } else {
-                logger.warn("  ${sp.codigo} pool=${sp.pool.sorted().joinToString("")} -> SIN ASIGNACION (disponibles: ${disponibles.map { it.grupo }})")
-            }
-        }
-
-        for ((slot, nombre) in entryPoints) {
-            if (nombre.any { c -> !c.isUpperCase() || c in 'á'..'ú' }) {
-                asignacion[slot] = nombre
-            }
-        }
-
-        return asignacion
     }
 
     data class SlotPendiente(val codigo: String, val pool: Set<String>)
 
     /**
-     * Maximum bipartite matching usando DFS augmenting path (Kuhn algorithm).
-     * Lado izquierdo: slots (indice i)
-     * Lado derecho: terceros (indice j)
-     * Arista si tercero.grupo in slot.pool
-     *
-     * @return matchingMap: Map<codigoSlot, nombreEquipo> con el matching maximo encontrado.
+     * Maximum bipartite matching (Kuhn algorithm) para slots terceros ↔ grupos.
+     * @return Map<slotCodigo, grupoLetra> o vacio si no hay matching perfecto.
      */
-    private fun maximumBipartiteMatching(
-        slots: List<SlotPendiente>,
-        terceros: List<TerceroRankeado>
-    ): Map<String, String> {
-        val n = slots.size       // left side
-        val m = terceros.size    // right side
+    private fun findPerfectMatching(slots: List<SlotPendiente>, groups: List<String>): Map<String, String> {
+        val n = slots.size
+        val m = groups.size
+        if (n != m) return emptyMap()
 
-        // adjacency: for each slot i, list of compatible tercero indices j
         val adj = List(n) { i ->
-            (0 until m).filter { j ->
-                terceros[j].grupo in slots[i].pool
-            }.toMutableList()
+            (0 until m).filter { j -> groups[j] in slots[i].pool }.toMutableList()
         }
 
-        // matchR[j] = which slot is matched to tercero j, or -1 if unmatched
         val matchR = IntArray(m) { -1 }
 
         fun dfs(u: Int, seen: BooleanArray): Boolean {
@@ -272,41 +218,51 @@ class EliminatoriasService(
             dfs(u, seen)
         }
 
-        // Build result map: slotCodigo -> tercero.nombreEquipo
         val result = mutableMapOf<String, String>()
         for (j in 0 until m) {
             if (matchR[j] != -1) {
-                val slot = slots[matchR[j]]
-                result[slot.codigo] = terceros[j].nombreEquipo
+                result[slots[matchR[j]].codigo] = groups[j]
             }
         }
-
-        // Log diagnostic
-        val cardinalidad = result.size
-        logger.info("=== MAX BIPARTITE MATCHING ===")
-        logger.info("Slots: $n, Terceros: $m")
-        logger.info("Cardinalidad maxima del matching: $cardinalidad")
-        for (i in 0 until n) {
-            val s = slots[i]
-            val adjGroups = adj[i].map { "${terceros[it].nombreEquipo}(${terceros[it].grupo})" }
-            logger.info("  ${s.codigo} pool=${s.pool.sorted().joinToString("")} -> compatible: ${adjGroups.joinToString(", ")}")
-        }
-        logger.info("Matching encontrado:")
-        result.forEach { (slot, eq) ->
-            logger.info("  $slot -> $eq")
-        }
-        if (cardinalidad < n) {
-            val unmatchedSlots = slots.filter { it.codigo !in result }.map { it.codigo }
-            val unmatchedTerceros = (0 until m).filter { matchR[it] == -1 }.map { "${terceros[it].nombreEquipo}(${terceros[it].grupo})" }
-            logger.warn("Slots sin match: ${unmatchedSlots.joinToString(", ")}")
-            logger.warn("Terceros sin match: ${unmatchedTerceros.joinToString(", ")}")
-        }
-
         return result
     }
 
-    private fun idxOf(lista: List<TerceroRankeado>, item: TerceroRankeado): Int {
-        return lista.indexOf(item)
+    private val tercerosMappingCache: Map<String, Map<String, String>> by lazy {
+        val slots3ros = bracketSlotRepository.findAllByOrderByRondaAscOrdenAsc()
+            .filter { it.visitanteTipo == "GRUPO_3" }
+        val allGroups = ('A'..'L').map { it.toString() }
+        val mapping = mutableMapOf<String, Map<String, String>>()
+        var sinSolucion = 0
+
+        for (combo in combinaciones(allGroups, 8)) {
+            val key = combo.sorted().joinToString("")
+            val slotPendientes = slots3ros.map { slot ->
+                val pool = slot.visitanteGrupos?.map { it.toString() }?.toSet() ?: emptySet()
+                SlotPendiente(slot.codigo, pool)
+            }
+            val match = findPerfectMatching(slotPendientes, combo.sorted())
+            if (match.size == 8) {
+                mapping[key] = match
+            } else {
+                sinSolucion++
+            }
+        }
+
+        logger.info("=== TERCEROS MAPPING PRECOMPUTADO ===")
+        logger.info("Combinaciones con solucion: ${mapping.size}, sin solucion: $sinSolucion")
+        if (sinSolucion > 0) {
+            logger.warn("HAY $sinSolucion combinaciones SIN matching perfecto — los pools estan mal")
+        }
+
+        mapping
+    }
+
+    private fun combinaciones(list: List<String>, k: Int): List<List<String>> {
+        if (k == 0) return listOf(emptyList())
+        if (list.size < k) return emptyList()
+        val first = list.first()
+        val rest = list.drop(1)
+        return combinaciones(rest, k - 1).map { listOf(first) + it } + combinaciones(rest, k)
     }
 
     private fun resolverReferencia(slot: BracketSlot, isLocal: Boolean): String? {
