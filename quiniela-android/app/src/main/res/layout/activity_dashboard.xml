@@ -62,164 +62,6 @@
                         android:paddingHorizontal="20dp"
                         android:visibility="gone" />
 
-                    <!-- Próximo partido (compacto) -->
-                    <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/cardProximoPartido"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="16dp"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginBottom="4dp"
-                        android:visibility="gone"
-                        app:cardBackgroundColor="#4D1A1A2E"
-                        app:cardCornerRadius="14dp"
-                        app:cardElevation="3dp"
-                        app:strokeWidth="1dp"
-                        app:strokeColor="#29FFFFFF">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:padding="10dp">
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:gravity="center_vertical"
-                                android:layout_marginBottom="4dp">
-
-                                <TextView
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_weight="1"
-                                    android:text="⚽ Próximo partido"
-                                    android:textSize="12sp"
-                                    android:textColor="#FFFFFF"
-                                    android:textStyle="bold"/>
-
-                                <TextView
-                                    android:id="@+id/tvProximoQuiniela"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:textSize="9sp"
-                                    android:textColor="#66FFFFFF"/>
-                            </LinearLayout>
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:gravity="center"
-                                android:layout_marginBottom="4dp">
-
-                                <LinearLayout
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_weight="1"
-                                    android:orientation="vertical"
-                                    android:gravity="center">
-
-                                    <ImageView
-                                        android:id="@+id/ivProximoLocal"
-                                        android:layout_width="24dp"
-                                        android:layout_height="16dp"
-                                        android:scaleType="fitCenter"
-                                        android:contentDescription="Bandera local"/>
-
-                                    <TextView
-                                        android:id="@+id/tvProximoLocal"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:textSize="11sp"
-                                        android:textColor="#FFFFFF"
-                                        android:textStyle="bold"
-                                        android:layout_marginTop="2dp"
-                                        android:gravity="center"/>
-                                </LinearLayout>
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="vs"
-                                    android:textSize="14sp"
-                                    android:textColor="#44FFFFFF"
-                                    android:textStyle="bold"
-                                    android:layout_marginHorizontal="8dp"/>
-
-                                <LinearLayout
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_weight="1"
-                                    android:orientation="vertical"
-                                    android:gravity="center">
-
-                                    <ImageView
-                                        android:id="@+id/ivProximoVisitante"
-                                        android:layout_width="24dp"
-                                        android:layout_height="16dp"
-                                        android:scaleType="fitCenter"
-                                        android:contentDescription="Bandera visitante"/>
-
-                                    <TextView
-                                        android:id="@+id/tvProximoVisitante"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:textSize="11sp"
-                                        android:textColor="#FFFFFF"
-                                        android:textStyle="bold"
-                                        android:layout_marginTop="2dp"
-                                        android:gravity="center"/>
-                                </LinearLayout>
-                            </LinearLayout>
-
-                            <LinearLayout
-                                android:id="@+id/layoutCuentaRegresiva"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:gravity="center"
-                                android:layout_marginBottom="6dp">
-
-                                <LinearLayout
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:orientation="vertical"
-                                    android:gravity="center"
-                                    android:layout_marginHorizontal="8dp">
-                                    <TextView android:id="@+id/tvCountdownDias" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="00" android:textSize="16sp" android:textColor="#FFFFFF" android:textStyle="bold"/>
-                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Días" android:textSize="7sp" android:textColor="#66FFFFFF" android:textStyle="bold"/>
-                                </LinearLayout>
-                                <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:layout_marginHorizontal="8dp">
-                                    <TextView android:id="@+id/tvCountdownHoras" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="00" android:textSize="16sp" android:textColor="#FFFFFF" android:textStyle="bold"/>
-                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Horas" android:textSize="7sp" android:textColor="#66FFFFFF" android:textStyle="bold"/>
-                                </LinearLayout>
-                                <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:layout_marginHorizontal="8dp">
-                                    <TextView android:id="@+id/tvCountdownMinutos" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="00" android:textSize="16sp" android:textColor="#FFFFFF" android:textStyle="bold"/>
-                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Min" android:textSize="7sp" android:textColor="#66FFFFFF" android:textStyle="bold"/>
-                                </LinearLayout>
-                                <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:layout_marginHorizontal="8dp">
-                                    <TextView android:id="@+id/tvCountdownSegundos" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="00" android:textSize="16sp" android:textColor="#FFFFFF" android:textStyle="bold"/>
-                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Seg" android:textSize="7sp" android:textColor="#66FFFFFF" android:textStyle="bold"/>
-                                </LinearLayout>
-                            </LinearLayout>
-
-                            <com.google.android.material.button.MaterialButton
-                                android:id="@+id/btnPronosticarProximo"
-                                android:layout_width="match_parent"
-                                android:layout_height="36dp"
-                                android:text="Pronosticar"
-                                android:textSize="12sp"
-                                android:textColor="#FFFFFF"
-                                android:textStyle="bold"
-                                app:backgroundTint="#0D5BFF"
-                                app:cornerRadius="12dp"
-                                app:elevation="2dp"/>
-
-                        </LinearLayout>
-                    </com.google.android.material.card.MaterialCardView>
-
                     <!-- Card Sistema de puntos -->
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/cardPuntosInfo"
@@ -288,71 +130,17 @@
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
 
-                    <!-- En Vivo compacto + Mis Quinielas -->
                     <TextView
                         android:id="@+id/tvSectionLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:text="Mis Quinielas"
                         android:textSize="28sp"
                         android:textStyle="bold"
                         android:textColor="#FFFFFF"
                         android:paddingHorizontal="20dp"
-                        android:paddingTop="4dp"
+                        android:paddingTop="12dp"
                         android:paddingBottom="8dp" />
-
-                    <!-- En Vivo compacto -->
-                    <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/cardPartidosEnVivo"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="16dp"
-                        android:layout_marginTop="2dp"
-                        android:visibility="gone"
-                        app:cardBackgroundColor="#B01A1A2E"
-                        app:cardCornerRadius="14dp"
-                        app:cardElevation="3dp"
-                        app:strokeWidth="1dp"
-                        app:strokeColor="#33FFFFFF">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:padding="10dp">
-
-                            <LinearLayout
-                                android:id="@+id/layoutLiveSectionHeader"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:gravity="center_vertical"
-                                android:layout_marginBottom="4dp">
-                                <View android:layout_width="6dp" android:layout_height="6dp" android:background="@drawable/bg_live_indicator" />
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="En Vivo"
-                                    android:textColor="#FF4D4D"
-                                    android:textSize="11sp"
-                                    android:textStyle="bold"
-                                    android:layout_marginStart="4dp" />
-                            </LinearLayout>
-
-                            <TextView
-                                android:id="@+id/tvLiveHeader"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textSize="11sp"
-                                android:textStyle="bold"
-                                android:textColor="#FFFFFF"
-                                android:layout_marginBottom="2dp" />
-
-                            <androidx.recyclerview.widget.RecyclerView
-                                android:id="@+id/rvPartidosEnVivo"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content" />
-                        </LinearLayout>
-                    </com.google.android.material.card.MaterialCardView>
 
                     <!-- Quinielas List -->
                     <androidx.recyclerview.widget.RecyclerView
@@ -445,16 +233,17 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="72dp"
+        android:layout_marginBottom="124dp"
         android:text="Crear"
+        android:textSize="12sp"
         android:textColor="#FFFFFF"
         android:textStyle="bold"
         app:icon="@android:drawable/ic_input_add"
         app:iconTint="#FFFFFF"
         app:backgroundTint="#0D5BFF"
-        app:elevation="8dp"
-        app:fabSize="normal"
-        app:cornerRadius="20dp" />
+        app:elevation="6dp"
+        app:fabSize="mini"
+        app:cornerRadius="16dp" />
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/btnUnirseQuiniela"
@@ -462,16 +251,17 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="68dp"
         android:text="Unirse QR"
+        android:textSize="12sp"
         android:textColor="#FFFFFF"
         android:textStyle="bold"
         app:icon="@android:drawable/ic_menu_camera"
         app:iconTint="#FFFFFF"
-        app:backgroundTint="#00B86B"
-        app:elevation="8dp"
-        app:fabSize="normal"
-        app:cornerRadius="20dp" />
+        app:backgroundTint="#0D5BFF"
+        app:elevation="6dp"
+        app:fabSize="mini"
+        app:cornerRadius="16dp" />
 
     <ProgressBar
         android:id="@+id/progressBar"
