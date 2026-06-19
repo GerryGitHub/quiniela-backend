@@ -27,6 +27,7 @@ import com.quiniela.app.repository.Result
 import com.quiniela.app.ui.auth.LoginActivity
 import com.quiniela.app.ui.quiniela.CrearQuinielaActivity
 import com.quiniela.app.ui.quiniela.QuinielaDetalleActivity
+import com.quiniela.app.ui.eliminatorias.EliminatoriasActivity
 import com.quiniela.app.ui.quiniela.QuinielaAdapter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.quiniela.app.databinding.DialogQrBinding
@@ -278,6 +279,10 @@ class DashboardActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
+            R.id.action_eliminatorias -> {
+                startActivity(Intent(this, EliminatoriasActivity::class.java))
+                true
+            }
             R.id.action_logout -> {
                 authRepository.logout()
                 startActivity(Intent(this, LoginActivity::class.java))
