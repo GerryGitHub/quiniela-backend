@@ -165,14 +165,37 @@ class EliminatoriasService(
         if (clasificados.size < 8) return emptyMap()
 
         val gruposSet = clasificados.map { it.grupo }.toSet()
+        val gruposKey = gruposSet.sorted().joinToString("")
+        logger.info("=== FIFA ANNEX C ===")
+        logger.info("1. Combinacion de grupos: {}", gruposKey)
+
         val option = thirdPlaceResolver.resolveOption(gruposSet)
+        logger.info("2. Opcion seleccionada: option={}", option)
+
         val combo = thirdPlaceResolver.resolveThirdPlaces(option)
+        logger.info("3. Fila completa de third_place_combination:")
+        logger.info("   p79={} p85={} p81={} p74={} p82={} p77={} p87={} p80={}",
+            combo.p79, combo.p85, combo.p81, combo.p74,
+            combo.p82, combo.p77, combo.p87, combo.p80)
 
         val matchToSlot = mapOf(
             Constantes.SLOT_P79 to combo.p79, Constantes.SLOT_P85 to combo.p85, Constantes.SLOT_P81 to combo.p81,
             Constantes.SLOT_P74 to combo.p74, Constantes.SLOT_P82 to combo.p82, Constantes.SLOT_P77 to combo.p77,
             Constantes.SLOT_P87 to combo.p87, Constantes.SLOT_P80 to combo.p80
         )
+
+        logger.info("4. Mapeo final slot -> grupo:")
+        matchToSlot.forEach { (slot, grupo) -> logger.info("   {} -> {}", slot, grupo) }
+
+        logger.info("5. Verificacion orden columnas:")
+        logger.info("   1A -> P79={}", combo.p79)
+        logger.info("   1B -> P85={}", combo.p85)
+        logger.info("   1D -> P81={}", combo.p81)
+        logger.info("   1E -> P74={}", combo.p74)
+        logger.info("   1G -> P82={}", combo.p82)
+        logger.info("   1I -> P77={}", combo.p77)
+        logger.info("   1K -> P87={}", combo.p87)
+        logger.info("   1L -> P80={}", combo.p80)
 
         val terceroPorGrupo = clasificados.associate { it.grupo to it.nombreEquipo }
 
