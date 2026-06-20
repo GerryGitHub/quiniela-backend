@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="412dp"
+    android:height="56dp"
+    android:viewportWidth="100"
+    android:viewportHeight="56">
+
+    <!-- Outer blue glow (behind main body, slightly larger) -->
+    <path
+        android:fillColor="#1A2563EB"
+        android:pathData="M2,14 L9,4 L91,4 L98,14 L98,54 L2,54 Z"/>
+
+    <!-- Main dark glass background -->
+    <path
+        android:fillColor="#EA050816"
+        android:pathData="M2,12 L9,2 L91,2 L98,12 L98,54 L2,54 Z"/>
+
+    <!-- Top diagonal + flat edge blue border -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#664F8DFF"
+        android:strokeWidth="0.8"
+        android:pathData="M2,12 L9,2 L91,2 L98,12"/>
+
+    <!-- Left border (subtle) -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#334F8DFF"
+        android:strokeWidth="0.5"
+        android:pathData="M2,12 L2,54"/>
+
+    <!-- Right border (subtle) -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#334F8DFF"
+        android:strokeWidth="0.5"
+        android:pathData="M98,12 L98,54"/>
+
+    <!-- Bottom border -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#334F8DFF"
+        android:strokeWidth="0.5"
+        android:pathData="M2,54 L98,54"/>
+
+</vector>

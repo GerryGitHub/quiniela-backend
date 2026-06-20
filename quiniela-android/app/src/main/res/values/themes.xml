@@ -11,6 +11,44 @@
 
     <style name="Theme.QuinielaApp" parent="Base.Theme.QuinielaApp" />
 
+    <!-- ============================================ -->
+    <!-- REUSABLE COMPONENTS -->
+    <!-- ============================================ -->
+
+    <!-- Section Title -->
+    <style name="TextAppearance.Quiniela.SectionTitle" parent="TextAppearance.Material3.HeadlineLarge">
+        <item name="android:textSize">32sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+
+    <!-- Glass Card -->
+    <style name="Widget.Quiniela.Card.Glass" parent="Widget.Material3.CardView.Filled">
+        <item name="cardCornerRadius">24dp</item>
+        <item name="cardElevation">2dp</item>
+        <item name="cardBackgroundColor">@color/glass_card</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="strokeColor">@color/glass_border</item>
+        <item name="contentPadding">16dp</item>
+    </style>
+
+    <!-- Small Glass Card -->
+    <style name="Widget.Quiniela.Card.GlassSmall" parent="Widget.Material3.CardView.Filled">
+        <item name="cardCornerRadius">20dp</item>
+        <item name="cardElevation">1dp</item>
+        <item name="cardBackgroundColor">@color/glass_card</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="strokeColor">@color/glass_border</item>
+        <item name="contentPadding">12dp</item>
+    </style>
+
+    <!-- Toolbar popup menu style -->
+    <style name="Widget.Quiniela.Toolbar.PopupMenu" parent="ThemeOverlay.AppCompat.Dark">
+        <item name="android:popupBackground">@drawable/bg_popup_menu</item>
+        <item name="android:popupElevation">8dp</item>
+        <item name="android:textColor">#FFFFFF</item>
+    </style>
+
     <!-- Splash Theme: shows QGol logo centered on background -->
     <style name="Theme.QGol.Splash" parent="Theme.AppCompat.NoActionBar">
         <item name="android:windowBackground">@drawable/splash_logo</item>
@@ -20,15 +58,15 @@
     <!-- BUTTONS -->
     <!-- ============================================ -->
     
-    <!-- Primary Button - Full width, rounded, elevated -->
+    <!-- Primary Button -->
     <style name="Widget.Quiniela.Button.Primary" parent="Widget.Material3.Button">
         <item name="android:textColor">@color/white</item>
         <item name="backgroundTint">@color/primary</item>
         <item name="cornerRadius">16dp</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:textSize">16sp</item>
-        <item name="android:minHeight">56dp</item>
-        <item name="elevation">4dp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="elevation">2dp</item>
     </style>
     
     <!-- Secondary Button - Outline style -->
@@ -75,19 +113,21 @@
     <!-- CARDS -->
     <!-- ============================================ -->
     
-    <!-- Elevated Card - Premium floating look -->
+    <!-- Elevated Card - Glass style -->
     <style name="Widget.Quiniela.Card.Elevated" parent="Widget.Material3.CardView.Elevated">
-        <item name="cardCornerRadius">20dp</item>
-        <item name="cardElevation">4dp</item>
-        <item name="cardBackgroundColor">@color/surface</item>
+        <item name="cardCornerRadius">24dp</item>
+        <item name="cardElevation">2dp</item>
+        <item name="cardBackgroundColor">@color/glass_card</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="strokeColor">@color/glass_border</item>
     </style>
     
-    <!-- Outlined Card -->
+    <!-- Outlined Card - Glass outlined style -->
     <style name="Widget.Quiniela.Card.Outlined" parent="Widget.Material3.CardView.Outlined">
-        <item name="cardCornerRadius">20dp</item>
-        <item name="strokeColor">@color/border_soft</item>
+        <item name="cardCornerRadius">24dp</item>
+        <item name="cardBackgroundColor">@color/glass_card</item>
+        <item name="strokeColor">@color/glass_border</item>
         <item name="strokeWidth">1dp</item>
-        <item name="cardBackgroundColor">@color/surface</item>
     </style>
 
     <!-- ============================================ -->

@@ -9,6 +9,4 @@ import java.util.Optional
 @Repository
 interface RefreshTokenRepository : JpaRepository<RefreshToken, Long> {
     fun findByToken(token: String): Optional<RefreshToken>
-    fun findByUsuarioAndRevokedFalseAndExpiresAtAfter(usuario: Usuario, now: java.time.LocalDateTime): List<RefreshToken>
-    fun deleteByUsuario(usuario: Usuario)
 }

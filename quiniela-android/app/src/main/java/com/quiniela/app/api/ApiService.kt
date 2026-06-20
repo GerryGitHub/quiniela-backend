@@ -118,6 +118,12 @@ interface ApiService {
     @POST("auth/refresh")
     suspend fun refresh(@Body request: RefreshTokenRequest): Response<RefreshTokenResponse>
 
+    @GET("pronosticos/quiniela/{quinielaId}/usuario/{usuarioId}")
+    suspend fun getPronosticosByUser(
+        @Path("quinielaId") quinielaId: Long,
+        @Path("usuarioId") usuarioId: Long
+    ): Response<MisPronosticosDTO>
+
     @GET("api/eliminatorias/preview")
     suspend fun getEliminatoriasPreview(): Response<BracketPreviewDTO>
 

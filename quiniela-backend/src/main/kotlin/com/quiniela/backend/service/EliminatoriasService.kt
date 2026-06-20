@@ -12,7 +12,6 @@ import java.time.LocalDateTime
 @Service
 class EliminatoriasService(
     private val bracketSlotRepository: BracketSlotRepository,
-    private val terceroMappingRepository: TerceroMappingRepository,
     private val grupoRepository: GrupoRepository,
     private val equipoRepository: EquipoRepository,
     private val partidoRepository: PartidoRepository,

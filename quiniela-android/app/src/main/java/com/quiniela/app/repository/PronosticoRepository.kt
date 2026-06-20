@@ -61,6 +61,21 @@ class PronosticoRepository(private val apiService: ApiService = RetrofitClient.a
         }
     }
 
+    suspend fun getPronosticosByUser(quinielaId: Long, usuarioId: Long): Result<MisPronosticosDTO> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.getPronosticosByUser(quinielaId, usuarioId)
+                if (response.isSuccessful) {
+                    response.body()?.let { Result.Success(it) } ?: Result.Error("Respuesta vacía")
+                } else {
+                    Result.Error(parseError(response))
+                }
+            } catch (e: Exception) {
+                Result.Error(e.message ?: "Error de conexión")
+            }
+        }
+    }
+
     suspend fun crearPronosticosBatch(
         idQuiniela: Long,
         pronosticos: List<PronosticoItemRequest>

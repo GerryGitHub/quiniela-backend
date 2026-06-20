@@ -20,8 +20,6 @@ class EmailVerificationToken(
     val expiresAt: LocalDateTime,
 
     @Column(nullable = false)
-    var used: Boolean = false,
+    var used: Boolean = false
 
-    @Column(nullable = false, updatable = false)
-    val createdAt: LocalDateTime = LocalDateTime.now()
 )
