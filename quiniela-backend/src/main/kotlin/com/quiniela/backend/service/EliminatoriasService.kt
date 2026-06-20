@@ -18,7 +18,8 @@ class EliminatoriasService(
     private val quinielaRepository: QuinielaRepository,
     private val participacionRepository: ParticipacionRepository,
     private val usuarioRepository: UsuarioRepository,
-    private val equipoEstadisticasRepository: EquipoEstadisticasRepository
+    private val equipoEstadisticasRepository: EquipoEstadisticasRepository,
+    private val thirdPlaceResolver: ThirdPlaceResolver
 ) {
 
     companion object {
@@ -26,29 +27,24 @@ class EliminatoriasService(
     }
 
     fun getPreview(): BracketPreviewDTO {
-        val rondaOrder = listOf("R32", "R16", "QF", "SF", "3RD", "FINAL")
+        val rondaOrder = Ronda.ALL
         val slots = bracketSlotRepository.findAllByOrderByRondaAscOrdenAsc()
-            .sortedBy { s -> rondaOrder.indexOf(s.ronda) * 100 + s.orden }
+            .sortedBy { s -> rondaOrder.indexOf(Ronda.from(s.ronda)) * 100 + s.orden }
         val posiciones = getPosicionesGrupos()
 
         val tercerasRankeadas = rankearTercerasPosiciones(posiciones)
         val clasificados = tercerasRankeadas.take(8)
-        val gruposClasificados = clasificados.map { it.grupo }.sorted().joinToString("")
 
-        val asignacion3ros = asignarTercerosASlots(clasificados, slots.filter { s ->
-            s.localTipo == "GRUPO_3" || s.visitanteTipo == "GRUPO_3"
-        }, gruposClasificados)
+        val asignacion3ros = asignarTercerosASlots(clasificados)
         tercerosLog(clasificados)
-        asignacionLog(asignacion3ros, slots.filter { s -> s.localTipo == "GRUPO_3" || s.visitanteTipo == "GRUPO_3" })
+        asignacionLog(asignacion3ros, slots.filter { s -> s.localTipo == SlotTipo.GRUPO_3.tipo || s.visitanteTipo == SlotTipo.GRUPO_3.tipo })
 
-        val slotsMap = slots.associateBy { it.codigo }
         val resultadosPorSlot = mutableMapOf<String, Pair<String?, String?>>()
-        val equiposUsados = mutableSetOf<String>()
 
         for (slot in slots) {
-            if (slot.ronda == "R32") {
-                val local = resolverEquipo(slot, true, posiciones, slotsMap, resultadosPorSlot, asignacion3ros, equiposUsados)
-                val visitante = resolverEquipo(slot, false, posiciones, slotsMap, resultadosPorSlot, asignacion3ros, equiposUsados)
+            if (slot.ronda == Ronda.R32.ronda) {
+                val local = resolverEquipo(slot, true, posiciones, resultadosPorSlot, asignacion3ros)
+                val visitante = resolverEquipo(slot, false, posiciones, resultadosPorSlot, asignacion3ros)
                 resultadosPorSlot[slot.codigo] = Pair(local, visitante)
             } else {
                 val local = resolverReferencia(slot, true)
@@ -64,7 +60,7 @@ class EliminatoriasService(
                 codigo = slot.codigo, ronda = slot.ronda, orden = slot.orden,
                 equipoLocal = local, equipoVisitante = visitante,
                 localSlot = slotToOrigenDTO(slot, true), visitanteSlot = slotToOrigenDTO(slot, false),
-                resuelto = slot.ronda == "R32" && local != null && visitante != null
+                resuelto = slot.ronda == Ronda.R32.ronda && local != null && visitante != null
             )
         }
 
@@ -158,117 +154,38 @@ class EliminatoriasService(
         logger.info("=== ASIGNACION TERCEROS ===")
         slots3ros.forEach { slot ->
             val eq = asignacion[slot.codigo]
-            val pool = if (slot.localTipo == "GRUPO_3") slot.localGrupos ?: "" else slot.visitanteGrupos ?: ""
+            val pool = if (slot.localTipo == SlotTipo.GRUPO_3.tipo) slot.localGrupos ?: "" else slot.visitanteGrupos ?: ""
             logger.info("${slot.codigo} pool=$pool -> ${eq ?: "POR DEFINIR"}")
         }
     }
 
     private fun asignarTercerosASlots(
-        clasificados: List<TerceroRankeado>,
-        slots3ros: List<BracketSlot>,
-        gruposClasificados: String
+        clasificados: List<TerceroRankeado>
     ): Map<String, String> {
-        if (gruposClasificados.length < 8) return emptyMap()
+        if (clasificados.size < 8) return emptyMap()
 
-        val asignacion = tercerosMappingCache[gruposClasificados]
-        if (asignacion == null) {
-            logger.warn("No hay mapping precomputado para combinacion $gruposClasificados")
-            return emptyMap()
-        }
+        val gruposSet = clasificados.map { it.grupo }.toSet()
+        val option = thirdPlaceResolver.resolveOption(gruposSet)
+        val combo = thirdPlaceResolver.resolveThirdPlaces(option)
 
-        return clasificados.filter { it.grupo in gruposClasificados }
-            .associate { tercero ->
-                val slot = asignacion.entries.first { it.value == tercero.grupo }.key
-                slot to tercero.nombreEquipo
-            }
-    }
+        val matchToSlot = mapOf(
+            Constantes.SLOT_P79 to combo.p79, Constantes.SLOT_P85 to combo.p85, Constantes.SLOT_P81 to combo.p81,
+            Constantes.SLOT_P74 to combo.p74, Constantes.SLOT_P82 to combo.p82, Constantes.SLOT_P77 to combo.p77,
+            Constantes.SLOT_P87 to combo.p87, Constantes.SLOT_P80 to combo.p80
+        )
 
-    data class SlotPendiente(val codigo: String, val pool: Set<String>)
+        val terceroPorGrupo = clasificados.associate { it.grupo to it.nombreEquipo }
 
-    /**
-     * Maximum bipartite matching (Kuhn algorithm) para slots terceros ↔ grupos.
-     * @return Map<slotCodigo, grupoLetra> o vacio si no hay matching perfecto.
-     */
-    private fun findPerfectMatching(slots: List<SlotPendiente>, groups: List<String>): Map<String, String> {
-        val n = slots.size
-        val m = groups.size
-        if (n != m) return emptyMap()
-
-        val adj = List(n) { i ->
-            (0 until m).filter { j -> groups[j] in slots[i].pool }.toMutableList()
-        }
-
-        val matchR = IntArray(m) { -1 }
-
-        fun dfs(u: Int, seen: BooleanArray): Boolean {
-            for (v in adj[u]) {
-                if (seen[v]) continue
-                seen[v] = true
-                if (matchR[v] == -1 || dfs(matchR[v], seen)) {
-                    matchR[v] = u
-                    return true
-                }
-            }
-            return false
-        }
-
-        for (u in 0 until n) {
-            val seen = BooleanArray(m)
-            dfs(u, seen)
-        }
-
-        val result = mutableMapOf<String, String>()
-        for (j in 0 until m) {
-            if (matchR[j] != -1) {
-                result[slots[matchR[j]].codigo] = groups[j]
-            }
-        }
-        return result
-    }
-
-    private val tercerosMappingCache: Map<String, Map<String, String>> by lazy {
-        val slots3ros = bracketSlotRepository.findAllByOrderByRondaAscOrdenAsc()
-            .filter { it.visitanteTipo == "GRUPO_3" }
-        val allGroups = ('A'..'L').map { it.toString() }
-        val mapping = mutableMapOf<String, Map<String, String>>()
-        var sinSolucion = 0
-
-        for (combo in combinaciones(allGroups, 8)) {
-            val key = combo.sorted().joinToString("")
-            val slotPendientes = slots3ros.map { slot ->
-                val pool = slot.visitanteGrupos?.map { it.toString() }?.toSet() ?: emptySet()
-                SlotPendiente(slot.codigo, pool)
-            }
-            val match = findPerfectMatching(slotPendientes, combo.sorted())
-            if (match.size == 8) {
-                mapping[key] = match
-            } else {
-                sinSolucion++
-            }
-        }
-
-        logger.info("=== TERCEROS MAPPING PRECOMPUTADO ===")
-        logger.info("Combinaciones con solucion: ${mapping.size}, sin solucion: $sinSolucion")
-        if (sinSolucion > 0) {
-            logger.warn("HAY $sinSolucion combinaciones SIN matching perfecto — los pools estan mal")
-        }
-
-        mapping
-    }
-
-    private fun combinaciones(list: List<String>, k: Int): List<List<String>> {
-        if (k == 0) return listOf(emptyList())
-        if (list.size < k) return emptyList()
-        val first = list.first()
-        val rest = list.drop(1)
-        return combinaciones(rest, k - 1).map { listOf(first) + it } + combinaciones(rest, k)
+        return matchToSlot.mapNotNull { (slotCodigo, grupoOrigen) ->
+            val equipo = terceroPorGrupo[grupoOrigen] ?: return@mapNotNull null
+            slotCodigo to equipo
+        }.toMap()
     }
 
     private fun resolverReferencia(slot: BracketSlot, isLocal: Boolean): String? {
-        val tipo = if (isLocal) slot.localTipo else slot.visitanteTipo
         val partidoOrigen = if (isLocal) slot.localPartidoOrigen else slot.visitantePartidoOrigen
         val esGanador = if (isLocal) slot.localEsGanador else slot.visitanteEsGanador
-        val prefijo = if (esGanador == true) "W" else if (esGanador == false) "L" else null ?: return null
+        val prefijo = if (esGanador == true) Constantes.PREFIJO_WINNER else if (esGanador == false) Constantes.PREFIJO_LOSER else null ?: return null
         val origen = partidoOrigen ?: return null
         return "$prefijo${origen.codigo}"
     }
@@ -276,10 +193,8 @@ class EliminatoriasService(
     private fun resolverEquipo(
         slot: BracketSlot, isLocal: Boolean,
         posiciones: Map<String, List<EquipoStats>>,
-        slotsMap: Map<String, BracketSlot>,
         resultadosPrevios: Map<String, Pair<String?, String?>>,
-        asignacion3ros: Map<String, String>,
-        equiposUsados: MutableSet<String>
+        asignacion3ros: Map<String, String>
     ): String? {
         val tipo = if (isLocal) slot.localTipo else slot.visitanteTipo
         val grupos = if (isLocal) slot.localGrupos else slot.visitanteGrupos
@@ -287,15 +202,15 @@ class EliminatoriasService(
         val esGanador = if (isLocal) slot.localEsGanador else slot.visitanteEsGanador
 
         return when (tipo) {
-            "GRUPO_1" -> posiciones[grupos]?.firstOrNull()?.nombre
-            "GRUPO_2" -> posiciones[grupos]?.getOrNull(1)?.nombre
-            "GRUPO_3" -> asignacion3ros[slot.codigo]
-            "WINNER" -> {
+            SlotTipo.GRUPO_1.tipo -> posiciones[grupos]?.firstOrNull()?.nombre
+            SlotTipo.GRUPO_2.tipo -> posiciones[grupos]?.getOrNull(1)?.nombre
+            SlotTipo.GRUPO_3.tipo -> asignacion3ros[slot.codigo]
+            SlotTipo.WINNER.tipo -> {
                 val origen = partidoOrigen ?: return null
                 val res = resultadosPrevios[origen.codigo] ?: return null
                 if (esGanador == true) res.first else res.second
             }
-            "LOSER" -> {
+            SlotTipo.LOSER.tipo -> {
                 val origen = partidoOrigen ?: return null
                 val res = resultadosPrevios[origen.codigo] ?: return null
                 if (esGanador == false) res.second else res.first
@@ -310,8 +225,10 @@ class EliminatoriasService(
         val partidoOrigen = if (isLocal) slot.localPartidoOrigen else slot.visitantePartidoOrigen
         val esGanador = if (isLocal) slot.localEsGanador else slot.visitanteEsGanador
         return when (tipo) {
-            "GRUPO_1", "GRUPO_2", "GRUPO_3" -> SlotOrigenDTO(tipo = tipo, grupos = grupos)
-            "WINNER", "LOSER" -> SlotOrigenDTO(tipo = tipo, partidoOrigen = partidoOrigen?.codigo, esGanador = esGanador)
+            SlotTipo.GRUPO_1.tipo, SlotTipo.GRUPO_2.tipo, SlotTipo.GRUPO_3.tipo ->
+                SlotOrigenDTO(tipo = tipo, grupos = grupos)
+            SlotTipo.WINNER.tipo, SlotTipo.LOSER.tipo ->
+                SlotOrigenDTO(tipo = tipo, partidoOrigen = partidoOrigen?.codigo, esGanador = esGanador)
             else -> null
         }
     }
@@ -324,13 +241,12 @@ class EliminatoriasService(
         val admin = usuarioRepository.findByEmail(email)
             .orElseThrow { NotFoundException("Usuario no encontrado") }
 
-        quinielaGrupos.estado = "FINALIZADA"
+        quinielaGrupos.estado = EstadoQuiniela.FINALIZADA.estado
         quinielaRepository.save(quinielaGrupos)
 
-        val nextRondas = listOf("R32", "R16", "QF", "SF", "3RD", "FINAL")
-        val rondaIdx = nextRondas.indexOf(quinielaGrupos.ronda)
-        val nuevaRonda = if (rondaIdx >= 0 && rondaIdx < nextRondas.size - 1) nextRondas[rondaIdx + 1] else "R32"
-        if (nuevaRonda !in nextRondas) throw IllegalStateException("No hay más rondas disponibles")
+        val nextRondas = Ronda.ALL
+        val rondaIdx = quinielaGrupos.ronda?.let { r -> nextRondas.indexOf(Ronda.from(r)) } ?: -1
+        val nuevaRonda = if (rondaIdx >= 0 && rondaIdx < nextRondas.size - 1) nextRondas[rondaIdx + 1].ronda else Ronda.R32.ronda
 
         val preview = getPreview()
         val slotsRonda = preview.rondas[nuevaRonda]?.sortedBy { it.orden } ?: emptyList()
@@ -345,7 +261,7 @@ class EliminatoriasService(
         val quiniela = Quiniela(
             nombre = nombreFinal, codigoInvitacion = generarCodigo(),
             administrador = admin, createdAt = LocalDateTime.now(),
-            estado = "ACTIVA", ronda = nuevaRonda
+            estado = EstadoQuiniela.ACTIVA.estado, ronda = nuevaRonda
         )
         val quinielaGuardada = quinielaRepository.save(quiniela)
 
@@ -360,7 +276,7 @@ class EliminatoriasService(
             Partido(
                 equipoLocal = equipoLocal, equipoVisitante = equipoVisitante,
                 grupo = null, fechaHora = LocalDateTime.now().plusDays(7 + slot.orden.toLong()),
-                estado = EstadoPartido.PENDIENTE, codigo = slot.codigo, quiniela = quinielaGuardada
+                estado = EstadoPartido.PENDIENTE, quiniela = quinielaGuardada
             )
         }
 
@@ -384,9 +300,9 @@ class EliminatoriasService(
     }
 
     fun getStatus(): EliminatoriasStatusDTO {
-        val quinielasActivas = quinielaRepository.findAll().filter { it.estado == "ACTIVA" && (it.ronda == null || it.ronda == "GRUPOS") }
+        val quinielasActivas = quinielaRepository.findAll().filter { it.estado == EstadoQuiniela.ACTIVA.estado && (it.ronda == null || it.ronda == EstadoQuiniela.GRUPOS.estado) }
         val quinielasEliminatorias = quinielaRepository.findAll()
-            .filter { it.ronda in listOf("R32", "R16", "QF", "SF", "3RD", "FINAL") }
+            .filter { Ronda.ALL.any { r -> it.ronda == r.ronda } }
             .sortedByDescending { it.createdAt }
 
         val faseGruposActiva = quinielasActivas.isNotEmpty()

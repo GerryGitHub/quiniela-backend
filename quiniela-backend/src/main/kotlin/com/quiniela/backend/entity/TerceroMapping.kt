@@ -7,8 +7,5 @@ import jakarta.persistence.*
 class TerceroMapping(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
-    val combinacion: String,
-    val slotCodigo: String,
-    val grupoOrigen: String
+    val id: Long = 0
 )

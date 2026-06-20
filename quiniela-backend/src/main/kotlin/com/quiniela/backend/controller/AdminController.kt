@@ -1,6 +1,7 @@
 package com.quiniela.backend.controller
 
 import com.quiniela.backend.dto.*
+import com.quiniela.backend.entity.Constantes
 import com.quiniela.backend.entity.EquipoEstadisticas
 import com.quiniela.backend.repository.EquipoEstadisticasRepository
 import com.quiniela.backend.repository.EquipoRepository
@@ -58,7 +59,7 @@ class AdminController(
     @PostMapping("/calculate-scores/{partidoId}")
     @Operation(summary = "Calcular puntos de un partido", description = "Calcula los puntos de todos los pronósticos asociados a un partido")
     fun calcularPuntos(@PathVariable partidoId: Long): ResponseEntity<Map<String, String>> {
-        return ResponseEntity.ok(mapOf("message" to "Puntos calculados para el partido $partidoId"))
+            return ResponseEntity.ok(mapOf(Constantes.RESPONSE_KEY_MESSAGE to "Puntos calculados para el partido $partidoId"))
     }
 
     @GetMapping("/users")

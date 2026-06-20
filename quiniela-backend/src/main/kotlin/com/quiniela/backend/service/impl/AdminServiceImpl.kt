@@ -2,7 +2,10 @@ package com.quiniela.backend.service.impl
 
 import com.quiniela.backend.dto.*
 import com.quiniela.backend.entity.EstadoPartido
+import com.quiniela.backend.entity.HealthStatus
 import com.quiniela.backend.entity.Quiniela
+import com.quiniela.backend.entity.SortDirection
+import com.quiniela.backend.entity.SortField
 import com.quiniela.backend.repository.ParticipacionRepository
 import com.quiniela.backend.repository.PartidoRepository
 import com.quiniela.backend.repository.PronosticoRepository
@@ -39,12 +42,12 @@ class AdminServiceImpl(
         }
         val ultimaActualizacion = try {
             partidoRepository.findUltimaActualizacion()?.toString()?.replace("T", " ")
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
         return AdminSystemDTO(
-            api = "ONLINE",
-            database = if (dbOnline) "ONLINE" else "OFFLINE",
+            api = HealthStatus.ONLINE.status,
+            database = if (dbOnline) HealthStatus.ONLINE.status else HealthStatus.OFFLINE.status,
             ultimaActualizacion = ultimaActualizacion
         )
     }
@@ -81,14 +84,14 @@ class AdminServiceImpl(
             }
         }
 
-        val comparator: Comparator<Quiniela> = when (sort?.lowercase()) {
-            "nombre" -> compareBy { it.nombre.lowercase() }
-            "creador" -> compareBy { it.administrador.nombre.lowercase() }
-            "fecha" -> compareBy { it.createdAt }
-            else -> compareByDescending { it.id }
+        val comparator: Comparator<Quiniela> = when (SortField.from(sort?.lowercase())) {
+            SortField.NOMBRE -> compareBy { it.nombre.lowercase() }
+            SortField.CREADOR -> compareBy { it.administrador.nombre.lowercase() }
+            SortField.FECHA -> compareBy { it.createdAt }
+            null -> compareByDescending { it.id }
         }
 
-        quinielas = if (order?.lowercase() == "asc") quinielas.sortedWith(comparator)
+        quinielas = if (SortDirection.from(order?.lowercase()) == SortDirection.ASC) quinielas.sortedWith(comparator)
         else quinielas.sortedWith(comparator.reversed())
 
         return quinielas.map {

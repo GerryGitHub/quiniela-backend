@@ -14,6 +14,7 @@ import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
+import com.quiniela.backend.entity.RolUsuario
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 
@@ -42,7 +43,7 @@ open class SecurityConfig(
                     .requestMatchers("/quinielas/**").authenticated()
                     .requestMatchers("/api/grupos/**").permitAll()
                     .requestMatchers("/api/resultados/**").permitAll()
-                    .requestMatchers("/admin/**").hasRole("ADMIN")
+                    .requestMatchers("/admin/**").hasRole(RolUsuario.ADMIN.rol)
                     .anyRequest().authenticated()
             }
             .sessionManagement { session ->

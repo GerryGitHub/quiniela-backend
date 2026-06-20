@@ -21,8 +21,6 @@ class RefreshToken(
     val expiresAt: LocalDateTime,
 
     @Column(nullable = false)
-    var revoked: Boolean = false,
+    var revoked: Boolean = false
 
-    @Column(nullable = false, updatable = false)
-    val createdAt: LocalDateTime = LocalDateTime.now()
 )

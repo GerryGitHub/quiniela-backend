@@ -14,6 +14,6 @@ class Quiniela(
     val administrador: Usuario,
     @Column(name = "created_at")
     var createdAt: LocalDateTime? = null,
-    var estado: String = "ACTIVA",
+    var estado: String = EstadoQuiniela.ACTIVA.estado,
     var ronda: String? = null
 )

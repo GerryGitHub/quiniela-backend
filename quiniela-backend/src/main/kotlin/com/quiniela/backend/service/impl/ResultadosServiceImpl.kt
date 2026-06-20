@@ -1,6 +1,7 @@
 package com.quiniela.backend.service.impl
 
-import com.quiniela.backend.dto.*
+import com.quiniela.backend.dto.ActualizarResultadoRequest
+import com.quiniela.backend.dto.PartidoDTO
 import com.quiniela.backend.entity.EstadoPartido
 import com.quiniela.backend.exception.NotFoundException
 import com.quiniela.backend.mapper.toPartidoDTO
@@ -13,7 +14,6 @@ import com.quiniela.backend.service.ResultadosService
 import com.quiniela.backend.service.WebSocketService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.Duration
 import java.time.ZoneId
 import java.time.ZonedDateTime
 

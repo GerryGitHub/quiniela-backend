@@ -3,20 +3,15 @@ package com.quiniela.backend.service
 import com.quiniela.backend.domain.*
 import com.quiniela.backend.dto.*
 import com.quiniela.backend.entity.EmailVerificationToken
-import com.quiniela.backend.entity.PasswordResetToken
 import com.quiniela.backend.entity.RefreshToken
 import com.quiniela.backend.entity.Usuario
 import com.quiniela.backend.exception.ForbiddenException
 import com.quiniela.backend.repository.EmailVerificationTokenRepository
-import com.quiniela.backend.repository.PasswordResetTokenRepository
-import com.quiniela.backend.repository.ParticipacionRepository
-import com.quiniela.backend.repository.QuinielaRepository
 import com.quiniela.backend.repository.RefreshTokenRepository
 import com.quiniela.backend.repository.UsuarioRepository
 import com.quiniela.backend.security.JwtService
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.beans.factory.annotation.Value
@@ -28,10 +23,7 @@ import java.util.UUID
 @Service
 class AuthService(
     private val usuarioRepository: UsuarioRepository,
-    private val participacionRepository: ParticipacionRepository,
-    private val quinielaRepository: QuinielaRepository,
     private val emailVerificationTokenRepository: EmailVerificationTokenRepository,
-    private val passwordResetTokenRepository: PasswordResetTokenRepository,
     private val refreshTokenRepository: RefreshTokenRepository,
     private val emailService: EmailService,
     private val passwordEncoder: PasswordEncoder,
@@ -43,15 +35,6 @@ class AuthService(
 
     @Transactional
     fun register(command: RegisterCommand): RegisterResponse {
-        if (command.email.isBlank() || !command.email.contains("@")) {
-            throw IllegalArgumentException("Email inválido")
-        }
-        if (command.password.length < 6) {
-            throw IllegalArgumentException("La contraseña debe tener al menos 6 caracteres")
-        }
-        if (command.nombre.isBlank()) {
-            throw IllegalArgumentException("El nombre es requerido")
-        }
         if (usuarioRepository.existsByEmail(command.email)) {
             throw IllegalArgumentException("El email ya está registrado")
         }
@@ -65,19 +48,7 @@ class AuthService(
         )
         val usuarioGuardado = usuarioRepository.save(usuario)
 
-        val code = String.format("%06d", (100000..999999).random())
-        val verificationToken = EmailVerificationToken(
-            usuario = usuarioGuardado,
-            token = code,
-            expiresAt = LocalDateTime.now().plusMinutes(15)
-        )
-        emailVerificationTokenRepository.save(verificationToken)
-
-        emailService.sendVerificationEmail(
-            email = usuarioGuardado.email,
-            nombre = usuarioGuardado.nombre,
-            token = code
-        )
+        crearTokenVerificacion(usuarioGuardado)
 
         return RegisterResponse(message = "Revisa tu correo para activar tu cuenta con el código OTP")
     }
@@ -188,120 +159,29 @@ class AuthService(
         if (usuario.isPresent && !usuario.get().emailVerified) {
             val user = usuario.get()
             emailVerificationTokenRepository.deleteByUsuario(user)
-
-            val newCode = String.format("%06d", (100000..999999).random())
-            val verificationToken = EmailVerificationToken(
-                usuario = user,
-                token = newCode,
-                expiresAt = LocalDateTime.now().plusMinutes(15)
-            )
-            emailVerificationTokenRepository.save(verificationToken)
-
-            emailService.sendVerificationEmail(
-                email = user.email,
-                nombre = user.nombre,
-                token = newCode
-            )
+            crearTokenVerificacion(user)
         }
 
         return MessageResponse(message = "Si el correo está registrado y no verificado, recibirás un código de verificación")
     }
 
-    @Transactional
-    fun forgotPassword(command: ForgotPasswordCommand): MessageResponse {
-        val usuario = usuarioRepository.findByEmail(command.email)
+    private fun generarCodigo(): String =
+        String.format("%06d", (100000..999999).random())
 
-        if (usuario.isPresent && usuario.get().emailVerified) {
-            val user = usuario.get()
-            passwordResetTokenRepository.deleteByUsuario(user)
-
-            val code = String.format("%06d", (100000..999999).random())
-            val resetToken = PasswordResetToken(
-                usuario = user,
-                token = code,
-                expiresAt = LocalDateTime.now().plusMinutes(15)
-            )
-            passwordResetTokenRepository.save(resetToken)
-
-            emailService.sendPasswordResetEmail(
-                email = user.email,
-                nombre = user.nombre,
-                token = code
-            )
-        }
-
-        return MessageResponse(message = "Si existe una cuenta, enviamos instrucciones.")
-    }
-
-    @Transactional
-    fun resetPassword(command: ResetPasswordCommand): MessageResponse {
-        val usuario = usuarioRepository.findByEmail(command.email)
-            .orElseThrow { IllegalArgumentException("Usuario no encontrado") }
-
-        val resetToken = passwordResetTokenRepository.findByUsuarioAndToken(usuario, command.code)
-            .orElseThrow { IllegalArgumentException("Código inválido") }
-
-        if (resetToken.used) {
-            throw IllegalArgumentException("El código ya fue utilizado")
-        }
-
-        if (resetToken.expiresAt.isBefore(LocalDateTime.now())) {
-            throw IllegalArgumentException("El código ha expirado")
-        }
-
-        usuario.password = passwordEncoder.encode(command.newPassword)
-        resetToken.used = true
-
-        usuarioRepository.save(usuario)
-        passwordResetTokenRepository.save(resetToken)
-
-        return MessageResponse(message = "Contraseña actualizada correctamente.")
-    }
-
-    fun getPerfil(email: String): UsuarioPerfilDTO {
-        val usuario = usuarioRepository.findByEmail(email)
-            .orElseThrow { IllegalArgumentException("Usuario no encontrado") }
-
-        val puntosGlobales = usuarioRepository.puntosTotalesGlobales(usuario.id)
-
-        val participaciones = participacionRepository.findByUsuario_IdAndQuiniela_Id(usuario.id, 0L)
-        val quinielas = mutableListOf<QuinielaResumenDTO>()
-
-        val misQuinielasAdmin = quinielaRepository.findByAdministradorId(usuario.id)
-        misQuinielasAdmin.forEach { q ->
-            val participacion = participacionRepository.findByUsuario_IdAndQuiniela_Id(usuario.id, q.id)
-            quinielas.add(
-                QuinielaResumenDTO(
-                    id = q.id,
-                    nombre = q.nombre,
-                    codigoInvitacion = q.codigoInvitacion,
-                    puntosTotales = participacion.map { it.puntosTotales }.orElse(0)
-                )
-            )
-        }
-
-        val misQuinielas = quinielaRepository.findByParticipanteId(usuario.id)
-        misQuinielas.forEach { q ->
-            if (quinielas.none { it.id == q.id }) {
-                val participacion = participacionRepository.findByUsuario_IdAndQuiniela_Id(usuario.id, q.id)
-                quinielas.add(
-                    QuinielaResumenDTO(
-                        id = q.id,
-                        nombre = q.nombre,
-                        codigoInvitacion = q.codigoInvitacion,
-                        puntosTotales = participacion.map { it.puntosTotales }.orElse(0)
-                    )
-                )
-            }
-        }
-
-        return UsuarioPerfilDTO(
-            id = usuario.id,
-            nombre = usuario.nombre,
-            email = usuario.email,
-            rol = usuario.rol,
-            puntosTotalesGlobales = puntosGlobales,
-            quinielas = quinielas
+    private fun crearTokenVerificacion(usuario: Usuario): String {
+        val code = generarCodigo()
+        val verificationToken = EmailVerificationToken(
+            usuario = usuario,
+            token = code,
+            expiresAt = LocalDateTime.now().plusMinutes(15)
         )
+        emailVerificationTokenRepository.save(verificationToken)
+        emailService.sendVerificationEmail(
+            email = usuario.email,
+            nombre = usuario.nombre,
+            token = code
+        )
+        return code
     }
+
 }
