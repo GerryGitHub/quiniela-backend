@@ -3,12 +3,11 @@ import App from '../App';
 import Login from '../pages/Login';
 import Dashboard from '../pages/Dashboard';
 import Grupos from '../pages/Grupos';
-import QuinielaDetalle from '../pages/QuinielaDetalle';
-import Pronosticos from '../pages/Pronosticos';
 import Resultados from '../pages/Resultados';
 import Users from '../pages/Users';
 import UserDetail from '../pages/UserDetail';
 import AdminQuinielas from '../pages/AdminQuinielas';
+import EstadisticasEquipos from '../pages/EstadisticasEquipos';
 
 const router = createBrowserRouter([
   {
@@ -26,14 +25,6 @@ const router = createBrowserRouter([
       {
         path: 'dashboard',
         element: <Dashboard />,
-      },
-      {
-        path: 'quinielas/:id',
-        element: <QuinielaDetalle />,
-      },
-      {
-        path: 'pronosticos/:quinielaId',
-        element: <Pronosticos />,
       },
       {
         path: 'grupos',
@@ -54,6 +45,10 @@ const router = createBrowserRouter([
       {
         path: 'admin/quinielas',
         element: <AdminQuinielas />,
+      },
+      {
+        path: 'admin/estadisticas',
+        element: <EstadisticasEquipos />,
       },
     ],
   },

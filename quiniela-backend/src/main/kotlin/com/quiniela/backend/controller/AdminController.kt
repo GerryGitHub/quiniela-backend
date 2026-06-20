@@ -1,17 +1,23 @@
 package com.quiniela.backend.controller
 
 import com.quiniela.backend.dto.*
+import com.quiniela.backend.entity.EquipoEstadisticas
+import com.quiniela.backend.repository.EquipoEstadisticasRepository
+import com.quiniela.backend.repository.EquipoRepository
 import com.quiniela.backend.service.AdminService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/admin")
 @Tag(name = "Administración", description = "Endpoints de administración")
 class AdminController(
-    private val adminService: AdminService
+    private val adminService: AdminService,
+    private val equipoRepository: EquipoRepository,
+    private val equipoEstadisticasRepository: EquipoEstadisticasRepository
 ) {
 
     @GetMapping("/dashboard")
@@ -62,5 +68,52 @@ class AdminController(
         @RequestParam(required = false) verificado: Boolean?
     ): ResponseEntity<List<AdminUserListDTO>> {
         return ResponseEntity.ok(adminService.getUsers(search, verificado))
+    }
+
+    @GetMapping("/equipos-estadisticas")
+    @Operation(summary = "Estadísticas de equipos", description = "Lista todos los equipos con ranking FIFA y fair play")
+    fun getEquiposEstadisticas(): ResponseEntity<List<EquipoEstadisticasDTO>> {
+        val equipos = equipoRepository.findAll()
+        val estadisticas = equipoEstadisticasRepository.findAll().associateBy { it.equipo.id }
+        val result = equipos.map { eq ->
+            val est = estadisticas[eq.id]
+            EquipoEstadisticasDTO(
+                equipoId = eq.id, nombre = eq.nombre,
+                grupo = eq.grupo?.nombre,
+                rankingFifa = est?.rankingFifa,
+                puntosFairPlay = est?.puntosFairPlay ?: 0
+            )
+        }
+        return ResponseEntity.ok(result)
+    }
+
+    @PutMapping("/equipos/{id}/estadisticas")
+    @Transactional
+    @Operation(summary = "Actualizar estadísticas", description = "Actualiza ranking FIFA y fair play de un equipo")
+    fun updateEstadisticas(
+        @PathVariable id: Long,
+        @RequestBody request: UpdateEstadisticasRequest
+    ): ResponseEntity<EquipoEstadisticasDTO> {
+        val equipo = equipoRepository.findById(id)
+            .orElseThrow { RuntimeException("Equipo no encontrado") }
+        var est = equipoEstadisticasRepository.findByEquipoId(id)
+
+        if (est == null) {
+            est = EquipoEstadisticas(equipo = equipo)
+        }
+
+        request.rankingFifa?.let { est.rankingFifa = it }
+        request.puntosFairPlay?.let { est.puntosFairPlay = it }
+
+        equipoEstadisticasRepository.save(est)
+
+        return ResponseEntity.ok(
+            EquipoEstadisticasDTO(
+                equipoId = equipo.id, nombre = equipo.nombre,
+                grupo = equipo.grupo?.nombre,
+                rankingFifa = est.rankingFifa,
+                puntosFairPlay = est.puntosFairPlay
+            )
+        )
     }
 }

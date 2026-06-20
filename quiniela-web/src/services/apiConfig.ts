@@ -1,3 +1,3 @@
 export function getApiUrl(): string {
-  return 'http://localhost:8080';
+  return import.meta.env.VITE_API_URL || 'https://api.gjapps.com';
 }

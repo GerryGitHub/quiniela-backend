@@ -20,8 +20,8 @@ android {
         applicationId = "com.quiniela.app"
         minSdk = 24
         targetSdk = 36
-        versionCode = 9
-        versionName = "1.4.0"
+        versionCode = 10
+        versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -57,6 +57,7 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)
+    implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.constraintlayout)
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
@@ -72,6 +73,8 @@ dependencies {
     
     // Biometric
     implementation(libs.biometric)
+
+
     
     // QR Code
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")

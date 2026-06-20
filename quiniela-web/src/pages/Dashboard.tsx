@@ -65,6 +65,7 @@ export default function Dashboard() {
           <Link to="/resultados" className="btn-grupos">Resultados</Link>
           <Link to="/admin/users" className="btn-grupos">Usuarios</Link>
           <Link to="/admin/quinielas" className="btn-grupos">Quinielas</Link>
+          <Link to="/admin/estadisticas" className="btn-grupos">Estadísticas</Link>
           <div className="header-right">
             <span className="user-info">{usuario?.nombre}</span>
             <button onClick={logoutAndRedirect} className="btn-logout">Cerrar Sesión</button>

@@ -1,11 +1,13 @@
 package com.quiniela.app.ui.quiniela
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.lifecycleScope
@@ -41,6 +43,7 @@ class QuinielaDetalleActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         binding = ActivityQuinielaDetalleBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -74,14 +77,6 @@ class QuinielaDetalleActivity : AppCompatActivity() {
         loadData()
     }
 
-    override fun onResume() {
-        super.onResume()
-        if (com.quiniela.app.api.RetrofitClient.sessionExpired) {
-            com.quiniela.app.api.RetrofitClient.sessionExpired = false
-            startActivity(Intent(this, com.quiniela.app.ui.auth.LoginActivity::class.java))
-            finish()
-        }
-    }
 
     private fun setupTabs() {
         binding.tabLayout.addOnTabSelectedListener(object : com.google.android.material.tabs.TabLayout.OnTabSelectedListener {
@@ -194,7 +189,7 @@ class QuinielaDetalleActivity : AppCompatActivity() {
                         if (::participantesAdapter.isInitialized) {
                             participantesAdapter.updateList(data)
                         } else {
-                            participantesAdapter = ParticipantesAdapter(data)
+                            participantesAdapter = ParticipantesAdapter(data) { entry -> mostrarPronosticosUsuario(entry) }
                             binding.rvParticipantes.adapter = participantesAdapter
                         }
 
@@ -270,6 +265,12 @@ class QuinielaDetalleActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        if (com.quiniela.app.api.RetrofitClient.sessionExpired) {
+            com.quiniela.app.api.RetrofitClient.sessionExpired = false
+            startActivity(Intent(this, com.quiniela.app.ui.auth.LoginActivity::class.java))
+            finish()
+            return
+        }
         leaderboardHandler.post(leaderboardPolling)
     }
 
@@ -353,6 +354,56 @@ class QuinielaDetalleActivity : AppCompatActivity() {
         binding.tvProgresoPendientes.text = "${total - completados} pendientes"
         binding.tvProgresoPendientes.visibility = if (total - completados > 0) View.VISIBLE else View.GONE
         binding.layoutProgresoPronosticos.visibility = if (total > 0) View.VISIBLE else View.GONE
+    }
+
+    private fun mostrarPronosticosUsuario(entry: LeaderboardEntryDTO) {
+        lifecycleScope.launch {
+            binding.progressBar.visibility = View.VISIBLE
+            when (val result = pronosticoRepository.getPronosticosByUser(quinielaId, entry.usuario.id)) {
+                is Result.Success -> {
+                    val pronosticos = result.data.pronosticos.sortedBy { it.partido.fechaHora }
+                    val dialogBinding = com.quiniela.app.databinding.DialogPronosticosUsuarioBinding.inflate(layoutInflater)
+                    dialogBinding.tvDialogTitle.text = "Pronósticos de ${entry.usuario.nombre}"
+                    dialogBinding.tvDialogSubtitle.visibility = if (pronosticos.isEmpty()) View.VISIBLE else View.GONE
+                    dialogBinding.tvDialogSubtitle.text = "Aún no ha hecho pronósticos"
+
+                    dialogBinding.rvPronosticosUsuario.layoutManager = androidx.recyclerview.widget.GridLayoutManager(this@QuinielaDetalleActivity, 2)
+                    dialogBinding.rvPronosticosUsuario.adapter = object : androidx.recyclerview.widget.RecyclerView.Adapter<PronosticoUsuarioViewHolder>() {
+                        override fun onCreateViewHolder(parent: android.view.ViewGroup, viewType: Int): PronosticoUsuarioViewHolder {
+                            val b = com.quiniela.app.databinding.ItemPronosticoUsuarioBinding.inflate(android.view.LayoutInflater.from(parent.context), parent, false)
+                            return PronosticoUsuarioViewHolder(b)
+                        }
+                        override fun onBindViewHolder(holder: PronosticoUsuarioViewHolder, position: Int) {
+                            holder.bind(pronosticos[position])
+                        }
+                        override fun getItemCount() = pronosticos.size
+                    }
+
+                    val dialog = MaterialAlertDialogBuilder(this@QuinielaDetalleActivity)
+                        .setView(dialogBinding.root)
+                        .setPositiveButton("Cerrar", null)
+                        .create()
+                    dialog.window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(0xE80B1220.toInt()))
+                    dialog.window?.setDimAmount(0.6f)
+                    dialog.show()
+                }
+                is Result.Error -> {
+                    UiUtils.showErrorSnackbar(binding.root, result.message)
+                }
+            }
+            binding.progressBar.visibility = View.GONE
+        }
+    }
+}
+
+class PronosticoUsuarioViewHolder(
+    private val binding: com.quiniela.app.databinding.ItemPronosticoUsuarioBinding
+) : androidx.recyclerview.widget.RecyclerView.ViewHolder(binding.root) {
+    fun bind(p: PronosticoDTO) {
+        binding.tvEquipos.text = "${p.partido.equipoLocal} vs ${p.partido.equipoVisitante}"
+        binding.tvPronostico.text = "${p.golesLocalPredicho} - ${p.golesVisitantePredicho}"
+        binding.tvPuntos.text = "${p.puntosObtenidos} pts"
+        binding.tvPuntos.setTextColor(if (p.puntosObtenidos > 0) android.graphics.Color.parseColor("#00B86B") else android.graphics.Color.parseColor("#66FFFFFF"))
     }
 }
 
@@ -603,7 +654,10 @@ class PartidosConPronosticoAdapter(
     }
 }
 
-class ParticipantesAdapter(private var participantes: List<LeaderboardEntryDTO>) : 
+class ParticipantesAdapter(
+    private var participantes: List<LeaderboardEntryDTO>,
+    private val onParticipantClick: ((LeaderboardEntryDTO) -> Unit)? = null
+) : 
     androidx.recyclerview.widget.RecyclerView.Adapter<ParticipantesAdapter.ViewHolder>() {
 
     private val posicionColors = intArrayOf(
@@ -636,6 +690,8 @@ class ParticipantesAdapter(private var participantes: List<LeaderboardEntryDTO>)
         androidx.recyclerview.widget.RecyclerView.ViewHolder(binding.root) {
         fun bind(entry: LeaderboardEntryDTO, posicion: Int, nextPts: Int? = null) {
             val context = binding.root.context
+
+            binding.root.setOnClickListener { onParticipantClick?.invoke(entry) }
 
             if (posicion <= 3) {
                 binding.cardRoot.strokeColor = posicionColors[posicion - 1]

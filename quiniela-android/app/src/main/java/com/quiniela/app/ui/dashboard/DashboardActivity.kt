@@ -3,13 +3,13 @@ package com.quiniela.app.ui.dashboard
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.os.CountDownTimer
 import android.os.Handler
 import android.os.Looper
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.quiniela.app.util.UiUtils
@@ -22,16 +22,18 @@ import com.quiniela.app.databinding.ActivityDashboardBinding
 import com.quiniela.app.repository.AuthRepository
 import com.quiniela.app.repository.QuinielaRepository
 import com.quiniela.app.repository.PartidoRepository
+import com.quiniela.app.repository.EliminatoriasRepository
 import com.quiniela.app.repository.Result
 import com.quiniela.app.ui.auth.LoginActivity
 import com.quiniela.app.ui.quiniela.CrearQuinielaActivity
 import com.quiniela.app.ui.quiniela.QuinielaDetalleActivity
 import com.quiniela.app.ui.quiniela.QuinielaAdapter
+import com.quiniela.app.ui.eliminatorias.BracketAdapter
+import com.quiniela.app.ui.eliminatorias.BracketItem
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.quiniela.app.databinding.DialogQrBinding
 import com.quiniela.app.model.PartidoDTO
 import com.quiniela.app.model.QuinielaResumenDTO
-import com.quiniela.app.model.QuinielaDetalleDTO
 import kotlinx.coroutines.launch
 
 class DashboardActivity : AppCompatActivity() {
@@ -39,26 +41,22 @@ class DashboardActivity : AppCompatActivity() {
     private val authRepository = AuthRepository()
     private val quinielaRepository = QuinielaRepository()
     private val partidoRepository = PartidoRepository()
+    private val eliminatoriasRepository = EliminatoriasRepository()
     private lateinit var adapter: QuinielaAdapter
-    private lateinit var adapterPartidosEnVivo: PartidoEnVivoAdapter
-    private var lastPartidosHash: Int = 0
     private var isFirstLoad = true
-    private var countdownTimer: CountDownTimer? = null
-    private var proximoPartido: PartidoDTO? = null
-    private var proximaQuinielaId: Long = 0
-    private var proximaQuinielaNombre: String = ""
 
-    override fun onResume() {
-        super.onResume()
-        if (com.quiniela.app.api.RetrofitClient.sessionExpired) {
-            com.quiniela.app.api.RetrofitClient.sessionExpired = false
-            startActivity(Intent(this, LoginActivity::class.java))
-            finish()
-        }
-    }
+    private val roundLabels = mapOf(
+        "R32" to "R32 — Dieciseisavos",
+        "R16" to "R16 — Octavos",
+        "QF" to "QF — Cuartos",
+        "SF" to "SF — Semifinales",
+        "3RD" to "3.er — Tercer lugar",
+        "FINAL" to "Final"
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         binding = ActivityDashboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -77,17 +75,111 @@ class DashboardActivity : AppCompatActivity() {
                 showQRDialog(quiniela)
             }
         )
-        
-        adapterPartidosEnVivo = PartidoEnVivoAdapter()
-        
+
         binding.rvQuinielas.layoutManager = LinearLayoutManager(this)
         binding.rvQuinielas.adapter = adapter
-        
-        binding.rvPartidosEnVivo.layoutManager = LinearLayoutManager(this)
-        binding.rvPartidosEnVivo.adapter = adapterPartidosEnVivo
 
+        setupBottomNav()
         setupButtons()
         loadData()
+    }
+
+    private fun setupBottomNav() {
+        selectTab(TAB_INICIO)
+
+        binding.tabInicio.setOnClickListener { selectTab(TAB_INICIO) }
+        binding.tabEnVivo.setOnClickListener { selectTab(TAB_ENVIVO) }
+        binding.tabEliminatorias.setOnClickListener { selectTab(TAB_ELIMINATORIAS) }
+    }
+
+    private fun selectTab(tab: String) {
+        animateTabClick(tab)
+        when (tab) {
+            TAB_INICIO -> {
+                binding.scrollInicio.visibility = View.VISIBLE
+                binding.scrollEnVivo.visibility = View.GONE
+                binding.scrollEliminatorias.visibility = View.GONE
+                binding.btnCrearQuiniela.visibility = View.VISIBLE
+                binding.btnUnirseQuiniela.visibility = View.VISIBLE
+                binding.ivBackground.visibility = View.VISIBLE
+            }
+            TAB_ENVIVO -> {
+                binding.scrollInicio.visibility = View.GONE
+                binding.scrollEnVivo.visibility = View.VISIBLE
+                binding.scrollEliminatorias.visibility = View.GONE
+                binding.btnCrearQuiniela.visibility = View.GONE
+                binding.btnUnirseQuiniela.visibility = View.GONE
+                binding.ivBackground.visibility = View.VISIBLE
+                cargarEnVivo()
+            }
+            TAB_ELIMINATORIAS -> {
+                binding.scrollInicio.visibility = View.GONE
+                binding.scrollEnVivo.visibility = View.GONE
+                binding.scrollEliminatorias.visibility = View.VISIBLE
+                binding.btnCrearQuiniela.visibility = View.GONE
+                binding.btnUnirseQuiniela.visibility = View.GONE
+                binding.ivBackground.visibility = View.VISIBLE
+                cargarEliminatorias()
+            }
+        }
+    }
+
+    private fun animateTabClick(tab: String) {
+        val tabs = listOf(
+            Triple(binding.tabInicio, binding.glowInicio, binding.lineInicio) to TAB_INICIO,
+            Triple(binding.tabEnVivo, binding.glowEnVivo, binding.lineEnVivo) to TAB_ENVIVO,
+            Triple(binding.tabEliminatorias, binding.glowEliminatorias, binding.lineEliminatorias) to TAB_ELIMINATORIAS
+        )
+
+        for ((views, id) in tabs) {
+            val (tabView, glow, line) = views
+            val icon = when (id) {
+                TAB_INICIO -> binding.ivTabInicio
+                TAB_ENVIVO -> binding.ivTabEnVivo
+                TAB_ELIMINATORIAS -> binding.ivTabEliminatorias
+                else -> null
+            }
+            val text = when (id) {
+                TAB_INICIO -> binding.tvTabInicio
+                TAB_ENVIVO -> binding.tvTabEnVivo
+                TAB_ELIMINATORIAS -> binding.tvTabEliminatorias
+                else -> null
+            }
+
+            if (id == tab) {
+                // Scale pulse animation
+                tabView.animate()
+                    .scaleX(0.93f).scaleY(0.93f)
+                    .setDuration(100)
+                    .withEndAction {
+                        tabView.animate()
+                            .scaleX(1f).scaleY(1f)
+                            .setDuration(150)
+                            .start()
+                    }
+                    .start()
+
+                // Glow fade in
+                glow.animate().alpha(0.25f).setDuration(200).start()
+                // Line fade in
+                line.animate().alpha(1f).setDuration(200).start()
+
+                icon?.setColorFilter(android.graphics.Color.WHITE)
+                text?.setTextColor(android.graphics.Color.WHITE)
+            } else {
+                glow.animate().alpha(0f).setDuration(150).start()
+                line.animate().alpha(0f).setDuration(150).start()
+
+                icon?.setColorFilter(android.graphics.Color.parseColor("#8A8AA5"))
+                text?.setTextColor(android.graphics.Color.parseColor("#8A8AA5"))
+            }
+        }
+    }
+
+    companion object {
+        private const val TAB_INICIO = "inicio"
+        private const val TAB_ENVIVO = "envivo"
+        private const val TAB_ELIMINATORIAS = "eliminatorias"
     }
 
     @SuppressLint("SetTextI18n")
@@ -100,7 +192,7 @@ class DashboardActivity : AppCompatActivity() {
                 is Result.Success -> {
                     binding.tvWelcome.text = "Bienvenido, ${result.data.nombre}"
                     binding.tvWelcome.visibility = View.VISIBLE
-                    
+
                     val quinielas = result.data.quinielas
                     if (quinielas.isEmpty()) {
                         binding.tvEmpty.visibility = View.VISIBLE
@@ -109,7 +201,6 @@ class DashboardActivity : AppCompatActivity() {
                         binding.tvEmpty.visibility = View.GONE
                         binding.rvQuinielas.visibility = View.VISIBLE
                         adapter.submitList(quinielas)
-                        cargarProximoPartido(quinielas[0].id, quinielas[0].nombre)
                     }
                 }
                 is Result.Error -> {
@@ -118,65 +209,31 @@ class DashboardActivity : AppCompatActivity() {
             }
             binding.progressBar.visibility = View.GONE
             isFirstLoad = false
-
-            loadPartidosEnVivo()
         }
     }
-    
-    private fun loadPartidosEnVivo() {
+
+    private fun cargarEnVivo() {
         lifecycleScope.launch {
-            when (val result = partidoRepository.getPartidosEnVivo()) {
+            // Próximo partido
+            when (val proxResult = partidoRepository.getPartidos()) {
                 is Result.Success -> {
-                    val partidos = result.data
-                    val currentHash = partidos.hashCode()
-                    
-                    if (currentHash == lastPartidosHash) return@launch
-
-                    val liveCount = partidos.count { it.estado == PartidoDTO.ESTADO_EN_CURSO }
-                    val upcomingCount = partidos.count { it.estado == PartidoDTO.ESTADO_POR_COMENZAR }
-                    val finishedCount = partidos.count { it.estado == PartidoDTO.ESTADO_FINALIZADO }
-
-                    if (partidos.isNotEmpty()) {
-                        binding.cardPartidosEnVivo.visibility = View.VISIBLE
-                        adapterPartidosEnVivo.submitList(partidos)
-
-                        val hasLiveOrUpcoming = liveCount > 0 || upcomingCount > 0
-                        binding.layoutLiveSectionHeader.visibility = if (hasLiveOrUpcoming) View.VISIBLE else View.GONE
-
-                        val headerText = when {
-                            liveCount > 0 && upcomingCount > 0 -> "🔴 En Vivo · ⏳ Próximos"
-                            liveCount > 0 -> "🔴 En Vivo"
-                            upcomingCount > 0 -> "⏳ Próximos"
-                            else -> ""
+                    val ahora = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.US).format(java.util.Date())
+                    val prox = proxResult.data
+                        .filter { it.estado == PartidoDTO.ESTADO_PENDIENTE || it.estado == PartidoDTO.ESTADO_POR_COMENZAR }
+                        .filter { it.fechaHora >= ahora }
+                        .minByOrNull { it.fechaHora }
+                    if (prox != null) {
+                        binding.cardProximoPartido.visibility = View.VISIBLE
+                        val ctx = this@DashboardActivity
+                        binding.ivProximoLocal.setImageDrawable(CountryFlagResolver.getFlagDrawable(ctx, prox.equipoLocal))
+                        binding.tvProximoLocal.text = prox.equipoLocal
+                        binding.ivProximoVisitante.setImageDrawable(CountryFlagResolver.getFlagDrawable(ctx, prox.equipoVisitante))
+                        binding.tvProximoVisitante.text = prox.equipoVisitante
+                        iniciarCuentaRegresiva(prox.fechaHora)
+                        binding.btnPronosticarProximo.setOnClickListener {
+                            // placeholder: podría abrir PronosticarActivity con este partido
+                            UiUtils.showSuccessSnackbar(binding.root, "Próximo partido: ${prox.equipoLocal} vs ${prox.equipoVisitante}")
                         }
-                        binding.tvLiveHeader.text = headerText
-                        adapterPartidosEnVivo.notifyDataSetChanged()
-                    } else {
-                        binding.cardPartidosEnVivo.visibility = View.GONE
-                    }
-
-                    lastPartidosHash = currentHash
-                }
-                is Result.Error -> {
-                    // Silently ignore errors for en vivo
-                }
-            }
-        }
-    }
-
-    private fun cargarProximoPartido(quinielaId: Long, quinielaNombre: String) {
-        lifecycleScope.launch {
-            when (val result = quinielaRepository.getQuinielaDetalle(quinielaId)) {
-                is Result.Success -> {
-                    val partidos = result.data.partidos
-                        .filter { it.estado == PartidoDTO.ESTADO_PENDIENTE }
-                        .sortedBy { it.fechaHora }
-                    val match = partidos.firstOrNull()
-                    if (match != null) {
-                        proximoPartido = match
-                        proximaQuinielaId = quinielaId
-                        proximaQuinielaNombre = quinielaNombre
-                        setupProximoPartidoCard(match, quinielaNombre)
                     } else {
                         binding.cardProximoPartido.visibility = View.GONE
                     }
@@ -185,73 +242,104 @@ class DashboardActivity : AppCompatActivity() {
                     binding.cardProximoPartido.visibility = View.GONE
                 }
             }
+
+            // En vivo
+            when (val result = partidoRepository.getPartidosEnVivo()) {
+                is Result.Success -> {
+                    val partidos = result.data
+                    if (partidos.isNotEmpty()) {
+                        val envivoAdapter = PartidoEnVivoAdapter()
+                        binding.rvEnVivoFull.layoutManager = LinearLayoutManager(this@DashboardActivity)
+                        binding.rvEnVivoFull.adapter = envivoAdapter
+                        envivoAdapter.submitList(partidos)
+                    } else {
+                        binding.rvEnVivoFull.adapter = null
+                    }
+                }
+                is Result.Error -> { }
+            }
         }
     }
 
-    @SuppressLint("SetTextI18n")
-    private fun setupProximoPartidoCard(match: PartidoDTO, quinielaNombre: String) {
-        binding.cardProximoPartido.visibility = View.VISIBLE
-        binding.tvProximoQuiniela.text = quinielaNombre
+    private fun cargarEliminatorias() {
+        binding.progressBar.visibility = View.VISIBLE
+        lifecycleScope.launch {
+            when (val result = eliminatoriasRepository.getPreview()) {
+                is Result.Success -> {
+                    val preview = result.data
+                    if (preview.gruposActivos) {
+                        binding.tvEliminatoriasInfo.visibility = View.VISIBLE
+                        binding.tvEliminatoriasInfo.text = "Fase de grupos en curso — los cruces se definen al finalizar"
+                    } else {
+                        binding.tvEliminatoriasInfo.visibility = View.GONE
+                    }
 
-        val localFlag = CountryFlagResolver.getFlagDrawable(this, match.equipoLocal)
-        binding.ivProximoLocal.setImageDrawable(localFlag)
-        binding.tvProximoLocal.text = match.equipoLocal
+                    val items = mutableListOf<BracketItem>()
+                    val rondaOrder = listOf("R32", "R16")
+                    for (ronda in rondaOrder) {
+                        val matches = preview.rondas[ronda]?.sortedBy { it.orden }
+                        if (matches.isNullOrEmpty()) continue
+                        val reales = matches.filter { it.resuelto }
+                        if (reales.isEmpty()) continue
+                        items.add(BracketItem(type = 0, roundName = ronda))
+                        for (match in reales) {
+                            items.add(BracketItem(type = 1, match = match))
+                        }
+                    }
 
-        val visitFlag = CountryFlagResolver.getFlagDrawable(this, match.equipoVisitante)
-        binding.ivProximoVisitante.setImageDrawable(visitFlag)
-        binding.tvProximoVisitante.text = match.equipoVisitante
-
-        binding.tvProximoFecha.text = try {
-            val sdf = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault())
-            val date = sdf.parse(match.fechaHora)
-            val out = java.text.SimpleDateFormat("d 'de' MMMM '—' HH:mm", java.util.Locale("es", "MX"))
-            out.format(date!!)
-        } catch (e: Exception) {
-            match.fechaHora
-        }
-
-        iniciarCuentaRegresiva(match.fechaHora)
-
-        binding.btnPronosticarProximo.setOnClickListener {
-            countdownTimer?.cancel()
-            val intent = Intent(this, QuinielaDetalleActivity::class.java)
-            intent.putExtra("quinielaId", proximaQuinielaId)
-            intent.putExtra("quinielaNombre", proximaQuinielaNombre)
-            intent.putExtra("quinielaCodigo", "")
-            startActivity(intent)
+                    if (items.isEmpty()) {
+                        binding.layoutEliminatoriasEmpty.visibility = View.VISIBLE
+                        binding.rvBracket.visibility = View.GONE
+                    } else {
+                        binding.layoutEliminatoriasEmpty.visibility = View.GONE
+                        binding.rvBracket.visibility = View.VISIBLE
+                        binding.rvBracket.layoutManager = LinearLayoutManager(this@DashboardActivity)
+                        binding.rvBracket.adapter = BracketAdapter(items, roundLabels)
+                    }
+                }
+                is Result.Error -> {
+                    binding.layoutEliminatoriasEmpty.visibility = View.VISIBLE
+                    UiUtils.showErrorSnackbar(binding.root, result.message)
+                }
+            }
+            binding.progressBar.visibility = View.GONE
         }
     }
+
+    private var countdownHandler: android.os.Handler = android.os.Handler(android.os.Looper.getMainLooper())
+    private var countdownRunnable: Runnable? = null
 
     private fun iniciarCuentaRegresiva(fechaHora: String) {
-        countdownTimer?.cancel()
-        countdownTimer = object : CountDownTimer(Long.MAX_VALUE, 1000) {
-            override fun onTick(millisUntilFinished: Long) {
-                val diff = try {
-                    val sdf = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault())
-                    sdf.parse(fechaHora)?.time?.minus(System.currentTimeMillis()) ?: 0L
-                } catch (e: Exception) { 0L }
-
-                if (diff <= 0) {
-                    binding.layoutCuentaRegresiva.visibility = View.GONE
-                    return
+        countdownRunnable?.let { countdownHandler.removeCallbacks(it) }
+        countdownRunnable = object : Runnable {
+            override fun run() {
+                try {
+                    val sdf = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.US)
+                    val fecha = sdf.parse(fechaHora)
+                    val ahora = java.util.Date()
+                    if (fecha != null && fecha.after(ahora)) {
+                        val diff = fecha.time - ahora.time
+                        val dias = diff / (24 * 60 * 60 * 1000)
+                        val horas = (diff % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000)
+                        val minutos = (diff % (60 * 60 * 1000)) / (60 * 1000)
+                        val segundos = (diff % (60 * 1000)) / 1000
+                        binding.tvCountdownDias.text = String.format("%02d", dias)
+                        binding.tvCountdownHoras.text = String.format("%02d", horas)
+                        binding.tvCountdownMinutos.text = String.format("%02d", minutos)
+                        binding.tvCountdownSegundos.text = String.format("%02d", segundos)
+                        countdownHandler.postDelayed(this, 1000)
+                    } else {
+                        binding.tvCountdownDias.text = "00"
+                        binding.tvCountdownHoras.text = "00"
+                        binding.tvCountdownMinutos.text = "00"
+                        binding.tvCountdownSegundos.text = "00"
+                    }
+                } catch (e: Exception) {
+                    countdownHandler.postDelayed(this, 1000)
                 }
-
-                binding.layoutCuentaRegresiva.visibility = View.VISIBLE
-                val dias = diff / 86400000
-                val horas = (diff % 86400000) / 3600000
-                val minutos = (diff % 3600000) / 60000
-                val segundos = (diff % 60000) / 1000
-
-                binding.tvCountdownDias.text = String.format("%02d", dias)
-                binding.tvCountdownHoras.text = String.format("%02d", horas)
-                binding.tvCountdownMinutos.text = String.format("%02d", minutos)
-                binding.tvCountdownSegundos.text = String.format("%02d", segundos)
             }
-
-            override fun onFinish() {
-                binding.layoutCuentaRegresiva.visibility = View.GONE
-            }
-        }.start()
+        }
+        countdownHandler.post(countdownRunnable!!)
     }
 
     private fun showQRDialog(quiniela: QuinielaResumenDTO) {
@@ -261,19 +349,16 @@ class DashboardActivity : AppCompatActivity() {
             .create()
 
         dialogBinding.tvCodigo.text = quiniela.codigoInvitacion
-
         val bitmap = QrUtils.generateQrBitmap(quiniela.codigoInvitacion, 500)
         if (bitmap != null) {
             dialogBinding.ivQR.setImageBitmap(bitmap)
         } else {
             Toast.makeText(this, "Error al generar QR", Toast.LENGTH_SHORT).show()
         }
-
         dialogBinding.btnCompartir.setOnClickListener {
             ShareUtils.shareQuiniela(this, quiniela.nombre, quiniela.codigoInvitacion)
             dialog.dismiss()
         }
-
         dialog.show()
     }
 
@@ -310,39 +395,22 @@ class DashboardActivity : AppCompatActivity() {
             intent.putExtra("modo", "crear")
             startActivity(intent)
         }
-        
         binding.btnUnirseQuiniela.setOnClickListener {
             val intent = Intent(this, CrearQuinielaActivity::class.java)
             intent.putExtra("modo", "unirse")
             startActivity(intent)
         }
-
         binding.cardPuntosInfo.setOnClickListener { showPuntosInfoDialog() }
-    }
-
-    private val handler = Handler(Looper.getMainLooper())
-    private val pollingRunnable = object : Runnable {
-        override fun run() {
-            loadPartidosEnVivo()
-            handler.postDelayed(this, 15000)
-        }
     }
 
     override fun onResume() {
         super.onResume()
+        if (com.quiniela.app.api.RetrofitClient.sessionExpired) {
+            com.quiniela.app.api.RetrofitClient.sessionExpired = false
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+            return
+        }
         loadData()
-        handler.post(pollingRunnable)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        countdownTimer?.cancel()
-        handler.removeCallbacks(pollingRunnable)
-        adapterPartidosEnVivo.cleanup()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        countdownTimer?.cancel()
     }
 }

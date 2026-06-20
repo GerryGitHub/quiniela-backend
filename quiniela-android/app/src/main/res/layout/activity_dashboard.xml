@@ -6,14 +6,13 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
 
-    <!-- Cancha de fútbol background -->
     <ImageView
+        android:id="@+id/ivBackground"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@drawable/cancha_futbol"
-        android:scaleType="centerCrop" />
+        android:scaleType="centerCrop"
+        android:src="@drawable/cancha_futbol" />
 
-    <!-- Scrim overlay for text readability -->
     <View
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -21,507 +20,711 @@
         android:clickable="false"
         android:focusable="false" />
 
-    <androidx.core.widget.NestedScrollView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:orientation="vertical">
 
-        <LinearLayout
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_height="?attr/actionBarSize"
+            android:background="@android:color/transparent"
+            app:menu="@menu/dashboard_menu"
+            app:popupTheme="@style/Widget.Quiniela.Toolbar.PopupMenu"
+            app:titleTextAppearance="@style/TextAppearance.App.Headline6"
+            app:titleTextColor="#FFFFFF" />
 
-            <com.google.android.material.appbar.MaterialToolbar
-                android:id="@+id/toolbar"
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <!-- INICIO TAB -->
+            <androidx.core.widget.NestedScrollView
+                android:id="@+id/scrollInicio"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:background="@android:color/transparent"
-                app:titleTextColor="#FFFFFF"
-                app:menu="@menu/dashboard_menu"
-                app:titleTextAppearance="@style/TextAppearance.App.Headline6"/>
-
-            <TextView
-                android:id="@+id/tvWelcome"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:textColor="#FFFFFF"
-                android:paddingHorizontal="20dp"
-                android:visibility="gone" />
-
-            <!-- Próximo partido -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardProximoPartido"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="4dp"
-                android:visibility="gone"
-                app:cardBackgroundColor="#4D1A1A2E"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="4dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="#29FFFFFF">
+                android:layout_height="match_parent"
+                android:fillViewport="true"
+                android:visibility="visible">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:layout_marginBottom="8dp">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="⚽ Próximo partido"
-                            android:textSize="14sp"
-                            android:textColor="#FFFFFF"
-                            android:textStyle="bold"/>
-
-                        <TextView
-                            android:id="@+id/tvProximoQuiniela"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textSize="10sp"
-                            android:textColor="#66FFFFFF"/>
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center"
-                        android:layout_marginBottom="8dp">
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:gravity="center">
-
-                            <ImageView
-                                android:id="@+id/ivProximoLocal"
-                                android:layout_width="32dp"
-                                android:layout_height="24dp"
-                                android:scaleType="fitCenter"
-                                android:contentDescription="Bandera local"/>
-
-                            <TextView
-                                android:id="@+id/tvProximoLocal"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textSize="12sp"
-                                android:textColor="#FFFFFF"
-                                android:textStyle="bold"
-                                android:layout_marginTop="4dp"
-                                android:gravity="center"/>
-                        </LinearLayout>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="vs"
-                            android:textSize="18sp"
-                            android:textColor="#44FFFFFF"
-                            android:textStyle="bold"
-                            android:layout_marginHorizontal="12dp"/>
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:gravity="center">
-
-                            <ImageView
-                                android:id="@+id/ivProximoVisitante"
-                                android:layout_width="32dp"
-                                android:layout_height="24dp"
-                                android:scaleType="fitCenter"
-                                android:contentDescription="Bandera visitante"/>
-
-                            <TextView
-                                android:id="@+id/tvProximoVisitante"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textSize="12sp"
-                                android:textColor="#FFFFFF"
-                                android:textStyle="bold"
-                                android:layout_marginTop="4dp"
-                                android:gravity="center"/>
-                        </LinearLayout>
-                    </LinearLayout>
+                    android:paddingHorizontal="20dp"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="16dp">
 
                     <TextView
-                        android:id="@+id/tvProximoFecha"
+                        android:id="@+id/tvWelcome"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:textSize="11sp"
-                        android:textColor="#66FFFFFF"
-                        android:layout_marginBottom="8dp"/>
+                        android:visibility="gone"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:textColor="#FFFFFF" />
 
-                    <LinearLayout
-                        android:id="@+id/layoutCuentaRegresiva"
+                    <!-- Card Sistema de puntos -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardPuntosInfo"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center"
-                        android:layout_marginBottom="12dp">
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="8dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?attr/selectableItemBackground"
+                        style="@style/Widget.Quiniela.Card.GlassSmall">
 
                         <LinearLayout
-                            android:id="@+id/layoutCountdownDias"
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:gravity="center"
-                            android:layout_marginHorizontal="12dp">
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:padding="10dp">
 
                             <TextView
-                                android:id="@+id/tvCountdownDias"
-                                android:layout_width="wrap_content"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:gravity="center"
+                                android:text="🏆"
+                                android:textSize="16sp" />
+
+                            <LinearLayout
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:text="00"
-                                android:textSize="20sp"
-                                android:textColor="#FFFFFF"
-                                android:textStyle="bold"/>
+                                android:layout_weight="1"
+                                android:layout_marginStart="8dp"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Sistema de puntos"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="13sp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="1dp"
+                                    android:text="Aprende cómo sumar más puntos"
+                                    android:textColor="@color/text_secondary"
+                                    android:textSize="10sp" />
+                            </LinearLayout>
+
                             <TextView
                                 android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Días"
-                                android:textSize="8sp"
-                                android:textColor="#66FFFFFF"
-                                android:textStyle="bold"/>
+                                android:layout_height="24dp"
+                                android:background="@drawable/bg_segmented_control"
+                                android:clickable="false"
+                                android:focusable="false"
+                                android:gravity="center"
+                                android:paddingHorizontal="10dp"
+                                android:text="Ver reglas"
+                                android:textColor="#2563EB"
+                                android:textSize="10sp"
+                                android:textStyle="bold" />
                         </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:gravity="center"
-                            android:layout_marginHorizontal="12dp">
-
-                            <TextView
-                                android:id="@+id/tvCountdownHoras"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="00"
-                                android:textSize="20sp"
-                                android:textColor="#FFFFFF"
-                                android:textStyle="bold"/>
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Horas"
-                                android:textSize="8sp"
-                                android:textColor="#66FFFFFF"
-                                android:textStyle="bold"/>
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:gravity="center"
-                            android:layout_marginHorizontal="12dp">
-
-                            <TextView
-                                android:id="@+id/tvCountdownMinutos"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="00"
-                                android:textSize="20sp"
-                                android:textColor="#FFFFFF"
-                                android:textStyle="bold"/>
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Min"
-                                android:textSize="8sp"
-                                android:textColor="#66FFFFFF"
-                                android:textStyle="bold"/>
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:gravity="center"
-                            android:layout_marginHorizontal="12dp">
-
-                            <TextView
-                                android:id="@+id/tvCountdownSegundos"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="00"
-                                android:textSize="20sp"
-                                android:textColor="#FFFFFF"
-                                android:textStyle="bold"/>
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Seg"
-                                android:textSize="8sp"
-                                android:textColor="#66FFFFFF"
-                                android:textStyle="bold"/>
-                        </LinearLayout>
-                    </LinearLayout>
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnPronosticarProximo"
-                        android:layout_width="match_parent"
-                        android:layout_height="44dp"
-                        android:text="Pronosticar ahora"
-                        android:textColor="#FFFFFF"
-                        android:textStyle="bold"
-                        app:backgroundTint="#0D5BFF"
-                        app:cornerRadius="16dp"
-                        app:elevation="4dp"/>
-
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Card Sistema de puntos -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardPuntosInfo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="4dp"
-                android:layout_marginBottom="4dp"
-                app:cardBackgroundColor="#4D1A1A2E"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="2dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="#29FFFFFF"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:padding="14dp">
+                    </com.google.android.material.card.MaterialCardView>
 
                     <TextView
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:text="🏆"
-                        android:textSize="22sp"
-                        android:gravity="center"/>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
+                        android:id="@+id/tvSectionLabel"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="12dp"
+                        android:text="Mis Quinielas"
+                        android:textAppearance="@style/TextAppearance.Quiniela.SectionTitle" />
+
+                    <!-- Quinielas List -->
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvQuinielas"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:clipToPadding="false"
+                        android:nestedScrollingEnabled="false"
+                        android:paddingBottom="16dp"
+                        tools:listitem="@layout/item_quiniela" />
+
+                    <!-- Empty State -->
+                    <LinearLayout
+                        android:id="@+id/tvEmpty"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
                         android:orientation="vertical"
-                        android:layout_marginStart="10dp">
+                        android:paddingVertical="24dp"
+                        android:visibility="gone">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Sistema de puntos"
-                            android:textSize="15sp"
+                            android:alpha="0.9"
+                            android:text="No tienes quinielas aún"
                             android:textColor="#FFFFFF"
-                            android:textStyle="bold"/>
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Aprende cómo sumar más puntos en tu quiniela"
-                            android:textSize="11sp"
-                            android:textColor="#88FFFFFF"
-                            android:layout_marginTop="1dp"/>
+                            android:layout_marginTop="4dp"
+                            android:alpha="0.7"
+                            android:text="¡Crea una o únete para empezar!"
+                            android:textColor="#FFFFFF"
+                            android:textSize="13sp" />
                     </LinearLayout>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="28dp"
-                        android:gravity="center"
-                        android:paddingHorizontal="12dp"
-                        android:text="Ver reglas"
-                        android:textSize="11sp"
-                        android:textColor="#0D5BFF"
-                        android:textStyle="bold"
-                        android:background="@drawable/bg_segmented_control"
-                        android:clickable="false"
-                        android:focusable="false"/>
-
                 </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+            </androidx.core.widget.NestedScrollView>
 
-            <!-- Mis Quinielas Title -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Mis Quinielas"
-                android:textSize="28sp"
-                android:textStyle="bold"
-                android:textColor="#FFFFFF"
-                android:paddingHorizontal="20dp"
-                android:paddingTop="4dp"
-                android:paddingBottom="12dp" />
-
-            <!-- Partidos en Vivo -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardPartidosEnVivo"
+            <!-- EN VIVO TAB -->
+            <androidx.core.widget.NestedScrollView
+                android:id="@+id/scrollEnVivo"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="4dp"
-                android:visibility="gone"
-                app:cardBackgroundColor="#B01A1A2E"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="4dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="#33FFFFFF">
+                android:layout_height="match_parent"
+                android:fillViewport="true"
+                android:visibility="gone">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="12dp">
+                    android:paddingHorizontal="20dp"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="16dp">
 
-                    <LinearLayout
-                        android:id="@+id/layoutLiveSectionHeader"
+                    <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:layout_marginBottom="8dp">
+                        android:layout_marginBottom="12dp"
+                        android:text="Resultados y En Vivo"
+                        android:textAppearance="@style/TextAppearance.Quiniela.SectionTitle" />
 
-                        <View
-                            android:layout_width="7dp"
-                            android:layout_height="7dp"
-                            android:background="@drawable/bg_live_indicator" />
+                    <!-- Próximo partido -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardProximoPartido"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:visibility="gone"
+                        style="@style/Widget.Quiniela.Card.GlassSmall">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="12dp">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:layout_marginBottom="4dp">
+
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="⚽ Próximo partido"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="13sp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:id="@+id/tvProximoQuiniela"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textColor="@color/text_secondary"
+                                    android:textSize="9sp" />
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:orientation="horizontal"
+                                android:layout_marginBottom="4dp">
+
+                                <LinearLayout
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:gravity="center"
+                                    android:orientation="vertical">
+
+                                    <ImageView
+                                        android:id="@+id/ivProximoLocal"
+                                        android:layout_width="28dp"
+                                        android:layout_height="20dp"
+                                        android:scaleType="fitCenter"
+                                        android:contentDescription="Bandera local" />
+
+                                    <TextView
+                                        android:id="@+id/tvProximoLocal"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginTop="2dp"
+                                        android:gravity="center"
+                                        android:textColor="#FFFFFF"
+                                        android:textSize="12sp"
+                                        android:textStyle="bold" />
+                                </LinearLayout>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginHorizontal="12dp"
+                                    android:text="VS"
+                                    android:textColor="@color/text_secondary"
+                                    android:textSize="16sp"
+                                    android:textStyle="bold" />
+
+                                <LinearLayout
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:gravity="center"
+                                    android:orientation="vertical">
+
+                                    <ImageView
+                                        android:id="@+id/ivProximoVisitante"
+                                        android:layout_width="28dp"
+                                        android:layout_height="20dp"
+                                        android:scaleType="fitCenter"
+                                        android:contentDescription="Bandera visitante" />
+
+                                    <TextView
+                                        android:id="@+id/tvProximoVisitante"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginTop="2dp"
+                                        android:gravity="center"
+                                        android:textColor="#FFFFFF"
+                                        android:textSize="12sp"
+                                        android:textStyle="bold" />
+                                </LinearLayout>
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:id="@+id/layoutCuentaRegresiva"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:orientation="horizontal"
+                                android:layout_marginBottom="6dp">
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:gravity="center"
+                                    android:orientation="vertical"
+                                    android:layout_marginHorizontal="8dp">
+                                    <TextView android:id="@+id/tvCountdownDias" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="00" android:textColor="#FFFFFF" android:textSize="18sp" android:textStyle="bold" />
+                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Días" android:textColor="@color/text_secondary" android:textSize="8sp" android:textStyle="bold" />
+                                </LinearLayout>
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:gravity="center"
+                                    android:orientation="vertical"
+                                    android:layout_marginHorizontal="8dp">
+                                    <TextView android:id="@+id/tvCountdownHoras" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="00" android:textColor="#FFFFFF" android:textSize="18sp" android:textStyle="bold" />
+                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Horas" android:textColor="@color/text_secondary" android:textSize="8sp" android:textStyle="bold" />
+                                </LinearLayout>
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:gravity="center"
+                                    android:orientation="vertical"
+                                    android:layout_marginHorizontal="8dp">
+                                    <TextView android:id="@+id/tvCountdownMinutos" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="00" android:textColor="#FFFFFF" android:textSize="18sp" android:textStyle="bold" />
+                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Min" android:textColor="@color/text_secondary" android:textSize="8sp" android:textStyle="bold" />
+                                </LinearLayout>
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:gravity="center"
+                                    android:orientation="vertical"
+                                    android:layout_marginHorizontal="8dp">
+                                    <TextView android:id="@+id/tvCountdownSegundos" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="00" android:textColor="#FFFFFF" android:textSize="18sp" android:textStyle="bold" />
+                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Seg" android:textColor="@color/text_secondary" android:textSize="8sp" android:textStyle="bold" />
+                                </LinearLayout>
+                            </LinearLayout>
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnPronosticarProximo"
+                                android:layout_width="match_parent"
+                                android:layout_height="48dp"
+                                android:text="Pronosticar"
+                                android:textSize="14sp"
+                                android:textColor="#FFFFFF"
+                                android:textStyle="bold"
+                                app:backgroundTint="@color/primary"
+                                app:cornerRadius="16dp"
+                                app:elevation="2dp" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- En Vivo List -->
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvEnVivoFull"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:nestedScrollingEnabled="false" />
+
+                </LinearLayout>
+            </androidx.core.widget.NestedScrollView>
+
+            <!-- ELIMINATORIAS TAB -->
+            <androidx.core.widget.NestedScrollView
+                android:id="@+id/scrollEliminatorias"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:fillViewport="true"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:id="@+id/tvEliminatoriasInfo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="13sp"
+                        android:visibility="gone" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvBracket"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:nestedScrollingEnabled="false" />
+
+                    <LinearLayout
+                        android:id="@+id/layoutEliminatoriasEmpty"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="32dp"
+                        android:visibility="gone">
 
                         <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="🏆"
+                            android:textSize="48sp"
+                            android:layout_marginBottom="16dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="No hay eliminatorias disponibles"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:gravity="center" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Los cruces se generarán cuando la fase de grupos finalice."
+                            android:textColor="@color/text_hint"
+                            android:textSize="13sp"
+                            android:gravity="center"
+                            android:layout_marginTop="8dp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.core.widget.NestedScrollView>
+
+        </FrameLayout>
+
+        <!-- ============================================ -->
+        <!-- SCOREBOARD BOTTOM NAVIGATION               -->
+        <!-- ============================================ -->
+        <FrameLayout
+            android:id="@+id/scoreboardContainer"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="12dp"
+            android:layout_marginBottom="12dp"
+            android:clickable="false"
+            android:focusable="false"
+            android:elevation="12dp">
+
+            <!-- Main scoreboard background with diagonal edges -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_scoreboard_container"
+                android:clickable="false"
+                android:focusable="false" />
+
+            <!-- LED accent - left top short -->
+            <View
+                android:layout_width="2dp"
+                android:layout_height="14dp"
+                android:layout_gravity="start|center_vertical"
+                android:layout_marginStart="14dp"
+                android:layout_marginTop="4dp"
+                android:background="#992563EB"
+                android:rotation="-15" />
+
+            <!-- LED accent - left bottom long -->
+            <View
+                android:layout_width="2dp"
+                android:layout_height="20dp"
+                android:layout_gravity="start|center_vertical"
+                android:layout_marginStart="18dp"
+                android:layout_marginBottom="2dp"
+                android:background="#992563EB"
+                android:rotation="-15" />
+
+            <!-- LED accent - right top short -->
+            <View
+                android:layout_width="2dp"
+                android:layout_height="14dp"
+                android:layout_gravity="end|center_vertical"
+                android:layout_marginEnd="14dp"
+                android:layout_marginTop="4dp"
+                android:background="#992563EB"
+                android:rotation="15" />
+
+            <!-- LED accent - right bottom long -->
+            <View
+                android:layout_width="2dp"
+                android:layout_height="20dp"
+                android:layout_gravity="end|center_vertical"
+                android:layout_marginEnd="18dp"
+                android:layout_marginBottom="2dp"
+                android:background="#992563EB"
+                android:rotation="15" />
+
+            <!-- Tabs container -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:paddingLeft="28dp"
+                android:paddingRight="28dp">
+
+                <!-- TAB: Inicio -->
+                <FrameLayout
+                    android:id="@+id/tabInicio"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground">
+
+                    <!-- Blue glow behind icon -->
+                    <View
+                        android:id="@+id/glowInicio"
+                        android:layout_width="40dp"
+                        android:layout_height="28dp"
+                        android:layout_gravity="center"
+                        android:layout_marginBottom="4dp"
+                        android:alpha="0"
+                        android:background="@drawable/bg_glow_active" />
+
+                    <!-- Content -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <ImageView
+                            android:id="@+id/ivTabInicio"
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:src="@drawable/ic_nav_home"
+                            android:importantForAccessibility="no" />
+
+                        <TextView
+                            android:id="@+id/tvTabInicio"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Inicio"
+                            android:textColor="#8A8AA5"
+                            android:textSize="10sp"
+                            android:layout_marginTop="2dp" />
+                    </LinearLayout>
+
+                    <!-- Blue indicator line -->
+                    <View
+                        android:id="@+id/lineInicio"
+                        android:layout_width="32dp"
+                        android:layout_height="2dp"
+                        android:layout_gravity="bottom|center_horizontal"
+                        android:layout_marginBottom="4dp"
+                        android:alpha="0"
+                        android:background="#2563EB" />
+                </FrameLayout>
+
+                <!-- TAB: En Vivo -->
+                <FrameLayout
+                    android:id="@+id/tabEnVivo"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground">
+
+                    <View
+                        android:id="@+id/glowEnVivo"
+                        android:layout_width="40dp"
+                        android:layout_height="28dp"
+                        android:layout_gravity="center"
+                        android:layout_marginBottom="4dp"
+                        android:alpha="0"
+                        android:background="@drawable/bg_glow_active" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <ImageView
+                            android:id="@+id/ivTabEnVivo"
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:src="@drawable/ic_nav_live"
+                            android:importantForAccessibility="no" />
+
+                        <TextView
+                            android:id="@+id/tvTabEnVivo"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="En Vivo"
-                            android:textColor="#FF4D4D"
-                            android:textSize="13sp"
-                            android:textStyle="bold"
-                            android:layout_marginStart="6dp" />
+                            android:textColor="#8A8AA5"
+                            android:textSize="10sp"
+                            android:layout_marginTop="2dp" />
                     </LinearLayout>
 
-                    <TextView
-                        android:id="@+id/tvLiveHeader"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="13sp"
-                        android:textStyle="bold"
-                        android:textColor="#FFFFFF"
-                        android:layout_marginBottom="4dp" />
+                    <View
+                        android:id="@+id/lineEnVivo"
+                        android:layout_width="32dp"
+                        android:layout_height="2dp"
+                        android:layout_gravity="bottom|center_horizontal"
+                        android:layout_marginBottom="4dp"
+                        android:alpha="0"
+                        android:background="#2563EB" />
+                </FrameLayout>
 
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/rvPartidosEnVivo"
+                <!-- TAB: Eliminatorias -->
+                <FrameLayout
+                    android:id="@+id/tabEliminatorias"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground">
+
+                    <View
+                        android:id="@+id/glowEliminatorias"
+                        android:layout_width="40dp"
+                        android:layout_height="28dp"
+                        android:layout_gravity="center"
+                        android:layout_marginBottom="4dp"
+                        android:alpha="0"
+                        android:background="@drawable/bg_glow_active" />
+
+                    <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical">
 
-                </LinearLayout>
+                        <ImageView
+                            android:id="@+id/ivTabEliminatorias"
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:src="@drawable/ic_nav_bracket"
+                            android:importantForAccessibility="no" />
 
-            </com.google.android.material.card.MaterialCardView>
+                        <TextView
+                            android:id="@+id/tvTabEliminatorias"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Eliminatorias"
+                            android:textColor="#8A8AA5"
+                            android:textSize="10sp"
+                            android:layout_marginTop="2dp" />
+                    </LinearLayout>
 
-            <!-- Quinielas List -->
+                    <View
+                        android:id="@+id/lineEliminatorias"
+                        android:layout_width="32dp"
+                        android:layout_height="2dp"
+                        android:layout_gravity="bottom|center_horizontal"
+                        android:layout_marginBottom="4dp"
+                        android:alpha="0"
+                        android:background="#2563EB" />
+                </FrameLayout>
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvQuinielas"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="4dp"
-                android:paddingBottom="90dp"
-                android:clipToPadding="false"
-                android:nestedScrollingEnabled="false"
-                tools:listitem="@layout/item_quiniela" />
-
-            <!-- Empty State -->
-            <LinearLayout
-                android:id="@+id/tvEmpty"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:visibility="gone"
-                android:paddingVertical="32dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="No tienes quinielas aún"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="#FFFFFF"
-                    android:alpha="0.9" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="¡Crea una o únete para empezar!"
-                    android:textSize="13sp"
-                    android:textColor="#FFFFFF"
-                    android:alpha="0.7"
-                    android:layout_marginTop="6dp" />
             </LinearLayout>
+        </FrameLayout>
 
-        </LinearLayout>
+    </LinearLayout>
 
-    </androidx.core.widget.NestedScrollView>
-
-    <!-- FAB Crear -->
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/btnCrearQuiniela"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="36dp"
         android:layout_gravity="bottom|end"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="80dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginBottom="122dp"
         android:text="Crear"
         android:textColor="#FFFFFF"
+        android:textSize="10sp"
         android:textStyle="bold"
+        app:backgroundTint="@color/primary"
+        app:cornerRadius="12dp"
+        app:elevation="4dp"
         app:icon="@android:drawable/ic_input_add"
-        app:iconTint="#FFFFFF"
-        app:backgroundTint="#0D5BFF"
-        app:elevation="8dp"
-        app:fabSize="normal"
-        app:cornerRadius="20dp" />
+        app:iconSize="14dp"
+        app:iconTint="#FFFFFF" />
 
-    <!-- FAB Unirse -->
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/btnUnirseQuiniela"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="36dp"
         android:layout_gravity="bottom|end"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginBottom="72dp"
         android:text="Unirse QR"
         android:textColor="#FFFFFF"
+        android:textSize="10sp"
         android:textStyle="bold"
+        app:backgroundTint="@color/success"
+        app:cornerRadius="12dp"
+        app:elevation="4dp"
         app:icon="@android:drawable/ic_menu_camera"
-        app:iconTint="#FFFFFF"
-        app:backgroundTint="#00B86B"
-        app:elevation="8dp"
-        app:fabSize="normal"
-        app:cornerRadius="20dp" />
+        app:iconSize="14dp"
+        app:iconTint="#FFFFFF" />
 
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:visibility="gone"
-        android:indeterminateTint="#FFFFFF" />
+        android:indeterminateTint="#FFFFFF"
+        android:visibility="gone" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

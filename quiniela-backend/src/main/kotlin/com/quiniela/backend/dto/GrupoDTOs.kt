@@ -21,7 +21,9 @@ data class SeleccionDTO(
     val golesAFavor: Int = 0,
     val golesEnContra: Int = 0,
     val puntos: Int = 0,
-    val diferenciaGoles: Int = 0
+    val diferenciaGoles: Int = 0,
+    val rankingFifa: Int? = null,
+    val puntosFairPlay: Int = 0
 )
 
 data class TablaGruposDTO(

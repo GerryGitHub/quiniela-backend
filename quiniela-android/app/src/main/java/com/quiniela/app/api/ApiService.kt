@@ -26,6 +26,8 @@ import com.quiniela.app.model.RegisterRequest
 import com.quiniela.app.model.TablaGruposDTO
 import com.quiniela.app.model.UnirseQuinielaRequest
 import com.quiniela.app.model.UsuarioPerfilDTO
+import com.quiniela.app.model.BracketPreviewDTO
+import com.quiniela.app.model.EliminatoriasStatusDTO
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -115,4 +117,16 @@ interface ApiService {
 
     @POST("auth/refresh")
     suspend fun refresh(@Body request: RefreshTokenRequest): Response<RefreshTokenResponse>
+
+    @GET("pronosticos/quiniela/{quinielaId}/usuario/{usuarioId}")
+    suspend fun getPronosticosByUser(
+        @Path("quinielaId") quinielaId: Long,
+        @Path("usuarioId") usuarioId: Long
+    ): Response<MisPronosticosDTO>
+
+    @GET("api/eliminatorias/preview")
+    suspend fun getEliminatoriasPreview(): Response<BracketPreviewDTO>
+
+    @GET("api/eliminatorias/status")
+    suspend fun getEliminatoriasStatus(): Response<EliminatoriasStatusDTO>
 }

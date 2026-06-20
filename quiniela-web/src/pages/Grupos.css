@@ -199,7 +199,13 @@
 .tabla-posiciones .puntos {
   font-weight: 700;
   color: #667eea;
-  font-size: 16px;
+}
+
+.tabla-posiciones .ranking,
+.tabla-posiciones .fairplay {
+  font-size: 0.8rem;
+  color: #888;
+  text-align: center;
 }
 
 .partidos-title {

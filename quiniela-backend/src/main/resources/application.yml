@@ -47,15 +47,3 @@ resend:
 logging:
   level:
     com.quiniela: DEBUG
-
-# APIs de resultados de fútbol (dejar en blanco si no se usa)
-api:
-  football:
-    key: ${API_FOOTBALL_KEY:}
-    host: ${API_FOOTBALL_HOST:api-football-v1.p.rapidapi.com}
-
-football-data:
-  key: ${FOOTBALL_DATA_KEY:}
-
-thesportsdb:
-  key: ${THESPORTSDB_KEY:}

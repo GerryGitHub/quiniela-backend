@@ -61,14 +61,11 @@ export default function AdminQuinielas() {
   return (
     <div className="users-page">
       <header className="header">
+        <Link to="/dashboard" className="btn-back">← Volver</Link>
         <h1>Gestión de Quinielas</h1>
-        <div className="header-actions">
-          <Link to="/dashboard" className="btn-grupos">Dashboard</Link>
-          <Link to="/admin/users" className="btn-grupos">Usuarios</Link>
-          <div className="header-right">
-            <span className="user-info">{usuario?.nombre}</span>
-            <button onClick={logout} className="btn-logout">Cerrar Sesión</button>
-          </div>
+        <div className="header-right" style={{ marginLeft: 'auto' }}>
+          <span className="user-info">{usuario?.nombre}</span>
+          <button onClick={logout} className="btn-logout">Cerrar Sesión</button>
         </div>
       </header>
 

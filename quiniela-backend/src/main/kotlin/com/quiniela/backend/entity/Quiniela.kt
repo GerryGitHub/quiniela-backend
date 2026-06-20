@@ -13,5 +13,7 @@ class Quiniela(
     @ManyToOne
     val administrador: Usuario,
     @Column(name = "created_at")
-    var createdAt: LocalDateTime? = null
+    var createdAt: LocalDateTime? = null,
+    var estado: String = "ACTIVA",
+    var ronda: String? = null
 )

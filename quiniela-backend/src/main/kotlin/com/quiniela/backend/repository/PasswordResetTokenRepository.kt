@@ -8,8 +8,6 @@ import java.util.Optional
 
 @Repository
 interface PasswordResetTokenRepository : JpaRepository<PasswordResetToken, Long> {
-    fun findByToken(token: String): Optional<PasswordResetToken>
-    fun findByUsuario(usuario: Usuario): List<PasswordResetToken>
     fun findByUsuarioAndToken(usuario: Usuario, token: String): Optional<PasswordResetToken>
     fun deleteByUsuario(usuario: Usuario)
 }

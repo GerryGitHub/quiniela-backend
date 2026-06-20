@@ -1,37 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Primary Colors -->
-    <color name="primary">#0D5BFF</color>
-    <color name="primary_dark">#0847CC</color>
+    <!-- Background -->
+    <color name="bg_dark">#020617</color>
+    <color name="bottom_bar">#17152C</color>
+
+    <!-- Primary -->
+    <color name="primary">#2563EB</color>
+    <color name="primary_dark">#1D4ED8</color>
     <color name="primary_light">#3B82F6</color>
+
+    <!-- Accent / Status -->
     <color name="accent">#00B86B</color>
-    
-    <!-- Secondary / Accent Colors -->
+    <color name="success">#00B86B</color>
+    <color name="live_red">#FF4D4D</color>
+    <color name="warning">#F59E0B</color>
+    <color name="error">#FF4D4D</color>
+
+    <!-- Text -->
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#A1A1AA</color>
+    <color name="text_hint">#71717A</color>
+    <color name="text_on_primary">#FFFFFF</color>
+
+    <!-- Glass / Translucent -->
+    <color name="glass_bg">#0DFFFFFF</color>
+    <color name="glass_border">#1FFFFFFF</color>
+    <color name="glass_card">#0DFFFFFF</color>
+    <color name="pill_inactive">#7A7A95</color>
+    <color name="nav_active_bg">#26FFFFFF</color>
+    <color name="live_bg">#2EFF4D4D</color>
+    <color name="share_bg">#1FFFFFFF</color>
+    <color name="overlay">#99000000</color>
+
+    <!-- Legacy aliases (for code compat) -->
     <color name="secondary_red">#FF4D4D</color>
     <color name="success_green">#00B86B</color>
     <color name="gold_accent">#F59E0B</color>
-    
-    <!-- Background Colors -->
-    <color name="background">#F8FAFC</color>
-    <color name="surface">#FFFFFF</color>
-    <color name="input_surface">#F1F5F9</color>
-    
-    <!-- Text Colors -->
-    <color name="text_primary">#111827</color>
-    <color name="text_secondary">#6B7280</color>
-    <color name="text_hint">#94A3B8</color>
-    <color name="text_on_primary">#FFFFFF</color>
-    
-    <!-- Border & Divider -->
-    <color name="border_soft">#E2E8F0</color>
-    <color name="divider">#E5E7EB</color>
-    
-    <!-- Status Colors -->
-    <color name="success">#00B86B</color>
-    <color name="warning">#F59E0B</color>
-    <color name="error">#FF4D4D</color>
-    
-    <!-- Base Colors -->
+    <color name="background">#020617</color>
+    <color name="surface">#0DFFFFFF</color>
+    <color name="input_surface">#1FFFFFFF</color>
+    <color name="border_soft">#1FFFFFFF</color>
+    <color name="divider">#1FFFFFFF</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 </resources>

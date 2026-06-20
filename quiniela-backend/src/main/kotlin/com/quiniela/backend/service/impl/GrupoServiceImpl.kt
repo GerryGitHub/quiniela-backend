@@ -1,9 +1,11 @@
 package com.quiniela.backend.service.impl
 
 import com.quiniela.backend.dto.*
+import com.quiniela.backend.entity.EquipoEstadisticas
 import com.quiniela.backend.entity.EstadoPartido
 import com.quiniela.backend.exception.NotFoundException
 import com.quiniela.backend.mapper.toPartidoDTO
+import com.quiniela.backend.repository.EquipoEstadisticasRepository
 import com.quiniela.backend.repository.EquipoRepository
 import com.quiniela.backend.repository.GrupoRepository
 import com.quiniela.backend.repository.PartidoRepository
@@ -15,17 +17,25 @@ import org.springframework.transaction.annotation.Transactional
 class GrupoServiceImpl(
     private val grupoRepository: GrupoRepository,
     private val equipoRepository: EquipoRepository,
-    private val partidoRepository: PartidoRepository
+    private val partidoRepository: PartidoRepository,
+    private val equipoEstadisticasRepository: EquipoEstadisticasRepository
 ) : GrupoService {
 
     override fun getAllGrupos(): TablaGruposDTO {
         val grupos = grupoRepository.findAll()
+        val estadisticas = equipoEstadisticasRepository.findAll().associateBy { it.equipo.id }
 
         val gruposDTO = grupos.map { grupo ->
             val partidosEntity = partidoRepository.findAll()
-                .filter { it.grupo.id == grupo.id }
+                .filter { it.grupo?.id == grupo.id }
                 .sortedBy { it.fechaHora }
-            val equipos = equipoRepository.findByGrupoId(grupo.id).map { it.toSeleccionDTO(partidosEntity) }
+            val equipos = equipoRepository.findByGrupoId(grupo.id)
+                .map { it.toSeleccionDTO(partidosEntity, estadisticas) }
+                .sortedWith(compareByDescending<SeleccionDTO> { it.puntos }
+                    .thenByDescending { it.diferenciaGoles }
+                    .thenByDescending { it.golesAFavor }
+                    .thenByDescending { it.puntosFairPlay }
+                    .thenBy { it.rankingFifa ?: 999 })
             val partidos = partidosEntity.map { it.toPartidoDTO() }
 
             GrupoDTO(
@@ -42,10 +52,17 @@ class GrupoServiceImpl(
 
     override fun getGrupo(nombre: String): GrupoDTO {
         val grupo = grupoRepository.findByNombre(nombre) ?: throw NotFoundException("Grupo no encontrado")
+        val estadisticas = equipoEstadisticasRepository.findAll().associateBy { it.equipo.id }
         val partidosEntity = partidoRepository.findAll()
-            .filter { it.grupo.id == grupo.id }
+            .filter { it.grupo?.id == grupo.id }
             .sortedBy { it.fechaHora }
-        val equipos = equipoRepository.findByGrupoId(grupo.id).map { it.toSeleccionDTO(partidosEntity) }
+        val equipos = equipoRepository.findByGrupoId(grupo.id)
+            .map { it.toSeleccionDTO(partidosEntity, estadisticas) }
+            .sortedWith(compareByDescending<SeleccionDTO> { it.puntos }
+                .thenByDescending { it.diferenciaGoles }
+                .thenByDescending { it.golesAFavor }
+                .thenByDescending { it.puntosFairPlay }
+                .thenBy { it.rankingFifa ?: 999 })
         val partidos = partidosEntity.map { it.toPartidoDTO() }
 
         return GrupoDTO(
@@ -73,7 +90,10 @@ class GrupoServiceImpl(
         return partidoRepository.findAllByOrderByFechaHoraAsc().map { it.toPartidoDTO() }
     }
 
-    private fun com.quiniela.backend.entity.Equipo.toSeleccionDTO(partidos: List<com.quiniela.backend.entity.Partido>): SeleccionDTO {
+    private fun com.quiniela.backend.entity.Equipo.toSeleccionDTO(
+        partidos: List<com.quiniela.backend.entity.Partido>,
+        estadisticas: Map<Long, EquipoEstadisticas>
+    ): SeleccionDTO {
         var pj = 0; var pg = 0; var pe = 0; var pp = 0
         var gf = 0; var gc = 0
 
@@ -102,6 +122,7 @@ class GrupoServiceImpl(
             }
         }
 
+        val est = estadisticas[id]
         return SeleccionDTO(
             id = id,
             nombre = nombre,
@@ -115,7 +136,9 @@ class GrupoServiceImpl(
             golesAFavor = gf,
             golesEnContra = gc,
             puntos = pg * 3 + pe,
-            diferenciaGoles = gf - gc
+            diferenciaGoles = gf - gc,
+            rankingFifa = est?.rankingFifa,
+            puntosFairPlay = est?.puntosFairPlay ?: 0
         )
     }
 }
