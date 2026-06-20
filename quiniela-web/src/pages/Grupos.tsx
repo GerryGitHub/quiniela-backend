@@ -16,6 +16,8 @@ interface Seleccion {
   golesEnContra: number;
   puntos: number;
   diferenciaGoles: number;
+  rankingFifa?: number;
+  puntosFairPlay?: number;
 }
 
 interface Partido {
