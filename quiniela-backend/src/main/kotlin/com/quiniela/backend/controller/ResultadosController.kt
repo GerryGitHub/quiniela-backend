@@ -1,6 +1,8 @@
 package com.quiniela.backend.controller
 
 import com.quiniela.backend.dto.*
+import com.quiniela.backend.entity.Constantes
+import com.quiniela.backend.entity.RolUsuario
 import com.quiniela.backend.service.ResultadosService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -28,10 +30,10 @@ class ResultadosController(
     fun debug(): ResponseEntity<*> {
         return try {
             val count = resultadosService.getPartidos().size
-            ResponseEntity.ok(mapOf("partidosCount" to count))
+            ResponseEntity.ok(mapOf(Constantes.RESPONSE_KEY_PARTIDOS_COUNT to count))
         } catch (e: Exception) {
             e.printStackTrace()
-            ResponseEntity.status(500).body(mapOf("error" to e.message))
+            ResponseEntity.status(500).body(mapOf(Constantes.RESPONSE_KEY_ERROR to e.message))
         }
     }
 
@@ -41,7 +43,7 @@ class ResultadosController(
         return try {
             ResponseEntity.ok(resultadosService.getPartidosEnVivo())
         } catch (e: Exception) {
-            ResponseEntity.status(500).body(mapOf("error" to e.message))
+            ResponseEntity.status(500).body(mapOf(Constantes.RESPONSE_KEY_ERROR to e.message))
         }
     }
 
@@ -65,7 +67,7 @@ class ResultadosController(
         @RequestBody request: ActualizarResultadoRequest,
         @AuthenticationPrincipal userDetails: UserDetails?
     ): ResponseEntity<PartidoDTO> {
-        val esAdmin = userDetails?.authorities?.any { it.authority == "ROLE_ADMIN" } == true
+        val esAdmin = userDetails?.authorities?.any { it.authority == RolUsuario.ADMIN.authority } == true
         return ResponseEntity.ok(resultadosService.actualizarResultado(id, request, esAdmin))
     }
 

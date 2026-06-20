@@ -136,7 +136,7 @@ class PronosticoService(
         )
     }
 
-    fun getPronosticosDeUsuario(quinielaId: Long, usuarioId: Long, email: String): MisPronosticosDTO {
+    fun getPronosticosDeUsuario(quinielaId: Long, usuarioId: Long): MisPronosticosDTO {
         val pronosticos = pronosticoRepository.findByQuinielaIdAndUsuarioId(quinielaId, usuarioId)
         val pronosticosDTO = pronosticos
             .filter { p ->
@@ -147,7 +147,7 @@ class PronosticoService(
         return MisPronosticosDTO(pronosticos = pronosticosDTO)
     }
 
-    fun getPronosticosPorPartido(quinielaId: Long, partidoId: Long, email: String): PronosticosPorPartidoDTO {
+    fun getPronosticosPorPartido(partidoId: Long): PronosticosPorPartidoDTO {
         val partido = partidoRepository.findById(partidoId)
             .orElseThrow { NotFoundException("Partido no encontrado") }
 

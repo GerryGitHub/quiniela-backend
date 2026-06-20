@@ -1,7 +1,6 @@
 package com.quiniela.backend.controller
 
 import com.quiniela.backend.domain.mapper.toCommand
-import com.quiniela.backend.domain.mapper.toItem
 import com.quiniela.backend.dto.*
 import com.quiniela.backend.service.PronosticoService
 import io.swagger.v3.oas.annotations.Operation
@@ -72,7 +71,7 @@ class PronosticoController(
         @AuthenticationPrincipal userDetails: UserDetails
     ): ResponseEntity<MisPronosticosDTO> {
         return ResponseEntity.ok(
-            pronosticoService.getPronosticosDeUsuario(quinielaId, usuarioId, userDetails.username)
+            pronosticoService.getPronosticosDeUsuario(quinielaId, usuarioId)
         )
     }
 
@@ -84,7 +83,7 @@ class PronosticoController(
         @AuthenticationPrincipal userDetails: UserDetails
     ): ResponseEntity<PronosticosPorPartidoDTO> {
         return ResponseEntity.ok(
-            pronosticoService.getPronosticosPorPartido(quinielaId, partidoId, userDetails.username)
+            pronosticoService.getPronosticosPorPartido(partidoId)
         )
     }
 }

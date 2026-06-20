@@ -1,5 +1,7 @@
 package com.quiniela.backend.dto
 
+import com.quiniela.backend.entity.Constantes
+import com.quiniela.backend.entity.RolUsuario
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
@@ -25,7 +27,7 @@ data class LoginRequest(
 data class AuthResponse(
     val accessToken: String,
     val refreshToken: String? = null,
-    val tipo: String = "Bearer",
+    val tipo: String = Constantes.TOKEN_TYPE_BEARER,
     val usuario: UsuarioDTO
 )
 
@@ -43,7 +45,7 @@ data class UsuarioDTO(
     val id: Long,
     val nombre: String,
     val email: String,
-    val rol: String = "USER",
+    val rol: String = RolUsuario.USER.rol,
     val puntosTotales: Int = 0
 )
 
@@ -91,7 +93,7 @@ data class UsuarioPerfilDTO(
     val id: Long,
     val nombre: String,
     val email: String,
-    val rol: String = "USER",
+    val rol: String = RolUsuario.USER.rol,
     val puntosTotalesGlobales: Int,
     val quinielas: List<QuinielaResumenDTO>
 )

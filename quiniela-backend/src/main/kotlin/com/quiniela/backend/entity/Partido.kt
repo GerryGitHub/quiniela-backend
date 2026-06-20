@@ -27,16 +27,8 @@ class Partido(
     var minutosJugados: Int? = null,
     @Enumerated(EnumType.STRING)
     var estado: EstadoPartido = EstadoPartido.PENDIENTE,
-    val codigo: String? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "quiniela_id")
     val quiniela: Quiniela? = null
-) {
-    fun isFinished() = estado == EstadoPartido.FINALIZADO
-    fun isLive() = estado == EstadoPartido.EN_CURSO
-    fun isPending() = estado == EstadoPartido.PENDIENTE
-    fun isAboutToStart() = estado == EstadoPartido.POR_COMENZAR
-    fun hasResult() = golesLocalReal != null && golesVisitanteReal != null
-    fun resultado(): Pair<Int, Int>? = if (hasResult()) Pair(golesLocalReal!!, golesVisitanteReal!!) else null
-}
+)
