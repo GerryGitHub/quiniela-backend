@@ -6,13 +6,16 @@ import com.quiniela.backend.entity.Partido
 import java.time.Duration
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+
+private val FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
 
 fun Partido.toPartidoDTO(): PartidoDTO {
     return PartidoDTO(
         id = id,
         equipoLocal = equipoLocal.nombre,
         equipoVisitante = equipoVisitante.nombre,
-        fechaHora = fechaHora.toString(),
+        fechaHora = fechaHora.format(FMT),
         grupo = grupo?.nombre,
         grupoId = grupo?.id,
         equipoLocalId = equipoLocal.id,
@@ -37,7 +40,7 @@ fun Partido.toPartidoDTOConMinutos(ahora: ZonedDateTime = ZonedDateTime.now(Zone
         id = id,
         equipoLocal = equipoLocal.nombre,
         equipoVisitante = equipoVisitante.nombre,
-        fechaHora = fechaHora.toString(),
+        fechaHora = fechaHora.format(FMT),
         grupo = grupo?.nombre,
         grupoId = grupo?.id,
         equipoLocalId = equipoLocal.id,
