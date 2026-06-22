@@ -92,14 +92,4 @@ object Constantes {
     const val RESPONSE_KEY_MESSAGE = "message"
     const val RESPONSE_KEY_ERROR = "error"
     const val RESPONSE_KEY_PARTIDOS_COUNT = "partidosCount"
-
-    const val SLOT_P79 = "P79"
-    const val SLOT_P85 = "P85"
-    const val SLOT_P81 = "P81"
-    const val SLOT_P74 = "P74"
-    const val SLOT_P82 = "P82"
-    const val SLOT_P77 = "P77"
-    const val SLOT_P87 = "P87"
-    const val SLOT_P80 = "P80"
-
 }
