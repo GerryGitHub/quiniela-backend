@@ -1,4 +1,5 @@
 INSERT INTO terceros_mapping (combinacion, slot_codigo, grupo_origen) VALUES
+
 ('EFGHIJKL','P79','E'),
 ('EFGHIJKL','P85','J'),
 ('EFGHIJKL','P81','I'),
@@ -3958,4 +3959,5 @@ INSERT INTO terceros_mapping (combinacion, slot_codigo, grupo_origen) VALUES
 ('ABCDEFGH','P82','A'),
 ('ABCDEFGH','P77','F'),
 ('ABCDEFGH','P87','D'),
-('ABCDEFGH','P80','E');
+('ABCDEFGH','P80','E')
+ON CONFLICT (combinacion, slot_codigo) DO NOTHING;
