@@ -44,6 +44,7 @@ class DashboardActivity : AppCompatActivity() {
     private val eliminatoriasRepository = EliminatoriasRepository()
     private lateinit var adapter: QuinielaAdapter
     private var isFirstLoad = true
+    private var primeraQuinielaId: Long? = null
 
     private val roundLabels = mapOf(
         "R32" to "R32 — Dieciseisavos",
@@ -194,6 +195,7 @@ class DashboardActivity : AppCompatActivity() {
                     binding.tvWelcome.visibility = View.VISIBLE
 
                     val quinielas = result.data.quinielas
+                    primeraQuinielaId = quinielas.firstOrNull()?.id
                     if (quinielas.isEmpty()) {
                         binding.tvEmpty.visibility = View.VISIBLE
                         binding.rvQuinielas.visibility = View.GONE
@@ -234,8 +236,10 @@ class DashboardActivity : AppCompatActivity() {
                         binding.tvProximoVisitante.text = prox.equipoVisitante
                         iniciarCuentaRegresiva(prox.fechaHora)
                         binding.btnPronosticarProximo.setOnClickListener {
-                            // placeholder: podría abrir PronosticarActivity con este partido
-                            UiUtils.showSuccessSnackbar(binding.root, "Próximo partido: ${prox.equipoLocal} vs ${prox.equipoVisitante}")
+                            val id = primeraQuinielaId ?: return@setOnClickListener
+                            val intent = Intent(this, com.quiniela.app.ui.quiniela.QuinielaDetalleActivity::class.java)
+                            intent.putExtra("quinielaId", id)
+                            startActivity(intent)
                         }
                     } else {
                         binding.cardProximoPartido.visibility = View.GONE
