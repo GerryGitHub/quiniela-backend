@@ -200,7 +200,10 @@ class DashboardActivity : AppCompatActivity() {
                     } else {
                         binding.tvEmpty.visibility = View.GONE
                         binding.rvQuinielas.visibility = View.VISIBLE
-                        adapter.submitList(quinielas)
+                        adapter.submitSections(
+                            quinielas.filter { it.estado != "FINALIZADA" },
+                            quinielas.filter { it.estado == "FINALIZADA" }
+                        )
                     }
                 }
                 is Result.Error -> {
