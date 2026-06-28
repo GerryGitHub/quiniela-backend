@@ -237,7 +237,7 @@ class DashboardActivity : AppCompatActivity() {
                         iniciarCuentaRegresiva(prox.fechaHora)
                         binding.btnPronosticarProximo.setOnClickListener {
                             val id = primeraQuinielaId ?: return@setOnClickListener
-                            val intent = Intent(this, com.quiniela.app.ui.quiniela.QuinielaDetalleActivity::class.java)
+                            val intent = Intent(ctx, com.quiniela.app.ui.quiniela.QuinielaDetalleActivity::class.java)
                             intent.putExtra("quinielaId", id)
                             startActivity(intent)
                         }
