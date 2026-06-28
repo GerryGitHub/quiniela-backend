@@ -1,0 +1,316 @@
+.eliminatorias-page {
+  min-height: 100vh;
+  background: #0B1220;
+  color: #fff;
+}
+
+.eliminatorias-page .header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 2rem;
+  background: rgba(11, 18, 32, 0.95);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.eliminatorias-page .header h1 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.eliminatorias-page .btn-back {
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.eliminatorias-page .btn-back:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.eliminatorias-page .content {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.eliminatorias-page .loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 1rem;
+}
+
+.eliminatorias-page .no-access {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 1rem;
+  margin-top: 4rem;
+}
+
+.eliminatorias-page .error-msg {
+  background: rgba(255, 77, 77, 0.1);
+  border: 1px solid rgba(255, 77, 77, 0.3);
+  color: #FF4D4D;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}
+
+.eliminatorias-page .success-msg {
+  background: rgba(0, 184, 107, 0.1);
+  border: 1px solid rgba(0, 184, 107, 0.3);
+  color: #00B86B;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}
+
+.status-card {
+  background: rgba(11, 18, 32, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.status-card h3 {
+  margin: 0 0 1rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.status-grid {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1.25rem;
+}
+
+.status-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.status-label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.status-value {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.status-value.activo {
+  color: #00B86B;
+}
+
+.status-value.inactivo {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.btn-crear {
+  background: linear-gradient(135deg, #0D5BFF, #0847CC);
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 14px rgba(13, 91, 255, 0.3);
+}
+
+.btn-crear:hover {
+  box-shadow: 0 6px 20px rgba(13, 91, 255, 0.45);
+  transform: translateY(-1px);
+}
+
+.btn-crear:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.info-banner {
+  background: rgba(13, 91, 255, 0.08);
+  border: 1px solid rgba(13, 91, 255, 0.2);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 2rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  text-align: center;
+}
+
+.empty-msg {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.9rem;
+  margin-top: 4rem;
+}
+
+.ronda-section {
+  margin-bottom: 1.5rem;
+}
+
+.ronda-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0 0 0.75rem;
+}
+
+.partidos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.partido-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(11, 18, 32, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  transition: background 0.2s;
+}
+
+.partido-card.no-resuelto {
+  opacity: 0.5;
+}
+
+.partido-card:hover {
+  background: rgba(11, 18, 32, 0.5);
+}
+
+.partido-codigo {
+  font-size: 0.7rem;
+  font-weight: 600;
+  font-family: monospace;
+  color: rgba(255, 255, 255, 0.25);
+  min-width: 28px;
+}
+
+.partido-card .equipo {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.partido-card .vs {
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.3);
+  font-weight: 500;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.modal {
+  background: rgba(11, 18, 32, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 480px;
+  width: 90%;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+}
+
+.modal h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.modal p {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.5;
+  margin: 0 0 0.75rem;
+}
+
+.modal .modal-ronda {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.modal .modal-ronda strong {
+  color: #fff;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.btn-cancel {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.6rem 1.25rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #fff;
+}
+
+.btn-confirm {
+  background: linear-gradient(135deg, #0D5BFF, #0847CC);
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.5rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 14px rgba(13, 91, 255, 0.3);
+}
+
+.btn-confirm:hover {
+  box-shadow: 0 6px 20px rgba(13, 91, 255, 0.45);
+}
+
+.btn-confirm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

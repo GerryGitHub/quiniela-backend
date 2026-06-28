@@ -30,7 +30,9 @@ class PerfilServiceImpl(
                     id = q.id,
                     nombre = q.nombre,
                     codigoInvitacion = q.codigoInvitacion,
-                    puntosTotales = participacion.map { it.puntosTotales }.orElse(0)
+                    puntosTotales = participacion.map { it.puntosTotales }.orElse(0),
+                    estado = q.estado,
+                    ganadorNombre = q.ganador?.usuario?.nombre
                 )
             )
         }
@@ -44,7 +46,9 @@ class PerfilServiceImpl(
                         id = q.id,
                         nombre = q.nombre,
                         codigoInvitacion = q.codigoInvitacion,
-                        puntosTotales = participacion.map { it.puntosTotales }.orElse(0)
+                        puntosTotales = participacion.map { it.puntosTotales }.orElse(0),
+                        estado = q.estado,
+                        ganadorNombre = q.ganador?.usuario?.nombre
                     )
                 )
             }

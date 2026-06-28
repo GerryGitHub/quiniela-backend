@@ -34,7 +34,9 @@ class QuinielaService(
                     id = q.id,
                     nombre = q.nombre,
                     codigoInvitacion = q.codigoInvitacion,
-                    puntosTotales = participacion.map { it.puntosTotales }.orElse(0)
+                    puntosTotales = participacion.map { it.puntosTotales }.orElse(0),
+                    estado = q.estado,
+                    ganadorNombre = q.ganador?.usuario?.nombre
                 )
             )
         }
@@ -48,7 +50,9 @@ class QuinielaService(
                         id = q.id,
                         nombre = q.nombre,
                         codigoInvitacion = q.codigoInvitacion,
-                        puntosTotales = participacion.map { it.puntosTotales }.orElse(0)
+                        puntosTotales = participacion.map { it.puntosTotales }.orElse(0),
+                        estado = q.estado,
+                        ganadorNombre = q.ganador?.usuario?.nombre
                     )
                 )
             }
@@ -89,7 +93,8 @@ class QuinielaService(
             nombre = quinielaGuardada.nombre,
             codigoInvitacion = quinielaGuardada.codigoInvitacion,
             administrador = UsuarioDTO(usuario.id, usuario.nombre, usuario.email),
-            participantes = listOf(UsuarioDTO(usuario.id, usuario.nombre, usuario.email))
+            participantes = listOf(UsuarioDTO(usuario.id, usuario.nombre, usuario.email)),
+            estado = quinielaGuardada.estado
         )
     }
 
@@ -141,7 +146,9 @@ class QuinielaService(
             ),
             participantes = participantes,
             partidos = partidos,
-            participacionId = participacionActual.map { it.id }.orElse(null)
+            participacionId = participacionActual.map { it.id }.orElse(null),
+            estado = quiniela.estado,
+            ganadorNombre = quiniela.ganador?.usuario?.nombre
         )
     }
 
@@ -187,7 +194,9 @@ class QuinielaService(
                 quiniela.administrador.nombre,
                 quiniela.administrador.email
             ),
-            participantes = participantes
+            participantes = participantes,
+            estado = quiniela.estado,
+            ganadorNombre = quiniela.ganador?.usuario?.nombre
         )
     }
 

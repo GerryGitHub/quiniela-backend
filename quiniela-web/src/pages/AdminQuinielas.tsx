@@ -96,6 +96,7 @@ export default function AdminQuinielas() {
                   <th onClick={() => handleSort('nombre')} className="sortable">Nombre{sortArrow('nombre')}</th>
                   <th onClick={() => handleSort('creador')} className="sortable">Creador{sortArrow('creador')}</th>
                   <th>Participantes</th>
+                  <th>Estado</th>
                   <th onClick={() => handleSort('fecha')} className="sortable">Fecha{sortArrow('fecha')}</th>
                 </tr>
               </thead>
@@ -105,6 +106,7 @@ export default function AdminQuinielas() {
                     <td>{q.nombre}</td>
                     <td>{q.creador}</td>
                     <td>{q.participantes}</td>
+                    <td><span className={`estado-label estado-${(q.estado || 'activa').toLowerCase()}`}>{q.estado || 'ACTIVA'}</span></td>
                     <td>{q.createdAt ? new Date(q.createdAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'}</td>
                   </tr>
                 ))}

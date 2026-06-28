@@ -231,5 +231,17 @@
             android:textColor="#33FFFFFF"
             android:gravity="center"/>
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:padding="12dp"
+            android:background="@drawable/bg_warning_banner"
+            android:text="⚠️ Solo cuenta el marcador en tiempo regular (no incluye tiempos extra ni penales)."
+            android:textSize="12sp"
+            android:textColor="#F59E0B"
+            android:textStyle="bold"
+            android:gravity="center"/>
+
     </LinearLayout>
 </ScrollView>

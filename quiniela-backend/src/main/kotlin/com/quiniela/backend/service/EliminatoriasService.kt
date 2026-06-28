@@ -63,7 +63,7 @@ class EliminatoriasService(
         return BracketPreviewDTO(rondas = rondasMap, gruposActivos = hayGruposActivos)
     }
 
-    data class EquipoStats(
+    private data class EquipoStats(
         val nombre: String,
         val puntos: Int,
         val dg: Int,
@@ -72,7 +72,7 @@ class EliminatoriasService(
         val ranking: Int
     )
 
-    data class TerceroRankeado(
+    private data class TerceroRankeado(
         val grupo: String,
         val nombreEquipo: String,
         val puntos: Int,
@@ -204,17 +204,24 @@ class EliminatoriasService(
 
     @Transactional
     fun crearEliminatorias(request: CrearEliminatoriasRequest, email: String): CrearEliminatoriasResponse {
-        val quinielaGrupos = quinielaRepository.findById(request.quinielaGruposId)
-            .orElseThrow { NotFoundException("Quiniela de grupos no encontrada") }
-
         val admin = usuarioRepository.findByEmail(email)
             .orElseThrow { NotFoundException("Usuario no encontrado") }
 
-        quinielaGrupos.estado = EstadoQuiniela.FINALIZADA.estado
-        quinielaRepository.save(quinielaGrupos)
+        val activas = quinielaRepository.findByEstado(EstadoQuiniela.ACTIVA.estado)
+        for (quiniela in activas) {
+            val participantes = participacionRepository.findByQuinielaIdOrderByPuntosDesc(quiniela.id)
+            if (participantes.isNotEmpty()) {
+                quiniela.ganador = participantes.first()
+            }
+            quiniela.estado = EstadoQuiniela.FINALIZADA.estado
+            quinielaRepository.save(quiniela)
+        }
 
         val nextRondas = Ronda.ALL
-        val rondaIdx = quinielaGrupos.ronda?.let { r -> nextRondas.indexOf(Ronda.from(r)) } ?: -1
+        val rondaActual = nextRondas.firstOrNull { r ->
+            quinielaRepository.findAll().any { it.ronda == r.ronda }
+        }
+        val rondaIdx = rondaActual?.let { nextRondas.indexOf(it) } ?: -1
         val nuevaRonda = if (rondaIdx >= 0 && rondaIdx < nextRondas.size - 1) nextRondas[rondaIdx + 1].ronda else Ronda.R32.ronda
 
         val preview = getPreview()

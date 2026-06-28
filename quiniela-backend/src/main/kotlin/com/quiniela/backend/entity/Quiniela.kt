@@ -15,5 +15,8 @@ class Quiniela(
     @Column(name = "created_at")
     var createdAt: LocalDateTime? = null,
     var estado: String = EstadoQuiniela.ACTIVA.estado,
-    var ronda: String? = null
+    var ronda: String? = null,
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ganador_id")
+    var ganador: Participacion? = null
 )

@@ -8,6 +8,7 @@ import Users from '../pages/Users';
 import UserDetail from '../pages/UserDetail';
 import AdminQuinielas from '../pages/AdminQuinielas';
 import EstadisticasEquipos from '../pages/EstadisticasEquipos';
+import Eliminatorias from '../pages/Eliminatorias';
 
 const router = createBrowserRouter([
   {
@@ -49,6 +50,10 @@ const router = createBrowserRouter([
       {
         path: 'admin/estadisticas',
         element: <EstadisticasEquipos />,
+      },
+      {
+        path: 'eliminatorias',
+        element: <Eliminatorias />,
       },
     ],
   },

@@ -17,7 +17,8 @@ data class AdminUserDTO(
 data class AdminQuinielaDTO(
     val id: Long,
     val nombre: String,
-    val administrador: String
+    val administrador: String,
+    val estado: String = "ACTIVA"
 )
 
 data class AdminPartidoDTO(
@@ -47,7 +48,8 @@ data class AdminQuinielaListDTO(
     val nombre: String,
     val creador: String,
     val participantes: Long,
-    val createdAt: String?
+    val createdAt: String?,
+    val estado: String = "ACTIVA"
 )
 
 data class AdminUserDetailDTO(

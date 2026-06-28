@@ -48,7 +48,9 @@ data class QuinielaResumenDTO(
     val id: Long,
     val nombre: String,
     val codigoInvitacion: String,
-    val puntosTotales: Int = 0
+    val puntosTotales: Int = 0,
+    val estado: String = "ACTIVA",
+    val ganadorNombre: String? = null
 )
 
 data class CrearQuinielaRequest(
@@ -75,7 +77,9 @@ data class QuinielaDetalleDTO(
     val codigoInvitacion: String,
     val administrador: UsuarioDTO,
     val participantes: List<UsuarioDTO>,
-    val partidos: List<PartidoDTO>
+    val partidos: List<PartidoDTO>,
+    val estado: String = "ACTIVA",
+    val ganadorNombre: String? = null
 )
 
 data class LeaderboardEntryDTO(

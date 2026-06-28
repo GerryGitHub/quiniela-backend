@@ -1,7 +1,5 @@
 package com.quiniela.backend.dto
 
-import java.time.LocalDateTime
-
 data class PartidoDTO(
     val id: Long,
     val equipoLocal: String,

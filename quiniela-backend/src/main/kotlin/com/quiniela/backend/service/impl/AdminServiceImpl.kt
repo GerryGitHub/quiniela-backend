@@ -57,7 +57,7 @@ class AdminServiceImpl(
             AdminUserDTO(id = it.id, nombre = it.nombre, email = it.email)
         }
         val quinielas = quinielaRepository.findTop10ByOrderByIdDesc().map {
-            AdminQuinielaDTO(id = it.id, nombre = it.nombre, administrador = it.administrador.nombre)
+            AdminQuinielaDTO(id = it.id, nombre = it.nombre, administrador = it.administrador.nombre, estado = it.estado)
         }
         val partidos = partidoRepository.findTop10ByOrderByIdDesc().map {
             AdminPartidoDTO(
@@ -100,7 +100,8 @@ class AdminServiceImpl(
                 nombre = it.nombre,
                 creador = it.administrador.nombre,
                 participantes = participacionRepository.countByQuinielaId(it.id),
-                createdAt = it.createdAt?.toString()?.replace("T", " ")
+                createdAt = it.createdAt?.toString()?.replace("T", " "),
+                estado = it.estado
             )
         }
     }
@@ -108,7 +109,7 @@ class AdminServiceImpl(
     override fun getUserDetail(id: Long): AdminUserDetailDTO? {
         val user = usuarioRepository.findById(id).orElse(null) ?: return null
         val quinielas = quinielaRepository.findByParticipanteId(id).map {
-            AdminQuinielaDTO(id = it.id, nombre = it.nombre, administrador = it.administrador.nombre)
+            AdminQuinielaDTO(id = it.id, nombre = it.nombre, administrador = it.administrador.nombre, estado = it.estado)
         }
         return AdminUserDetailDTO(
             id = user.id,

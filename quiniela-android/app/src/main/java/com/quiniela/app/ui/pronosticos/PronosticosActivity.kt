@@ -57,31 +57,33 @@ class PronosticosActivity : AppCompatActivity() {
     }
 
     private fun crearListaAgrupada(pronosticos: List<PronosticoDTO>): List<MisPronosticosItem> {
-        val ordenGrupo = listOf("A", "B", "C", "D", "E", "F", "G", "H")
-        
-        val grouped = pronosticos.groupBy { it.partido.grupo ?: "Sin grupo" }
-        
+        val sorted = pronosticos.sortedBy { it.partido.fechaHora }
         val result = mutableListOf<MisPronosticosItem>()
-        
-        val gruposOrdenados = grouped.keys.sortedWith { a, b ->
-            val idxA = ordenGrupo.indexOf(a)
-            val idxB = ordenGrupo.indexOf(b)
-            when {
-                idxA != -1 && idxB != -1 -> idxA - idxB
-                idxA != -1 -> -1
-                idxB != -1 -> 1
-                else -> a.compareTo(b)
-            }
-        }
-        
-        for (grupo in gruposOrdenados) {
-            result.add(MisPronosticosItem.Header(grupo))
-            val pronosticosDelGrupo = grouped[grupo]?.sortedBy { it.partido.fechaHora } ?: emptyList()
-            for (pronostico in pronosticosDelGrupo) {
+        val porDia = sorted.groupBy { it.partido.fechaHora.substring(0, 10) }
+        val diasOrdenados = porDia.keys.sorted()
+        for (dia in diasOrdenados) {
+            result.add(MisPronosticosItem.Header(dayLabel(dia)))
+            for (pronostico in porDia[dia]!!) {
                 result.add(MisPronosticosItem.PronosticoItem(pronostico))
             }
         }
-        
         return result
+    }
+
+    private fun dayLabel(isoDate: String): String {
+        val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+        val date = sdf.parse(isoDate) ?: return isoDate
+        val today = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date())
+        val tomorrow = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(
+            java.util.Date(System.currentTimeMillis() + 86400000L)
+        )
+        return when (isoDate) {
+            today -> "Hoy"
+            tomorrow -> "Mañana"
+            else -> {
+                val fmt = java.text.SimpleDateFormat("EEEE d 'de' MMMM", java.util.Locale("es"))
+                fmt.format(date)
+            }
+        }
     }
 }

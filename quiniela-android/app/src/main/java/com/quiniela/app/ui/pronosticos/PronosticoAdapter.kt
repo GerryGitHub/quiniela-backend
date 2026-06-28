@@ -51,7 +51,7 @@ class PronosticoAdapter : ListAdapter<MisPronosticosItem, RecyclerView.ViewHolde
 
     inner class HeaderViewHolder(private val binding: ItemGrupoHeaderBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(grupo: String) {
-            binding.tvHeader.text = "Grupo $grupo"
+            binding.tvHeader.text = grupo
         }
     }
 

@@ -18,14 +18,18 @@ data class QuinielaDTO(
     val codigoInvitacion: String,
     val administrador: UsuarioDTO,
     val participantes: List<UsuarioDTO>,
-    val esPublica: Boolean = false
+    val esPublica: Boolean = false,
+    val estado: String = "ACTIVA",
+    val ganadorNombre: String? = null
 )
 
 data class QuinielaResumenDTO(
     val id: Long,
     val nombre: String,
     val codigoInvitacion: String,
-    val puntosTotales: Int = 0
+    val puntosTotales: Int = 0,
+    val estado: String = "ACTIVA",
+    val ganadorNombre: String? = null
 )
 
 data class LeaderboardEntryDTO(
@@ -42,5 +46,7 @@ data class QuinielaDetalleDTO(
     val administrador: UsuarioDTO,
     val participantes: List<UsuarioDTO>,
     val partidos: List<PartidoDTO>,
-    val participacionId: Long? = null
+    val participacionId: Long? = null,
+    val estado: String = "ACTIVA",
+    val ganadorNombre: String? = null
 )

@@ -101,3 +101,20 @@ export const pronosticoService = {
     return response.data;
   },
 };
+
+export const eliminatoriasService = {
+  getPreview: async () => {
+    const response = await api.get('/api/eliminatorias/preview');
+    return response.data;
+  },
+
+  getStatus: async () => {
+    const response = await api.get('/api/eliminatorias/status');
+    return response.data;
+  },
+
+  crear: async (data: { nombreQuiniela: string; quinielaGruposId: number }) => {
+    const response = await api.post('/api/eliminatorias/crear', data);
+    return response.data;
+  },
+};

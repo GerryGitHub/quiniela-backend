@@ -43,6 +43,7 @@ open class SecurityConfig(
                     .requestMatchers("/quinielas/**").authenticated()
                     .requestMatchers("/api/grupos/**").permitAll()
                     .requestMatchers("/api/resultados/**").permitAll()
+                    .requestMatchers("/api/eliminatorias/**").permitAll()
                     .requestMatchers("/admin/**").hasRole(RolUsuario.ADMIN.rol)
                     .anyRequest().authenticated()
             }

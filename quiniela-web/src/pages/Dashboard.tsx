@@ -63,6 +63,7 @@ export default function Dashboard() {
         <div className="header-actions">
           <Link to="/grupos" className="btn-grupos">Grupos FIFA</Link>
           <Link to="/resultados" className="btn-grupos">Resultados</Link>
+          <Link to="/eliminatorias" className="btn-grupos">Eliminatorias</Link>
           <Link to="/admin/users" className="btn-grupos">Usuarios</Link>
           <Link to="/admin/quinielas" className="btn-grupos">Quinielas</Link>
           <Link to="/admin/estadisticas" className="btn-grupos">Estadísticas</Link>

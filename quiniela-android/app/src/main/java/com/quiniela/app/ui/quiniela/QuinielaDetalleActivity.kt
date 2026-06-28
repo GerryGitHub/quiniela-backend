@@ -41,6 +41,8 @@ class QuinielaDetalleActivity : AppCompatActivity() {
     private lateinit var partidosAdapter: PartidosConPronosticoAdapter
     private lateinit var participantesAdapter: ParticipantesAdapter
 
+    private var quinielaFinalizada = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -126,36 +128,56 @@ class QuinielaDetalleActivity : AppCompatActivity() {
                 is Result.Success -> {
                     val detalle = result.data
                     binding.toolbar.title = detalle.nombre
-                    
- when (val pronosResult = pronosticoRepository.getMisPronosticosByQuiniela(quinielaId)) {
-                        is Result.Success -> {
-                            val totalPartidos = detalle.partidos.size
-                            val pronosticosMap = pronosResult.data.pronosticos.associateBy { it.partido.id }
-                            val partidosConPronostico = detalle.partidos.map { partido ->
-                                val pronostico = pronosticosMap[partido.id]
-                                PartidoConPronostico(
-                                    partido = partido,
-                                    golesLocalPredicho = pronostico?.golesLocalPredicho,
-                                    golesVisitantePredicho = pronostico?.golesVisitantePredicho
-                                )
-                            }
-                            val completados = partidosConPronostico.count {
-                                it.golesLocalPredicho != null && it.golesVisitantePredicho != null
-                            }
-                            actualizarProgresoPronosticos(completados, totalPartidos)
-                            val itemsAgrupados = crearListaAgrupada(partidosConPronostico)
-                            partidosAdapter = PartidosConPronosticoAdapter(itemsAgrupados) { actualizarBotonGuardar() }
-                            binding.rvPartidos.adapter = partidosAdapter
-                            actualizarBotonGuardar()
+                    quinielaFinalizada = detalle.estado == "FINALIZADA"
+
+                    if (quinielaFinalizada) {
+                        binding.tabLayout.visibility = View.GONE
+                        binding.layoutPronosticos.visibility = View.GONE
+                        binding.layoutPosiciones.visibility = View.VISIBLE
+                        binding.btnGuardarPronosticos.visibility = View.GONE
+                        binding.layoutProgresoPronosticos.visibility = View.GONE
+
+                        if (!detalle.ganadorNombre.isNullOrBlank()) {
+                            binding.tvInfoQuiniela.text = "🏆 Ganador: ${detalle.ganadorNombre}"
+                            binding.tvInfoQuiniela.visibility = View.VISIBLE
                         }
-                        is Result.Error -> {
-                            val partidosConPronostico = detalle.partidos.map { partido ->
-                                PartidoConPronostico(partido = partido)
+                    } else {
+                        binding.tabLayout.visibility = View.VISIBLE
+                        binding.layoutProgresoPronosticos.visibility = View.VISIBLE
+                        binding.btnGuardarPronosticos.visibility = View.VISIBLE
+
+                        when (val pronosResult = pronosticoRepository.getMisPronosticosByQuiniela(quinielaId)) {
+                            is Result.Success -> {
+                                val pendientes = detalle.partidos.filter { it.estado == "PENDIENTE" }
+                                val totalPendientes = pendientes.size
+                                val pronosticosMap = pronosResult.data.pronosticos.associateBy { it.partido.id }
+                                val partidosConPronostico = pendientes.map { partido ->
+                                    val pronostico = pronosticosMap[partido.id]
+                                    PartidoConPronostico(
+                                        partido = partido,
+                                        golesLocalPredicho = pronostico?.golesLocalPredicho,
+                                        golesVisitantePredicho = pronostico?.golesVisitantePredicho
+                                    )
+                                }
+                                val completados = partidosConPronostico.count {
+                                    it.golesLocalPredicho != null && it.golesVisitantePredicho != null
+                                }
+                                actualizarProgresoPronosticos(completados, totalPendientes)
+                                val itemsAgrupados = crearListaAgrupada(partidosConPronostico)
+                                partidosAdapter = PartidosConPronosticoAdapter(itemsAgrupados) { actualizarBotonGuardar() }
+                                binding.rvPartidos.adapter = partidosAdapter
+                                actualizarBotonGuardar()
                             }
-                            val itemsAgrupados = crearListaAgrupada(partidosConPronostico)
-                            partidosAdapter = PartidosConPronosticoAdapter(itemsAgrupados) { actualizarBotonGuardar() }
-                            binding.rvPartidos.adapter = partidosAdapter
-                            actualizarBotonGuardar()
+                            is Result.Error -> {
+                                val pendientes = detalle.partidos.filter { it.estado == "PENDIENTE" }
+                                val partidosConPronostico = pendientes.map { partido ->
+                                    PartidoConPronostico(partido = partido)
+                                }
+                                val itemsAgrupados = crearListaAgrupada(partidosConPronostico)
+                                partidosAdapter = PartidosConPronosticoAdapter(itemsAgrupados) { actualizarBotonGuardar() }
+                                binding.rvPartidos.adapter = partidosAdapter
+                                actualizarBotonGuardar()
+                            }
                         }
                     }
                 }
@@ -222,37 +244,36 @@ class QuinielaDetalleActivity : AppCompatActivity() {
     }
 
     private fun crearListaAgrupada(partidos: List<PartidoConPronostico>): List<GrupoExpansible> {
-        val ordenGrupo = listOf("A", "B", "C", "D", "E", "F", "G", "H")
-        
-        val grouped = partidos.groupBy { 
-            normalizarGrupo(it.partido.grupo) 
+        val pendientes = partidos
+            .filter { it.partido.estado == "PENDIENTE" }
+            .sortedBy { it.partido.fechaHora }
+        val grupos = mutableListOf<GrupoExpansible>()
+        val porDia = pendientes.groupBy { it.partido.fechaHora.substring(0, 10) }
+        val diasOrdenados = porDia.keys.sorted()
+        for (dia in diasOrdenados) {
+            grupos.add(GrupoExpansible(dayLabel(dia), porDia[dia]!!.toMutableList(), expandido = true))
         }
-        
-        val gruposOrdenados = grouped.keys.sortedWith { a, b ->
-            val idxA = ordenGrupo.indexOf(a)
-            val idxB = ordenGrupo.indexOf(b)
-            when {
-                idxA != -1 && idxB != -1 -> idxA - idxB
-                idxA != -1 -> -1
-                idxB != -1 -> 1
-                else -> a.compareTo(b)
+        return grupos
+    }
+
+    private fun dayLabel(isoDate: String): String {
+        val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+        val date = sdf.parse(isoDate) ?: return isoDate
+        val cal = java.util.Calendar.getInstance()
+        val today = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date())
+        val tomorrow = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(
+            java.util.Date(System.currentTimeMillis() + 86400000L)
+        )
+        return when (isoDate) {
+            today -> "Hoy"
+            tomorrow -> "Mañana"
+            else -> {
+                val fmt = java.text.SimpleDateFormat("EEEE d 'de' MMMM", java.util.Locale("es"))
+                fmt.format(date)
             }
-        }
-        
-        return gruposOrdenados.map { grupo ->
-            GrupoExpansible(
-                nombre = grupo,
-                partidos = (grouped[grupo]?.sortedBy { it.partido.fechaHora } ?: emptyList()).toMutableList(),
-                expandido = false
-            )
         }
     }
     
-    private fun normalizarGrupo(grupo: String?): String {
-        if (grupo == null) return "Sin grupo"
-        return grupo.trim().take(1).uppercase()
-    }
-
     private val leaderboardHandler = Handler(Looper.getMainLooper())
     private val leaderboardPolling = object : Runnable {
         override fun run() {
@@ -521,7 +542,7 @@ class PartidosConPronosticoAdapter(
         androidx.recyclerview.widget.RecyclerView.ViewHolder(binding.root) {
         
         fun bind(grupo: GrupoExpansible) {
-            binding.tvHeader.text = "Grupo ${grupo.nombre}"
+            binding.tvHeader.text = grupo.nombre
             binding.ivExpandido.setImageResource(
                 if (grupo.expandido) android.R.drawable.arrow_up_float 
                 else android.R.drawable.arrow_down_float

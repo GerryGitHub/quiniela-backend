@@ -29,6 +29,8 @@ export interface QuinielaResumen {
   nombre: string;
   codigoInvitacion: string;
   puntosTotales: number;
+  estado: string;
+  ganadorNombre?: string;
 }
 
 export interface Quiniela {
@@ -39,6 +41,8 @@ export interface Quiniela {
   participantes: Usuario[];
   esPublica?: boolean;
   partidos?: Partido[];
+  estado: string;
+  ganadorNombre?: string;
 }
 
 export interface QuinielaDetalle extends Quiniela {

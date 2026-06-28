@@ -81,16 +81,14 @@ class PronosticarActivity : AppCompatActivity() {
         lifecycleScope.launch {
             when (val result = partidoRepository.getPartidos()) {
                 is Result.Success -> {
-                    val partidosActivos = result.data.filter { 
-                        it.estado == "PENDIENTE" || it.estado == "POR_COMENZAR" || it.estado == "EN_CURSO" || it.estado == "FINALIZADO" 
-                    }
-                    if (partidosActivos.isEmpty()) {
+                    val pendientes = result.data.filter { it.estado == "PENDIENTE" }
+                    if (pendientes.isEmpty()) {
                         binding.layoutEmpty.visibility = View.VISIBLE
                         binding.tvEmptyTitle.text = "No hay partidos disponibles"
                         binding.tvEmptySubtitle.text = "Los partidos se publicarán cuando el torneo comience."
                         binding.rvPartidos.visibility = View.GONE
                     } else {
-                        val items = crearListaAgrupada(partidosActivos)
+                        val items = crearListaAgrupada(pendientes)
                         adapter.submitList(items)
                     }
                 }
@@ -103,32 +101,34 @@ class PronosticarActivity : AppCompatActivity() {
     }
 
     private fun crearListaAgrupada(partidos: List<PartidoDTO>): List<PronosticoItem> {
-        val ordenGrupo = listOf("A", "B", "C", "D", "E", "F", "G", "H")
-        
-        val grouped = partidos.groupBy { it.grupo ?: "Sin grupo" }
-        
+        val sorted = partidos.sortedBy { it.fechaHora }
         val result = mutableListOf<PronosticoItem>()
-        
-        val gruposOrdenados = grouped.keys.sortedWith { a, b ->
-            val idxA = ordenGrupo.indexOf(a)
-            val idxB = ordenGrupo.indexOf(b)
-            when {
-                idxA != -1 && idxB != -1 -> idxA - idxB
-                idxA != -1 -> -1
-                idxB != -1 -> 1
-                else -> a.compareTo(b)
-            }
-        }
-        
-        for (grupo in gruposOrdenados) {
-            result.add(PronosticoItem.Header(grupo))
-            val partidosDelGrupo = grouped[grupo]?.sortedBy { it.fechaHora } ?: emptyList()
-            for (partido in partidosDelGrupo) {
+        val porDia = sorted.groupBy { it.fechaHora.substring(0, 10) }
+        val diasOrdenados = porDia.keys.sorted()
+        for (dia in diasOrdenados) {
+            result.add(PronosticoItem.Header(dayLabel(dia)))
+            for (partido in porDia[dia]!!) {
                 result.add(PronosticoItem.PartidoItem(partido))
             }
         }
-        
         return result
+    }
+
+    private fun dayLabel(isoDate: String): String {
+        val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+        val date = sdf.parse(isoDate) ?: return isoDate
+        val today = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date())
+        val tomorrow = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(
+            java.util.Date(System.currentTimeMillis() + 86400000L)
+        )
+        return when (isoDate) {
+            today -> "Hoy"
+            tomorrow -> "Mañana"
+            else -> {
+                val fmt = java.text.SimpleDateFormat("EEEE d 'de' MMMM", java.util.Locale("es"))
+                fmt.format(date)
+            }
+        }
     }
 
     private fun cargarPronosticos(quinielaId: Long) {

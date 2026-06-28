@@ -1,11 +1,16 @@
 package com.quiniela.app.ui.quiniela
 
 import android.annotation.SuppressLint
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.quiniela.app.R
 import com.quiniela.app.databinding.ItemQuinielaBinding
 import com.quiniela.app.model.QuinielaResumenDTO
 
@@ -28,6 +33,14 @@ class QuinielaAdapter(
         fun bind(quiniela: QuinielaResumenDTO) {
             binding.tvNombre.text = quiniela.nombre
             binding.tvPuntos.text = quiniela.puntosTotales.toString()
+
+            val finalizada = quiniela.estado == "FINALIZADA"
+            binding.tvEstado.text = quiniela.estado
+            binding.tvEstado.visibility = View.VISIBLE
+            val bg = binding.tvEstado.background?.mutate() as? GradientDrawable
+            if (bg != null) {
+                bg.setColor(Color.parseColor(if (finalizada) "#E53935" else "#43A047"))
+            }
             
             binding.root.setOnClickListener { onItemClick(quiniela) }
             binding.btnShare.setOnClickListener { onShareClick(quiniela) }
