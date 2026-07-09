@@ -7,6 +7,7 @@ import com.quiniela.backend.entity.Participacion
 import com.quiniela.backend.entity.Quiniela
 import com.quiniela.backend.exception.NotFoundException
 import com.quiniela.backend.repository.*
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import org.springframework.transaction.annotation.Transactional
@@ -19,6 +20,8 @@ class QuinielaService(
     private val partidoRepository: PartidoRepository,
     private val pronosticoRepository: PronosticoRepository
 ) {
+
+    private val logger = LoggerFactory.getLogger(QuinielaService::class.java)
 
     fun getQuinielas(email: String): List<QuinielaResumenDTO> {
         val usuario = usuarioRepository.findByEmail(email)
@@ -154,7 +157,7 @@ class QuinielaService(
 
     @Transactional
     fun unirseQuiniela(command: UnirseQuinielaCommand, email: String): QuinielaDTO {
-        println("UnirseQuiniela - email: $email, codigo: ${command.codigoInvitacion}")
+        logger.debug("UnirseQuiniela - email: $email, codigo: ${command.codigoInvitacion}")
 
         val usuario = usuarioRepository.findByEmail(email)
             .orElseThrow { IllegalArgumentException("Usuario no encontrado") }
@@ -162,7 +165,7 @@ class QuinielaService(
         val quiniela = quinielaRepository.findByCodigoInvitacion(command.codigoInvitacion)
             .orElseThrow { NotFoundException("Quiniela no encontrada con ese código") }
 
-        println("UnirseQuiniela - usuario: ${usuario.id}, quiniela: ${quiniela.id}")
+        logger.debug("UnirseQuiniela - usuario: ${usuario.id}, quiniela: ${quiniela.id}")
 
         if (participacionRepository.existsByUsuario_IdAndQuiniela_Id(usuario.id, quiniela.id)) {
             throw IllegalArgumentException("Ya estás participando en esta quiniela")

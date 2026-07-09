@@ -1,5 +1,6 @@
 package com.quiniela.backend.config
 
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.cors.CorsConfiguration
@@ -9,9 +10,21 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 class CorsConfig {
 
     @Bean
-    fun corsConfigurationSource(): UrlBasedCorsConfigurationSource {
+    fun corsConfigurationSource(
+        @Value("\${cors.allowed-origins:}") allowedOrigins: String,
+        @Value("\${app.base-url:}") appBaseUrl: String
+    ): UrlBasedCorsConfigurationSource {
+        val origins = (allowedOrigins.split(",").map { it.trim() } + appBaseUrl)
+            .filter { it.isNotBlank() }
+
+        if (origins.isEmpty()) {
+            throw IllegalStateException(
+                "No CORS allowed origins configured. Set cors.allowed-origins (comma-separated) or app.base-url."
+            )
+        }
+
         val configuration = CorsConfiguration()
-        configuration.allowedOriginPatterns = listOf("*")
+        configuration.allowedOriginPatterns = origins
         configuration.allowedMethods = listOf("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
         configuration.allowedHeaders = listOf("*")
         configuration.allowCredentials = true

@@ -1,13 +1,13 @@
 spring:
   application:
     name: quiniela-backend
-  
+
   datasource:
     url: jdbc:postgresql://postgres:5432/quiniela
-    username: quiniela_user
-    password: quiniela_pass
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
-  
+
   jpa:
     hibernate:
       ddl-auto: validate
@@ -16,7 +16,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
-  
+
   flyway:
     enabled: true
     baseline-on-migrate: true
@@ -26,7 +26,7 @@ server:
   port: 8080
 
 jwt:
-  secret: dGhpc2lzYXZlcnlsb25nc2VjcmV0a2V5Zm9yand0YXV0aGVudGljYXRpb25wdXJwb3Nlcw==
+  secret: ${JWT_SECRET}
 
 springdoc:
   api-docs:
@@ -46,4 +46,6 @@ resend:
 
 logging:
   level:
-    com.quiniela: DEBUG
+    com.quiniela: INFO
+    root: INFO
+

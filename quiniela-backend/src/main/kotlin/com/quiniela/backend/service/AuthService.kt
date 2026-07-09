@@ -12,6 +12,7 @@ import com.quiniela.backend.repository.UsuarioRepository
 import com.quiniela.backend.security.JwtService
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.beans.factory.annotation.Value
@@ -84,12 +85,13 @@ class AuthService(
 
     @Transactional
     fun login(command: LoginCommand): AuthResponse {
-        val usuario = usuarioRepository.findByEmail(command.email)
-            .orElseThrow { IllegalArgumentException("Usuario no encontrado") }
+        val usuarioOpt = usuarioRepository.findByEmail(command.email)
 
-        if (!usuario.emailVerified) {
-            throw ForbiddenException("Debes verificar tu correo antes de iniciar sesión")
+        if (usuarioOpt.isEmpty || !usuarioOpt.get().emailVerified) {
+            throw BadCredentialsException("Credenciales inválidas")
         }
+
+        val usuario = usuarioOpt.get()
 
         authenticationManager.authenticate(
             UsernamePasswordAuthenticationToken(command.email, command.password)

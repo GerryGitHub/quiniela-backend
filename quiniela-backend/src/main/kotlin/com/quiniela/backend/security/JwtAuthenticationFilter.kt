@@ -3,6 +3,7 @@ package com.quiniela.backend.security
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.slf4j.LoggerFactory
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetailsService
@@ -15,6 +16,8 @@ class JwtAuthenticationFilter(
     private val jwtService: JwtService,
     private val userDetailsService: UserDetailsService
 ) : OncePerRequestFilter() {
+
+    private val logger = LoggerFactory.getLogger(JwtAuthenticationFilter::class.java)
 
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
         val path = request.servletPath
@@ -49,7 +52,7 @@ class JwtAuthenticationFilter(
                 }
             } catch (e: Exception) {
                 // Log error but continue - let controller handle auth
-                println("JWT Filter error: ${e.message}")
+                logger.debug("JWT validation failed: $e")
             }
         }
 

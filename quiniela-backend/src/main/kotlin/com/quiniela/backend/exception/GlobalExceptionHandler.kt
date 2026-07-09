@@ -4,6 +4,7 @@ import com.quiniela.backend.entity.Constantes
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.AuthenticationException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
@@ -38,6 +39,12 @@ class GlobalExceptionHandler {
     fun handleNotFoundException(e: NotFoundException): ResponseEntity<Map<String, String>> {
         logger.warn("Not found: {}", e.message)
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(mapOf(Constantes.RESPONSE_KEY_ERROR to (e.message ?: "Not found")))
+    }
+
+    @ExceptionHandler(AuthenticationException::class)
+    fun handleAuthenticationException(e: AuthenticationException): ResponseEntity<Map<String, String>> {
+        logger.warn("Authentication failed: {}", e.message)
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(mapOf(Constantes.RESPONSE_KEY_ERROR to "Credenciales inválidas"))
     }
 
     @ExceptionHandler(Exception::class)

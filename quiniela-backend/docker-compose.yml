@@ -23,8 +23,10 @@ services:
     container_name: quiniela-backend
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/quiniela
-      SPRING_DATASOURCE_USERNAME: quiniela_user
-      SPRING_DATASOURCE_PASSWORD: quiniela_pass
+      DB_USER: ${DB_USER:quiniela_user}
+      DB_PASSWORD: ${DB_PASSWORD:quiniela_pass}
+      JWT_SECRET: ${JWT_SECRET}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
       RESEND_API_KEY: ${RESEND_API_KEY}
       APP_BASE_URL: https://api.gjapps.com
       EMAIL_FROM: ${EMAIL_FROM}
